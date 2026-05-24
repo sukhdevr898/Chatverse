@@ -1,0 +1,6 @@
+{
+  "name": "ChatVerse",
+  "description": "Ultra-premium Android chat app with futuristic and elegant UI",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

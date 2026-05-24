@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108.0"
+    android:viewportHeight="108.0">
+    <path
+        android:pathData="M 34 34 L 74 34 Q 84 34 84 44 L 84 64 Q 84 74 74 74 L 64 74 L 54 84 L 44 74 L 34 74 Q 24 74 24 64 L 24 44 Q 24 34 34 34 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:startX="24" android:startY="34" android:endX="84" android:endY="84" android:type="linear">
+                <item android:color="#00D4FF" android:offset="0.0"/>
+                <item android:color="#B000FF" android:offset="1.0"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+    <!-- Inner lines to suggest chatting -->
+    <path
+        android:strokeColor="#0A001A"
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:pathData="M 40 48 L 68 48 M 40 60 L 58 60" />
+</vector>
