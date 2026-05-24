@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -163,38 +164,48 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
                     .padding(horizontal = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Icon(
-                    imageVector = Icons.Filled.ChatBubble,
-                    contentDescription = "Logo",
-                    tint = NeonBlue,
-                    modifier = Modifier.size(48.dp)
-                )
+                // Header matching HTML
+                Box(
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(androidx.compose.foundation.shape.CircleShape)
+                        .background(StitchPrimaryContainer.copy(alpha = 0.2f))
+                        .border(1.dp, StitchPrimary.copy(alpha = 0.2f), androidx.compose.foundation.shape.CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.ChatBubble,
+                        contentDescription = "Logo",
+                        tint = StitchPrimary,
+                        modifier = Modifier.size(40.dp)
+                    )
+                }
+
                 Spacer(modifier = Modifier.height(24.dp))
                 
                 Text(
-                    text = "Welcome Back",
-                    style = MaterialTheme.typography.headlineLarge,
+                    text = "ChatVerse",
+                    style = MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.ExtraBold),
                     color = TextPrimary
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Connect heart to heart instantly",
+                    text = "Welcome Back",
                     style = MaterialTheme.typography.bodyLarge,
-                    color = TextSecondary
+                    color = StitchSurfaceVariant
                 )
                 
                 Spacer(modifier = Modifier.height(40.dp))
 
                 GlassCard(modifier = Modifier.fillMaxWidth()) {
                     Column(
-                        modifier = Modifier.padding(24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                        modifier = Modifier.padding(24.dp)
                     ) {
                         PremiumTextField(
                             value = email,
                             onValueChange = { email = it },
-                            label = "Email",
-                            leadingIcon = { Icon(Icons.Outlined.Email, "Email", tint = TextSecondary) },
+                            label = "Email Address",
+                            leadingIcon = { Icon(Icons.Outlined.Email, "Email", tint = StitchSurfaceVariant) },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
                         )
                         Spacer(modifier = Modifier.height(16.dp))
@@ -202,7 +213,15 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
                             value = password,
                             onValueChange = { password = it },
                             label = "Password",
-                            leadingIcon = { Icon(Icons.Outlined.Lock, "Password", tint = TextSecondary) },
+                            leadingIcon = { Icon(Icons.Outlined.Lock, "Password", tint = StitchSurfaceVariant) },
+                            trailingIcon = {
+                                Icon(
+                                    imageVector = if (passwordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                                    contentDescription = "Toggle password visibility",
+                                    tint = StitchSurfaceVariant,
+                                    modifier = Modifier.clickable { passwordVisible = !passwordVisible }
+                                )
+                            },
                             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
                         )
@@ -214,8 +233,8 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
                         ) {
                             Text(
                                 text = "Forgot Password?",
-                                color = NeonBlue,
-                                style = MaterialTheme.typography.labelLarge,
+                                color = StitchPrimary,
+                                style = MaterialTheme.typography.labelMedium,
                                 modifier = Modifier.clickable { navController.navigate("forgotPassword") }
                             )
                         }
@@ -223,7 +242,7 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
                         Spacer(modifier = Modifier.height(32.dp))
                         
                         GlowButton(
-                            text = "LOGIN",
+                            text = "Login",
                             onClick = {
                                 authViewModel.login(email, password) {
                                     // Normally navigate to home
@@ -231,33 +250,46 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
                             },
                             isLoading = isLoading
                         )
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            SocialButton(
+                                text = "Google",
+                                icon = { 
+                                    // Simplified Google icon approach since we don't have SVG inline
+                                    Text("G", fontWeight = FontWeight.ExtraBold, color = Color(0xFF4285F4))
+                                },
+                                onClick = {},
+                                modifier = Modifier.weight(1f)
+                            )
+                            SocialButton(
+                                text = "Apple",
+                                icon = {
+                                    Icon(Icons.Filled.PhoneIphone, "Apple", tint = TextPrimary)
+                                },
+                                onClick = {},
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(40.dp))
-
-                Text("Or continue with", color = TextSecondary, style = MaterialTheme.typography.bodyMedium)
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(24.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    SocialButton(icon = { Icon(Icons.Filled.AccountCircle, "Google", tint = TextPrimary, modifier = Modifier.size(28.dp)) }) {}
-                    SocialButton(icon = { Icon(Icons.Filled.Face, "Facebook", tint = TextPrimary, modifier = Modifier.size(28.dp)) }) {}
-                }
-
-                Spacer(modifier = Modifier.height(40.dp))
+                Spacer(modifier = Modifier.height(32.dp))
                 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Don't have an account? ", color = TextSecondary)
+                    Text("Don't have an account? ", color = StitchSurfaceVariant)
                     Text(
                         "Create Account",
-                        color = ElectricPurple,
+                        color = StitchPrimary,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.clickable { navController.navigate("signup") }
+                        modifier = Modifier.padding(start = 4.dp).clickable { navController.navigate("signup") }
                     )
                 }
+                Spacer(modifier = Modifier.height(32.dp))
             }
         }
     }
@@ -268,13 +300,23 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
     
     val isLoading by authViewModel.isLoading.collectAsState(initial = false)
 
     var isVisible by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { isVisible = true }
 
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    // Password strength logic
+    val strength = when {
+        password.isEmpty() -> 0
+        password.length < 6 -> 1 // weak
+        password.length < 10 -> 2 // medium
+        else -> 3 // strong
+    }
+
+    Box(modifier = Modifier.fillMaxSize().padding(top = 16.dp, bottom = 16.dp), contentAlignment = Alignment.Center) {
         AnimatedVisibility(
             visible = isVisible,
             enter = fadeIn(tween(800)) + slideInVertically(initialOffsetY = { 200 }, animationSpec = tween(800))
@@ -285,74 +327,193 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
                     .padding(horizontal = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = "Create Your Universe",
-                    style = MaterialTheme.typography.headlineLarge,
-                    color = TextPrimary
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Start your journey on ChatVerse",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = TextSecondary
-                )
-                
-                Spacer(modifier = Modifier.height(40.dp))
+                // Header matching HTML
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.padding(bottom = 32.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.BubbleChart,
+                        contentDescription = "Logo",
+                        tint = StitchPrimary,
+                        modifier = Modifier.size(36.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = "ChatVerse",
+                        style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.ExtraBold),
+                        color = StitchPrimary
+                    )
+                }
 
                 GlassCard(modifier = Modifier.fillMaxWidth()) {
                     Column(
-                        modifier = Modifier.padding(24.dp),
+                        modifier = Modifier.padding(top = 32.dp, start = 24.dp, end = 24.dp, bottom = 24.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        PremiumTextField(
-                            value = username,
-                            onValueChange = { username = it },
-                            label = "Username",
-                            leadingIcon = { Icon(Icons.Outlined.Person, "Username", tint = TextSecondary) }
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        PremiumTextField(
-                            value = email,
-                            onValueChange = { email = it },
-                            label = "Email",
-                            leadingIcon = { Icon(Icons.Outlined.Email, "Email", tint = TextSecondary) },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        PremiumTextField(
-                            value = password,
-                            onValueChange = { password = it },
-                            label = "Password",
-                            leadingIcon = { Icon(Icons.Outlined.Lock, "Password", tint = TextSecondary) },
-                            visualTransformation = PasswordVisualTransformation(),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
-                        )
+                        // Avatar Picker
+                        Box(
+                            modifier = Modifier
+                                .offset(y = (-56).dp)
+                                .size(96.dp)
+                                .clip(androidx.compose.foundation.shape.CircleShape)
+                                .background(StitchBackground.copy(alpha = 0.5f))
+                                .border(
+                                    width = 2.dp,
+                                    brush = Brush.linearGradient(listOf(StitchGradient3.copy(0.3f), StitchGradient3.copy(0.1f))),
+                                    shape = androidx.compose.foundation.shape.CircleShape
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(androidx.compose.foundation.shape.CircleShape)
+                                    .background(StitchGradient3.copy(alpha = 0.15f))
+                                    .border(1.dp, StitchGradient3.copy(alpha = 0.3f), androidx.compose.foundation.shape.CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(Icons.Filled.PhotoCamera, "Avatar", tint = StitchGradient3, modifier = Modifier.size(20.dp))
+                            }
+                        }
 
-                        Spacer(modifier = Modifier.height(32.dp))
-                        
-                        GlowButton(
-                            text = "SIGN UP",
-                            onClick = {
-                                authViewModel.signup(email, password) {
-                                    navController.popBackStack()
+                        Column(modifier = Modifier.offset(y = (-32).dp)) {
+                            PremiumTextField(
+                                value = username,
+                                onValueChange = { username = it },
+                                label = "Username",
+                                leadingIcon = null
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            PremiumTextField(
+                                value = email,
+                                onValueChange = { email = it },
+                                label = "Email Address",
+                                leadingIcon = null,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            PremiumTextField(
+                                value = password,
+                                onValueChange = { password = it },
+                                label = "Password",
+                                leadingIcon = null,
+                                trailingIcon = {
+                                    Icon(
+                                        imageVector = if (passwordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                                        contentDescription = "Toggle password visibility",
+                                        tint = StitchSurfaceVariant,
+                                        modifier = Modifier.clickable { passwordVisible = !passwordVisible }
+                                    )
+                                },
+                                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                            )
+                            
+                            // Strength Meter
+                            if (password.isNotEmpty()) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 8.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    val color1 = if (strength >= 1) {
+                                        if (strength == 1) ErrorRed else if (strength == 2) StitchPrimary else StitchGradient3
+                                    } else Color.White.copy(0.1f)
+                                    
+                                    val color2 = if (strength >= 2) {
+                                        if (strength == 2) StitchPrimary else StitchGradient3
+                                    } else Color.White.copy(0.1f)
+                                    
+                                    val color3 = if (strength >= 3) StitchGradient3 else Color.White.copy(0.1f)
+                                    
+                                    Box(modifier = Modifier.weight(1f).height(4.dp).clip(androidx.compose.foundation.shape.CircleShape).background(color1))
+                                    Box(modifier = Modifier.weight(1f).height(4.dp).clip(androidx.compose.foundation.shape.CircleShape).background(color2))
+                                    Box(modifier = Modifier.weight(1f).height(4.dp).clip(androidx.compose.foundation.shape.CircleShape).background(color3))
+                                    
+                                    val labelText = when(strength) {
+                                        1 -> "Weak"
+                                        2 -> "Medium"
+                                        3 -> "Strong"
+                                        else -> ""
+                                    }
+                                    val labelColor = when(strength) {
+                                        1 -> ErrorRed
+                                        2 -> StitchPrimary
+                                        3 -> StitchGradient3
+                                        else -> Color.Transparent
+                                    }
+                                    
+                                    Text(
+                                        text = labelText,
+                                        color = labelColor,
+                                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                        modifier = Modifier.padding(start = 8.dp)
+                                    )
                                 }
-                            },
-                            isLoading = isLoading
-                        )
+                            } else {
+                                Spacer(modifier = Modifier.height(16.dp))
+                            }
+                            
+                            PremiumTextField(
+                                value = confirmPassword,
+                                onValueChange = { confirmPassword = it },
+                                label = "Confirm Password",
+                                leadingIcon = null,
+                                visualTransformation = PasswordVisualTransformation(),
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                                isError = confirmPassword.isNotEmpty() && confirmPassword != password,
+                                errorMessage = if (confirmPassword.isNotEmpty() && confirmPassword != password) "Passwords do not match" else null
+                            )
+
+                            Spacer(modifier = Modifier.height(24.dp))
+                            
+                            GlowButton(
+                                text = "Create Account",
+                                onClick = {
+                                    if (password == confirmPassword) {
+                                        authViewModel.signup(email, password) {
+                                            navController.popBackStack()
+                                        }
+                                    }
+                                },
+                                isLoading = isLoading
+                            )
+                            
+                            Spacer(modifier = Modifier.height(16.dp))
+                            
+                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                                HorizontalDivider(modifier = Modifier.weight(1f), color = Color.White.copy(0.1f))
+                                Text("OR", color = StitchSurfaceVariant, style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(horizontal = 16.dp))
+                                HorizontalDivider(modifier = Modifier.weight(1f), color = Color.White.copy(0.1f))
+                            }
+                            
+                            Spacer(modifier = Modifier.height(16.dp))
+                            
+                            SocialButton(
+                                text = "Continue with Google",
+                                icon = { 
+                                    Text("G", fontWeight = FontWeight.ExtraBold, color = Color(0xFF4285F4))
+                                },
+                                onClick = {},
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(40.dp))
+                Spacer(modifier = Modifier.height(32.dp))
                 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Already have an account? ", color = TextSecondary)
+                    Text("Already have an account? ", color = StitchSurfaceVariant)
                     Text(
                         "Login",
-                        color = NeonBlue,
+                        color = StitchGradient3,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.clickable { navController.popBackStack() }
+                        modifier = Modifier.padding(start = 4.dp).clickable { navController.popBackStack() }
                     )
                 }
+                Spacer(modifier = Modifier.height(32.dp))
             }
         }
     }
@@ -371,7 +532,7 @@ fun ForgotPasswordScreen(navController: NavController, authViewModel: AuthViewMo
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         AnimatedVisibility(
             visible = isVisible,
-            enter = fadeIn(tween(800)) + slideInVertically(initialOffsetY = { 100 }, animationSpec = tween(800))
+            enter = fadeIn(tween(800)) + slideInVertically(initialOffsetY = { 200 }, animationSpec = tween(800))
         ) {
             Column(
                 modifier = Modifier
@@ -379,45 +540,74 @@ fun ForgotPasswordScreen(navController: NavController, authViewModel: AuthViewMo
                     .padding(horizontal = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Icon(
-                    imageVector = Icons.Outlined.Lock,
-                    contentDescription = "Lock",
-                    tint = CyanAccent,
-                    modifier = Modifier.size(64.dp)
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-                Text(
-                    text = if(isSubmitted) "Check your email" else "Reset Password",
-                    style = MaterialTheme.typography.headlineLarge,
-                    color = TextPrimary
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = if(isSubmitted) "We sent a recovery link to you." else "We'll help you recover your account",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = TextSecondary,
-                    textAlign = TextAlign.Center
-                )
-                
-                Spacer(modifier = Modifier.height(40.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.padding(bottom = 32.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.BubbleChart,
+                        contentDescription = "Logo",
+                        tint = StitchPrimary,
+                        modifier = Modifier.size(36.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = "ChatVerse",
+                        style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.ExtraBold),
+                        color = StitchPrimary
+                    )
+                }
 
-                if (!isSubmitted) {
-                    GlassCard(modifier = Modifier.fillMaxWidth()) {
-                        Column(
-                            modifier = Modifier.padding(24.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
+                GlassCard(modifier = Modifier.fillMaxWidth()) {
+                    Column(
+                        modifier = Modifier.padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        if (!isSubmitted) {
+                            Box(
+                                modifier = Modifier
+                                    .size(80.dp)
+                                    .clip(androidx.compose.foundation.shape.CircleShape)
+                                    .background(StitchPrimaryContainer.copy(alpha = 0.1f))
+                                    .border(1.dp, StitchPrimary.copy(alpha = 0.2f), androidx.compose.foundation.shape.CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Lock,
+                                    contentDescription = "Lock",
+                                    tint = StitchGradient3,
+                                    modifier = Modifier.size(36.dp)
+                                )
+                            }
+                            
+                            Spacer(modifier = Modifier.height(24.dp))
+                            Text(
+                                text = "Forgot Password?",
+                                style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.SemiBold),
+                                color = TextPrimary
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Enter your email to reset",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = StitchSurfaceVariant,
+                                textAlign = TextAlign.Center
+                            )
+                            
+                            Spacer(modifier = Modifier.height(32.dp))
+                            
                             PremiumTextField(
                                 value = email,
                                 onValueChange = { email = it },
-                                label = "Email",
-                                leadingIcon = { Icon(Icons.Outlined.Email, "Email", tint = TextSecondary) },
+                                label = "Email Address",
+                                leadingIcon = { Icon(Icons.Outlined.Email, "Email", tint = StitchSurfaceVariant) },
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
                             )
                             Spacer(modifier = Modifier.height(32.dp))
                             
                             GlowButton(
-                                text = "SEND RESET LINK",
+                                text = "Send Reset Link",
                                 onClick = {
                                     authViewModel.resetPassword(email) {
                                         isSubmitted = true
@@ -425,18 +615,71 @@ fun ForgotPasswordScreen(navController: NavController, authViewModel: AuthViewMo
                                 },
                                 isLoading = isLoading
                             )
+
+                            Spacer(modifier = Modifier.height(32.dp))
+                            
+                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { navController.popBackStack() }) {
+                                Icon(Icons.Filled.ArrowBack, "Back", tint = StitchSurfaceVariant, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    "Back to Login",
+                                    color = StitchSurfaceVariant,
+                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                                )
+                            }
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .size(96.dp)
+                                    .clip(androidx.compose.foundation.shape.CircleShape)
+                                    .background(StitchGradient3.copy(alpha = 0.1f))
+                                    .border(1.dp, StitchGradient3.copy(alpha = 0.3f), androidx.compose.foundation.shape.CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.CheckCircle,
+                                    contentDescription = "Success",
+                                    tint = StitchGradient3,
+                                    modifier = Modifier.size(48.dp)
+                                )
+                            }
+                            
+                            Spacer(modifier = Modifier.height(24.dp))
+                            Text(
+                                text = "Email Sent!",
+                                style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.SemiBold),
+                                color = TextPrimary
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "We've sent a password reset link to your email address. Please check your inbox.",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = StitchSurfaceVariant,
+                                textAlign = TextAlign.Center
+                            )
+                            
+                            Spacer(modifier = Modifier.height(32.dp))
+                            
+                            GlowButton(
+                                text = "Return to Login",
+                                onClick = { navController.popBackStack() }
+                            )
+                            
+                            Spacer(modifier = Modifier.height(16.dp))
+                            
+                            SocialButton(
+                                text = "Resend Link",
+                                icon = { 
+                                    Icon(Icons.Filled.Refresh, "Resend", tint = TextPrimary)
+                                },
+                                onClick = {
+                                    authViewModel.resetPassword(email) {}
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            )
                         }
                     }
                 }
-
-                Spacer(modifier = Modifier.height(40.dp))
-                
-                Text(
-                    "Back to Login",
-                    color = TextSecondary,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.clickable { navController.popBackStack() }
-                )
             }
         }
     }

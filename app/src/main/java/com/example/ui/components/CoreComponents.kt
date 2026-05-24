@@ -1,5 +1,6 @@
 package com.example.ui.components
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -10,7 +11,11 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,11 +23,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Dp
@@ -37,94 +43,51 @@ fun AnimatedGradientMeshBackground() {
         initialValue = 0f,
         targetValue = 360f,
         animationSpec = infiniteRepeatable(
-            animation = tween(15000, easing = LinearEasing),
+            animation = tween(20000, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         ), label = "angle"
-    )
-    val scale = infiniteTransition.animateFloat(
-        initialValue = 1f,
-        targetValue = 1.3f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(8000, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ), label = "scale"
     )
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(PureBlack)
+            .background(StitchBackground)
     ) {
-        // Neon Blue Orb
+        // Primary Container Orb (Top Left)
         Box(
             modifier = Modifier
-                .offset(x = (-50).dp, y = (-100).dp)
-                .size(400.dp)
+                .offset(x = (-100).dp, y = (-100).dp)
+                .size(600.dp)
                 .graphicsLayer {
                     rotationZ = angle.value
-                    scaleX = scale.value
-                    scaleY = scale.value
                 }
-                .blur(radius = 120.dp, edgeTreatment = androidx.compose.ui.draw.BlurredEdgeTreatment.Unbounded)
                 .background(
                     Brush.radialGradient(
-                        colors = listOf(DeepIndigo.copy(alpha = 0.5f), Color.Transparent),
-                        center = Offset(200f, 200f),
-                        radius = 400f
+                        colors = listOf(StitchPrimaryContainer.copy(alpha = 0.3f), Color.Transparent),
+                        center = Offset(300f, 300f),
+                        radius = 600f
                     ),
                     shape = CircleShape
                 )
         )
 
-        // Electric Purple Orb
+        // Secondary Container Orb (Bottom Right)
         Box(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .offset(x = 100.dp, y = 100.dp)
-                .size(500.dp)
+                .size(600.dp)
                 .graphicsLayer {
                     rotationZ = -angle.value
-                    scaleX = scale.value * 0.9f
-                    scaleY = scale.value * 0.9f
                 }
-                .blur(radius = 150.dp, edgeTreatment = androidx.compose.ui.draw.BlurredEdgeTreatment.Unbounded)
                 .background(
                     Brush.radialGradient(
-                        colors = listOf(ElectricPurple.copy(alpha = 0.4f), Color.Transparent),
-                        center = Offset(250f, 250f),
-                        radius = 500f
+                        colors = listOf(StitchGradient3.copy(alpha = 0.2f), Color.Transparent),
+                        center = Offset(300f, 300f),
+                        radius = 600f
                     ),
                     shape = CircleShape
                 )
-        )
-        
-        // Cyan Accent Orb
-        Box(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .offset(x = 150.dp, y = (-50).dp)
-                .size(300.dp)
-                .graphicsLayer {
-                    rotationZ = angle.value * 1.5f
-                    scaleX = scale.value * 1.1f
-                    scaleY = scale.value * 1.1f
-                }
-                .blur(radius = 100.dp, edgeTreatment = androidx.compose.ui.draw.BlurredEdgeTreatment.Unbounded)
-                .background(
-                    Brush.radialGradient(
-                        colors = listOf(NeonBlue.copy(alpha = 0.3f), Color.Transparent),
-                        center = Offset(150f, 150f),
-                        radius = 300f
-                    ),
-                    shape = CircleShape
-                )
-        )
-        
-        // Dark Overlay for readability
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(PureBlack.copy(alpha = 0.4f))
         )
     }
 }
@@ -132,24 +95,27 @@ fun AnimatedGradientMeshBackground() {
 @Composable
 fun GlassCard(
     modifier: Modifier = Modifier,
-    cornerRadius: Dp = 32.dp,
+    cornerRadius: Dp = 24.dp,
     content: @Composable BoxScope.() -> Unit
 ) {
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(cornerRadius))
-            .background(GlassWhite)
+            .background(GlassCardBg)
             .border(
                 width = 1.dp,
-                brush = Brush.linearGradient(
-                    colors = listOf(
-                        Color.White.copy(alpha = 0.2f),
-                        Color.White.copy(alpha = 0.05f)
-                    )
-                ),
+                color = GlassInputBorder,
                 shape = RoundedCornerShape(cornerRadius)
             )
-            .padding(2.dp), // Inner glow padding
+            .drawBehind {
+                // inner shadow emulation conceptually
+                drawRoundRect(
+                    color = Color.White.copy(alpha = 0.1f),
+                    size = size,
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(cornerRadius.toPx()),
+                    style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1f)
+                )
+            },
         content = content
     )
 }
@@ -161,47 +127,101 @@ fun PremiumTextField(
     label: String,
     modifier: Modifier = Modifier,
     leadingIcon: (@Composable () -> Unit)? = null,
+    trailingIcon: (@Composable () -> Unit)? = null,
     visualTransformation: VisualTransformation = VisualTransformation.None,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    isError: Boolean = false,
+    isSuccess: Boolean = false,
+    errorMessage: String? = null
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
 
-    val glowAlpha by animateFloatAsState(
-        targetValue = if (isFocused) 0.5f else 0.1f,
-        animationSpec = tween(300), label = "glow"
+    val borderColor by animateColorAsState(
+        targetValue = when {
+            isError -> ErrorRed
+            isFocused -> GlassInputFocusBorder
+            else -> GlassInputBorder
+        }, label = "borderColor"
     )
 
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        label = { Text(label, color = if (isFocused) NeonBlue else TextSecondary) },
-        leadingIcon = leadingIcon,
-        visualTransformation = visualTransformation,
-        keyboardOptions = keyboardOptions,
-        interactionSource = interactionSource,
-        singleLine = true,
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = NeonBlue,
-            unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
-            focusedContainerColor = PureBlack.copy(alpha = 0.3f),
-            unfocusedContainerColor = PureBlack.copy(alpha = 0.2f),
-            focusedTextColor = TextPrimary,
-            unfocusedTextColor = TextPrimary,
-            cursorColor = NeonBlue
-        ),
-        shape = RoundedCornerShape(16.dp),
-        modifier = modifier
-            .fillMaxWidth()
-            .drawBehind {
-                drawRoundRect(
-                    color = NeonBlue.copy(alpha = glowAlpha),
-                    size = size,
-                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(16.dp.toPx())
-                )
-            }
-            .clip(RoundedCornerShape(16.dp))
+    val bgColor by animateColorAsState(
+        targetValue = when {
+            isFocused -> GlassInputFocusBg
+            else -> GlassInputBg
+        }, label = "bgColor"
     )
+
+    val labelSize by animateFloatAsState(targetValue = if (isFocused || value.isNotEmpty()) 12f else 16f, label = "labelSize")
+    val labelOffset by animateFloatAsState(targetValue = if (isFocused || value.isNotEmpty()) (-12f) else 0f, label = "labelOffset")
+
+    Column(modifier = modifier.fillMaxWidth()) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .background(bgColor)
+                .border(1.dp, borderColor, RoundedCornerShape(16.dp))
+                .padding(horizontal = 20.dp, vertical = 16.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (leadingIcon != null) {
+                    Box(modifier = Modifier.padding(end = 12.dp)) {
+                        leadingIcon()
+                    }
+                }
+
+                Box(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = label,
+                        color = if (isError) ErrorRed else StitchSurfaceVariant,
+                        fontSize = labelSize.sp,
+                        fontWeight = if (isFocused || value.isNotEmpty()) FontWeight.SemiBold else FontWeight.Normal,
+                        modifier = Modifier.offset(y = labelOffset.dp)
+                    )
+
+                    BasicTextField(
+                        value = value,
+                        onValueChange = onValueChange,
+                        textStyle = TextStyle(
+                            color = TextPrimary,
+                            fontSize = 16.sp,
+                            fontFamily = MaterialTheme.typography.bodyLarge.fontFamily
+                        ),
+                        singleLine = true,
+                        keyboardOptions = keyboardOptions,
+                        visualTransformation = visualTransformation,
+                        interactionSource = interactionSource,
+                        cursorBrush = SolidColor(StitchPrimary),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = if (isFocused || value.isNotEmpty()) 8.dp else 0.dp)
+                    )
+                }
+
+                if (isError) {
+                    Icon(Icons.Filled.Error, "Error", tint = ErrorRed, modifier = Modifier.padding(start = 8.dp).size(20.dp))
+                } else if (isSuccess) {
+                    Icon(Icons.Filled.CheckCircle, "Success", tint = SuccessGreen, modifier = Modifier.padding(start = 8.dp).size(20.dp))
+                }
+                
+                if (trailingIcon != null) {
+                    Box(modifier = Modifier.padding(start = 8.dp)) {
+                        trailingIcon()
+                    }
+                }
+            }
+        }
+        
+        if (isError && errorMessage != null) {
+            Text(
+                text = errorMessage,
+                color = ErrorRed,
+                style = MaterialTheme.typography.labelMedium,
+                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+            )
+        }
+    }
 }
 
 @Composable
@@ -215,13 +235,8 @@ fun GlowButton(
     val isPressed by interactionSource.collectIsPressedAsState()
 
     val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.95f else 1f,
+        targetValue = if (isPressed) 0.98f else 1f,
         animationSpec = tween(150), label = "scale"
-    )
-
-    val contentAlpha by animateFloatAsState(
-        targetValue = if (isPressed) 0.8f else 1f,
-        animationSpec = tween(150), label = "alpha"
     )
 
     Box(
@@ -232,10 +247,10 @@ fun GlowButton(
             }
             .fillMaxWidth()
             .height(56.dp)
-            .clip(RoundedCornerShape(24.dp))
+            .clip(RoundedCornerShape(16.dp))
             .background(
-                brush = Brush.horizontalGradient(
-                    colors = listOf(NeonBlue, ElectricPurple)
+                brush = Brush.linearGradient(
+                    colors = listOf(StitchGradient1, StitchGradient2)
                 )
             )
             .clickable(interactionSource = interactionSource, indication = null, onClick = {
@@ -250,45 +265,56 @@ fun GlowButton(
                 strokeWidth = 2.dp
             )
         } else {
-            Text(
-                text = text,
-                color = Color.White.copy(alpha = contentAlpha),
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    letterSpacing = 1.sp
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = text,
+                    color = Color.White,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = 0.5.sp
+                    )
                 )
-            )
+            }
         }
     }
 }
 
 @Composable
 fun SocialButton(
+    text: String,
     icon: @Composable () -> Unit,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.9f else 1f,
-        animationSpec = tween(150), label = "scale"
+    val bgColor by animateColorAsState(
+        targetValue = if (isPressed) GlassInputFocusBg else GlassInputBg,
+        label = "bg"
     )
 
     Box(
-        modifier = Modifier
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
-            .size(56.dp)
-            .clip(CircleShape)
-            .background(DarkSurface.copy(alpha = 0.8f))
-            .border(1.dp, Color.White.copy(alpha = 0.1f), CircleShape)
+        modifier = modifier
+            .height(48.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(bgColor)
+            .border(1.dp, GlassInputBorder, RoundedCornerShape(16.dp))
             .clickable(interactionSource = interactionSource, indication = null, onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        icon()
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            icon()
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = text,
+                color = TextPrimary,
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium)
+            )
+        }
     }
 }
+
