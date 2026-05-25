@@ -12,6 +12,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Lock
@@ -40,6 +41,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ui.AuthViewModel
 import com.example.ui.components.*
+import com.example.ui.screens.*
 import com.example.ui.theme.*
 import kotlinx.coroutines.delay
 
@@ -73,9 +75,15 @@ fun ChatVerseApp(authViewModel: AuthViewModel = viewModel()) {
             popExitTransition = { fadeOut(tween(500)) + slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Down, tween(500)) }
         ) {
             composable("splash") { SplashScreen(navController) }
+            composable("onboarding") { OnboardingScreen(navController) }
             composable("login") { LoginScreen(navController, authViewModel) }
             composable("signup") { SignupScreen(navController, authViewModel) }
             composable("forgotPassword") { ForgotPasswordScreen(navController, authViewModel) }
+            composable("main") { MainScreen(navController) }
+            composable("chat/{chatId}") { backStackEntry ->
+                val chatId = backStackEntry.arguments?.getString("chatId") ?: ""
+                ChatScreen(navController, chatId)
+            }
         }
 
         // Overlay Dynamic Island at the top
@@ -83,64 +91,7 @@ fun ChatVerseApp(authViewModel: AuthViewModel = viewModel()) {
     }
 }
 
-@Composable
-fun SplashScreen(navController: NavController) {
-    var startAnimation by remember { mutableStateOf(false) }
-
-    LaunchedEffect(Unit) {
-        startAnimation = true
-        delay(2500)
-        navController.navigate("login") {
-            popUpTo("splash") { inclusive = true }
-        }
-    }
-
-    val scale by animateFloatAsState(
-        targetValue = if (startAnimation) 1f else 0.5f,
-        animationSpec = tween(durationMillis = 1500, easing = FastOutSlowInEasing),
-        label = "logo_scale"
-    )
-
-    val alpha by animateFloatAsState(
-        targetValue = if (startAnimation) 1f else 0f,
-        animationSpec = tween(durationMillis = 1500),
-        label = "logo_alpha"
-    )
-
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.scale(scale).alpha(alpha)
-        ) {
-            Icon(
-                imageVector = Icons.Filled.ChatBubble,
-                contentDescription = "Logo",
-                tint = NeonBlue,
-                modifier = Modifier.size(80.dp)
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-            Text(
-                text = "ChatVerse",
-                style = MaterialTheme.typography.displayLarge.copy(
-                    fontWeight = FontWeight.Bold,
-                    brush = Brush.horizontalGradient(listOf(NeonBlue, ElectricPurple))
-                )
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Rista dil se dil tk",
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.Light,
-                    color = TextSecondary,
-                    letterSpacing = 2.sp
-                )
-            )
-        }
-    }
-}
+// SplashScreen moved to ui.screens
 
 @Composable
 fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
@@ -245,7 +196,9 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
                             text = "Login",
                             onClick = {
                                 authViewModel.login(email, password) {
-                                    // Normally navigate to home
+                                    navController.navigate("main") {
+                                        popUpTo("login") { inclusive = true }
+                                    }
                                 }
                             },
                             isLoading = isLoading
@@ -619,7 +572,7 @@ fun ForgotPasswordScreen(navController: NavController, authViewModel: AuthViewMo
                             Spacer(modifier = Modifier.height(32.dp))
                             
                             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { navController.popBackStack() }) {
-                                Icon(Icons.Filled.ArrowBack, "Back", tint = StitchSurfaceVariant, modifier = Modifier.size(16.dp))
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = StitchSurfaceVariant, modifier = Modifier.size(16.dp))
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     "Back to Login",

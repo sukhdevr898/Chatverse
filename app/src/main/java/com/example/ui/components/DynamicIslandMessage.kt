@@ -34,13 +34,14 @@ fun DynamicIslandMessage(messages: List<IslandMessage>) {
             .padding(top = 48.dp, start = 24.dp, end = 24.dp), // Clear status bar
         contentAlignment = Alignment.TopCenter
     ) {
-        messages.forEach { message ->
-            AnimatedVisibility(
-                visible = true,
-                enter = slideInVertically(initialOffsetY = { -100 }) + fadeIn() + scaleIn(initialScale = 0.8f),
-                exit = slideOutVertically(targetOffsetY = { -100 }) + fadeOut() + scaleOut(targetScale = 0.8f),
-                modifier = Modifier.padding(bottom = 8.dp)
-            ) {
+        val currentMessage = messages.lastOrNull()
+        AnimatedVisibility(
+            visible = currentMessage != null,
+            enter = slideInVertically(initialOffsetY = { -100 }) + fadeIn() + scaleIn(initialScale = 0.8f),
+            exit = slideOutVertically(targetOffsetY = { -100 }) + fadeOut() + scaleOut(targetScale = 0.8f),
+            modifier = Modifier.padding(bottom = 8.dp)
+        ) {
+            currentMessage?.let { message ->
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(32.dp))

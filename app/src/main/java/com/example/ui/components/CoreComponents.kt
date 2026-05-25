@@ -159,9 +159,9 @@ fun PremiumTextField(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
+                .clip(RoundedCornerShape(20.dp))
                 .background(bgColor)
-                .border(1.dp, borderColor, RoundedCornerShape(16.dp))
+                .border(1.dp, borderColor, RoundedCornerShape(20.dp))
                 .padding(horizontal = 20.dp, vertical = 16.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -247,7 +247,7 @@ fun GlowButton(
             }
             .fillMaxWidth()
             .height(56.dp)
-            .clip(RoundedCornerShape(16.dp))
+            .clip(CircleShape)
             .background(
                 brush = Brush.linearGradient(
                     colors = listOf(StitchGradient1, StitchGradient2)
@@ -297,9 +297,9 @@ fun SocialButton(
     Box(
         modifier = modifier
             .height(48.dp)
-            .clip(RoundedCornerShape(16.dp))
+            .clip(CircleShape)
             .background(bgColor)
-            .border(1.dp, GlassInputBorder, RoundedCornerShape(16.dp))
+            .border(1.dp, GlassInputBorder, CircleShape)
             .clickable(interactionSource = interactionSource, indication = null, onClick = onClick),
         contentAlignment = Alignment.Center
     ) {

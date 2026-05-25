@@ -18,14 +18,14 @@ import androidx.core.view.WindowCompat
 private val ChatVerseColorScheme = darkColorScheme(
     primary = NeonBlue,
     secondary = ElectricPurple,
-    tertiary = CyanAccent,
-    background = PureBlack,
-    surface = DarkSurface,
-    onPrimary = PureBlack,
-    onSecondary = PureBlack,
-    onTertiary = PureBlack,
-    onBackground = TextPrimary,
-    onSurface = TextPrimary,
+    tertiary = CyanGlow,
+    background = DeepBlack,
+    surface = Graphite,
+    onPrimary = DeepBlack,
+    onSecondary = DeepBlack,
+    onTertiary = DeepBlack,
+    onBackground = PureWhite,
+    onSurface = PureWhite,
     error = ErrorRed
 )
 
