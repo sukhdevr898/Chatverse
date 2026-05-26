@@ -101,7 +101,15 @@ class FriendsViewModel : ViewModel() {
                 }
                 _searchResults.value = updated
                 
-                android.widget.Toast.makeText(context, "Friend Request Sent!", android.widget.Toast.LENGTH_SHORT).show()
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                    val targetUsername = _searchResults.value.find { it.id == targetUserId }?.username ?: "your friend"
+                    android.widget.Toast.makeText(context, "Friend Request Sent!", android.widget.Toast.LENGTH_SHORT).show()
+                    com.example.NotificationHelper.showSystemNotification(
+                        context, 
+                        "Friend Request Sent", 
+                        "Notification sent to $targetUsername that you've added them!"
+                    )
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
             }

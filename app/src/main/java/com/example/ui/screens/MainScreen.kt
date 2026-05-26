@@ -35,8 +35,7 @@ fun MainScreen(rootNavController: NavController) {
     
     Scaffold(
         containerColor = DeepBlack,
-        bottomBar = { PremiumBottomNavBar(bottomNavController) },
-        contentWindowInsets = WindowInsets(0, 0, 0, 0)
+        bottomBar = { PremiumBottomNavBar(bottomNavController) }
     ) { paddingValues ->
         Box(
             modifier = Modifier

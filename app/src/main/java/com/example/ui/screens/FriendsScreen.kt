@@ -34,6 +34,7 @@ fun FriendsScreen(navController: NavController, viewModel: FriendsViewModel = vi
     val friendRequests by viewModel.friendRequests.collectAsState()
 
     val context = androidx.compose.ui.platform.LocalContext.current
+    val keyboardController = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
 
     DisposableEffect(Unit) {
         viewModel.loadData()
@@ -64,7 +65,12 @@ fun FriendsScreen(navController: NavController, viewModel: FriendsViewModel = vi
                     .padding(horizontal = 16.dp, vertical = 2.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Filled.Search, contentDescription = null, tint = NeonBlue)
+                    IconButton(onClick = {
+                        viewModel.searchUsers(query)
+                        keyboardController?.hide()
+                    }) {
+                        Icon(Icons.Filled.Search, contentDescription = "Search", tint = NeonBlue)
+                    }
                     Spacer(modifier = Modifier.width(12.dp))
                     TextField(
                         value = query,
@@ -77,7 +83,10 @@ fun FriendsScreen(navController: NavController, viewModel: FriendsViewModel = vi
                             imeAction = androidx.compose.ui.text.input.ImeAction.Search
                         ),
                         keyboardActions = androidx.compose.foundation.text.KeyboardActions(
-                            onSearch = { viewModel.searchUsers(query) }
+                            onSearch = { 
+                                viewModel.searchUsers(query)
+                                keyboardController?.hide()
+                            }
                         ),
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = Color.Transparent,
