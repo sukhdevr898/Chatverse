@@ -29,6 +29,7 @@ fun SettingsScreen(navController: NavController) {
             .fillMaxSize()
             .background(DeepBlack)
     ) {
+        val context = androidx.compose.ui.platform.LocalContext.current
         LazyColumn(
             contentPadding = PaddingValues(bottom = 120.dp, top = 24.dp)
         ) {
@@ -48,26 +49,39 @@ fun SettingsScreen(navController: NavController) {
             
             item {
                 SettingsCategory("Account")
-                SettingsMenuItem(Icons.Filled.Person, "Account Settings", "Password, Security")
-                SettingsMenuItem(Icons.Filled.Lock, "Privacy", "Who can message me")
+                SettingsMenuItem(Icons.Filled.Person, "Account Settings", "Password, Security") {
+                    android.widget.Toast.makeText(context, "Account Settings not yet implemented", android.widget.Toast.LENGTH_SHORT).show()
+                }
+                SettingsMenuItem(Icons.Filled.Lock, "Privacy", "Who can message me") {
+                    android.widget.Toast.makeText(context, "Privacy settings not yet implemented", android.widget.Toast.LENGTH_SHORT).show()
+                }
             }
             
             item { Spacer(modifier = Modifier.height(16.dp)) }
             
             item {
                 SettingsCategory("Preferences")
-                SettingsMenuItem(Icons.Filled.Notifications, "Notifications", "Sounds & Vibes")
-                SettingsMenuItem(Icons.Filled.Palette, "Theme", "Dark AMOLED, Cyber Neon")
-                SettingsMenuItem(Icons.Filled.Language, "Language", "English (US)")
+                SettingsMenuItem(Icons.Filled.Notifications, "Notifications", "Sounds & Vibes") {
+                    android.widget.Toast.makeText(context, "Notifications not yet implemented", android.widget.Toast.LENGTH_SHORT).show()
+                }
+                SettingsMenuItem(Icons.Filled.Palette, "Theme", "Dark AMOLED, Cyber Neon") {
+                    android.widget.Toast.makeText(context, "Themes not yet implemented", android.widget.Toast.LENGTH_SHORT).show()
+                }
+                SettingsMenuItem(Icons.Filled.Language, "Language", "English (US)") {
+                    android.widget.Toast.makeText(context, "Language selection not yet implemented", android.widget.Toast.LENGTH_SHORT).show()
+                }
             }
             
             item { Spacer(modifier = Modifier.height(16.dp)) }
             
             item {
                 SettingsCategory("Danger Zone")
-                SettingsMenuItem(Icons.Filled.Block, "Block List", "Manage blocked contacts", isDanger = true)
+                SettingsMenuItem(Icons.Filled.Block, "Block List", "Manage blocked contacts", isDanger = true) {
+                    android.widget.Toast.makeText(context, "Block list not yet implemented", android.widget.Toast.LENGTH_SHORT).show()
+                }
                 SettingsMenuItem(Icons.AutoMirrored.Filled.Logout, "Log Out", "", isDanger = true, onClick = {
-                    navController.navigate("login") { popUpTo(0) }
+                    com.example.data.UserSession.clear()
+                    navController.navigate("onboarding") { popUpTo(0) }
                 })
             }
         }

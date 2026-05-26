@@ -34,8 +34,14 @@ fun SplashScreen(navController: NavController) {
     LaunchedEffect(Unit) {
         startAnimation = true
         kotlinx.coroutines.delay(2000)
-        navController.navigate("onboarding") {
-            popUpTo("splash") { inclusive = true }
+        if (com.example.data.UserSession.idToken != null) {
+            navController.navigate("main") {
+                popUpTo("splash") { inclusive = true }
+            }
+        } else {
+            navController.navigate("onboarding") {
+                popUpTo("splash") { inclusive = true }
+            }
         }
     }
 

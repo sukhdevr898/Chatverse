@@ -48,6 +48,7 @@ import kotlinx.coroutines.delay
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        com.example.data.UserSession.init(this)
         // Preview Reload Trigger
         enableEdgeToEdge()
         setContent {
@@ -57,6 +58,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
 
 @Composable
 fun ChatVerseApp(authViewModel: AuthViewModel = viewModel()) {

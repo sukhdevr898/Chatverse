@@ -49,7 +49,13 @@ fun MainScreen(rootNavController: NavController) {
                 enterTransition = { fadeIn(tween(300)) },
                 exitTransition = { fadeOut(tween(300)) }
             ) {
-                composable("chats") { HomeScreen(rootNavController) }
+                composable("chats") { HomeScreen(rootNavController, onNavigateToFriends = {
+                    bottomNavController.navigate("friends") {
+                        popUpTo(bottomNavController.graph.startDestinationId) { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }) }
                 composable("friends") { FriendsScreen(rootNavController) }
                 composable("calls") { CallsScreen(rootNavController) }
                 composable("stories") { StoriesScreen(rootNavController) }

@@ -35,7 +35,7 @@ import kotlinx.coroutines.delay
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun HomeScreen(navController: NavController, viewModel: HomeViewModel = viewModel()) {
+fun HomeScreen(navController: NavController, onNavigateToFriends: () -> Unit, viewModel: HomeViewModel = viewModel()) {
     val chats by viewModel.chats.collectAsState()
 
     Box(
@@ -50,7 +50,7 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = viewMode
         }
         
         FloatingActionButton(
-            onClick = { navController.navigate("friends") },
+            onClick = onNavigateToFriends,
             containerColor = NeonBlue,
             contentColor = PureWhite,
             modifier = Modifier
@@ -178,14 +178,38 @@ data class ChatItemUiModel(
 
 @Composable
 fun ChatList(chats: List<ChatItemUiModel>, navController: NavController) {
-    LazyColumn(
-        contentPadding = PaddingValues(top = 16.dp, bottom = 120.dp)
-    ) {
-        items(chats, key = { it.id }) { chat ->
-            ChatItem(
-                chat = chat,
-                onClick = { navController.navigate("chat/${chat.id}") }
-            )
+    if (chats.isEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 120.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Icon(
+                    imageVector = Icons.Filled.AddComment,
+                    contentDescription = null,
+                    modifier = Modifier.size(64.dp),
+                    tint = SoftGray.copy(alpha = 0.5f)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "No recent chats",
+                    color = SoftGray,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+        }
+    } else {
+        LazyColumn(
+            contentPadding = PaddingValues(top = 16.dp, bottom = 120.dp)
+        ) {
+            items(chats, key = { it.id }) { chat ->
+                ChatItem(
+                    chat = chat,
+                    onClick = { navController.navigate("chat/${chat.id}") }
+                )
+            }
         }
     }
 }
