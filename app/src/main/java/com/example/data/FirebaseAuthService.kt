@@ -36,19 +36,19 @@ data class OobCodeResponse(
 )
 
 interface FirebaseAuthApi {
-    @POST("accounts:signUp")
+    @POST("v1/accounts:signUp")
     suspend fun signUp(
         @Query("key") apiKey: String,
         @Body request: AuthRequest
     ): Response<AuthResponse>
 
-    @POST("accounts:signInWithPassword")
+    @POST("v1/accounts:signInWithPassword")
     suspend fun signIn(
         @Query("key") apiKey: String,
         @Body request: AuthRequest
     ): Response<AuthResponse>
 
-    @POST("accounts:sendOobCode")
+    @POST("v1/accounts:sendOobCode")
     suspend fun sendPasswordReset(
         @Query("key") apiKey: String,
         @Body request: OobCodeRequest
@@ -56,7 +56,7 @@ interface FirebaseAuthApi {
 }
 
 object FirebaseAuthService {
-    private const val BASE_URL = "https://identitytoolkit.googleapis.com/v1/"
+    private const val BASE_URL = "https://identitytoolkit.googleapis.com/"
     
     val api: FirebaseAuthApi by lazy {
         val moshi = Moshi.Builder()
