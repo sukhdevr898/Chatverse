@@ -98,7 +98,14 @@ fun ChatVerseApp(authViewModel: AuthViewModel = viewModel()) {
                 try {
                     val projectId = com.example.data.FirestoreService.getProjectIdFromToken(auth)
                     val reqResponse = com.example.data.FirestoreService.api.getFriendRequests(projectId, currentUserId, "Bearer $auth")
-                    if (reqResponse.isSuccessful) {
+                    if (!reqResponse.isSuccessful && reqResponse.code() == 401) {
+                        com.example.data.UserSession.clear()
+                        kotlinx.coroutines.Dispatchers.Main.dispatch(kotlin.coroutines.EmptyCoroutineContext, Runnable {
+                            navController.navigate("login") {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        })
+                    } else if (reqResponse.isSuccessful) {
                         val currentRequests = reqResponse.body()?.documents?.mapNotNull { it.toFriendRequest() } ?: emptyList()
                         val currentSenderIds = currentRequests.map { it.senderId }.toSet()
                         
