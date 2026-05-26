@@ -31,6 +31,9 @@ class FriendsViewModel : ViewModel() {
     private val _friends = MutableStateFlow<Set<String>>(emptySet())
     val friends: StateFlow<Set<String>> = _friends.asStateFlow()
 
+    private val _friendsList = MutableStateFlow<List<UserSearchItem>>(emptyList())
+    val friendsList: StateFlow<List<UserSearchItem>> = _friendsList.asStateFlow()
+
     private val _isSearching = MutableStateFlow(false)
     val isSearching: StateFlow<Boolean> = _isSearching.asStateFlow()
 
@@ -70,11 +73,26 @@ class FriendsViewModel : ViewModel() {
                     val docs = usersResponse.body()?.documents ?: emptyList()
                     val usersList = docs.mapNotNull { it.toUser() }
                     allUsersCache = usersList.associateBy { it.id }
+                    updateFriendsList()
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
+    }
+
+    private fun updateFriendsList() {
+        val currentUserId = UserSession.userId ?: return
+        val list = allUsersCache.values.filter { _friends.value.contains(it.id) }.map {
+            UserSearchItem(
+                id = it.id,
+                username = it.username,
+                isFriend = true,
+                requestSent = false,
+                isSelf = it.id == currentUserId
+            )
+        }.sortedBy { it.username }
+        _friendsList.value = list
     }
 
     fun searchUsers(query: String) {

@@ -23,6 +23,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.compose.foundation.border
+import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -80,16 +82,15 @@ fun PremiumBottomNavBar(navController: NavHostController) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 24.dp)
+            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.95f))
+            .border(width = 1.dp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(72.dp)
-                .clip(RoundedCornerShape(36.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-                .padding(horizontal = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+                .height(80.dp)
+                .padding(start = 8.dp, end = 8.dp, bottom = 12.dp),
+            horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
         ) {
             items.forEach { item ->
@@ -119,25 +120,39 @@ private fun NavBarItem(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     
-    // Animation for width expansion
-    val backgroundAlpha by animateFloatAsState(if (isSelected) 0.15f else 0f)
     val iconColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+    val textColor = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
+    val fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium
     
-    Box(
+    Column(
         modifier = Modifier
-            .clip(CircleShape)
-            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
-            .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = backgroundAlpha) else Color.Transparent)
-            .padding(horizontal = 16.dp, vertical = 10.dp),
-        contentAlignment = Alignment.Center
+            .width(64.dp)
+            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        Icon(
-            imageVector = if (isSelected) item.activeIcon else item.icon,
-            contentDescription = item.label,
-            tint = iconColor,
-            modifier = Modifier.size(26.dp)
+        Box(
+            modifier = Modifier
+                .width(64.dp)
+                .height(32.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(if (isSelected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = if (isSelected) item.activeIcon else item.icon,
+                contentDescription = item.label,
+                tint = iconColor,
+                modifier = Modifier.size(24.dp)
+            )
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = item.label,
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = fontWeight, color = textColor)
         )
     }
 }
+
 
 data class NavItem(val route: String, val label: String, val icon: ImageVector, val activeIcon: ImageVector)

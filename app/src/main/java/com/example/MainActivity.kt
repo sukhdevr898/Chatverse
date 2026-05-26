@@ -59,12 +59,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         com.example.data.UserSession.init(this)
         
-        val serviceIntent = Intent(this, MessagePollingService::class.java)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(serviceIntent)
-        } else {
-            startService(serviceIntent)
-        }
+// Foreground service removed to prevent Android 14+ crash without proper permissions
 
         enableEdgeToEdge()
         setContent {
