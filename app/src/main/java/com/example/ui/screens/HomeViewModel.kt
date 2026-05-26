@@ -13,9 +13,28 @@ import kotlinx.coroutines.launch
 class HomeViewModel : ViewModel() {
     private val _chats = MutableStateFlow<List<ChatItemUiModel>>(emptyList())
     val chats: StateFlow<List<ChatItemUiModel>> = _chats.asStateFlow()
+    
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
+    private var allChats = listOf<ChatItemUiModel>()
 
     init {
         loadUsers()
+    }
+    
+    fun updateSearchQuery(query: String) {
+        _searchQuery.value = query
+        filterChats()
+    }
+    
+    private fun filterChats() {
+        val q = _searchQuery.value.trim().lowercase()
+        if (q.isEmpty()) {
+            _chats.value = allChats
+        } else {
+            _chats.value = allChats.filter { it.username.lowercase().contains(q) }
+        }
     }
 
     private fun loadUsers() {
@@ -46,7 +65,8 @@ class HomeViewModel : ViewModel() {
                                 isTyping = false
                             )
                         }
-                    _chats.value = chatItems
+                    allChats = chatItems
+                    filterChats()
                 }
             } catch (e: Exception) {
                 e.printStackTrace()

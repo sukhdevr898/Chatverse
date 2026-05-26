@@ -37,6 +37,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @Composable
 fun HomeScreen(navController: NavController, onNavigateToFriends: () -> Unit, viewModel: HomeViewModel = viewModel()) {
     val chats by viewModel.chats.collectAsState()
+    val searchQuery by viewModel.searchQuery.collectAsState()
 
     Box(
         modifier = Modifier
@@ -44,8 +45,8 @@ fun HomeScreen(navController: NavController, onNavigateToFriends: () -> Unit, vi
             .background(DeepBlack)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            HomeTopHeader()
-            HomeSearchBar()
+            HomeTopHeader(onNavigateToFriends)
+            HomeSearchBar(searchQuery, viewModel::updateSearchQuery)
             ChatList(chats, navController)
         }
         
@@ -63,7 +64,7 @@ fun HomeScreen(navController: NavController, onNavigateToFriends: () -> Unit, vi
 }
 
 @Composable
-fun HomeTopHeader() {
+fun HomeTopHeader(onNavigateToFriends: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -122,28 +123,22 @@ fun HomeTopHeader() {
 
         // Actions
         Row(
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Icon(
-                Icons.Filled.Search,
-                contentDescription = "Search",
-                tint = SoftGray,
-                modifier = Modifier.size(24.dp)
-            )
-            Icon(
-                Icons.Filled.Notifications,
-                contentDescription = "Notifications",
-                tint = SoftGray,
-                modifier = Modifier.size(24.dp)
-            )
+            IconButton(onClick = onNavigateToFriends) {
+                Icon(
+                    Icons.Filled.Notifications,
+                    contentDescription = "Notifications",
+                    tint = SoftGray,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
         }
     }
 }
 
 @Composable
-fun HomeSearchBar() {
-    var query by remember { mutableStateOf("") }
-    
+fun HomeSearchBar(query: String, onQueryChange: (String) -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -151,16 +146,31 @@ fun HomeSearchBar() {
             .clip(RoundedCornerShape(25.dp))
             .background(GlassCardBg)
             .border(1.dp, GlassInputBorder, RoundedCornerShape(25.dp))
-            .padding(horizontal = 16.dp, vertical = 12.dp)
+            .padding(horizontal = 16.dp, vertical = 4.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Filled.Search, contentDescription = null, tint = SoftGray)
-            Spacer(modifier = Modifier.width(12.dp))
-            // Minimal fake search field for UI
-            Text(
-                "Search chats, friends, media...",
-                color = SoftGray,
-                style = MaterialTheme.typography.bodyMedium
+            Spacer(modifier = Modifier.width(4.dp))
+            TextField(
+                value = query,
+                onValueChange = onQueryChange,
+                placeholder = {
+                    Text(
+                        "Search chats, friends, media...",
+                        color = SoftGray,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                },
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedTextColor = PureWhite,
+                    unfocusedTextColor = PureWhite,
+                    cursorColor = NeonBlue
+                ),
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
             )
         }
     }
