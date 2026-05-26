@@ -56,12 +56,12 @@ fun HomeScreen(navController: NavController, onNavigateToFriends: () -> Unit, vi
                 .padding(end = 24.dp, bottom = 112.dp)
                 .size(64.dp)
                 .clip(CircleShape)
-                .background(Brush.linearGradient(listOf(ElectricPurple, NeonBlue)))
+                .background(Brush.linearGradient(listOf(MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.primary)))
                 .clickable { onNavigateToFriends() }
-                .border(1.dp, PureWhite.copy(alpha = 0.2f), CircleShape),
+                .border(1.dp, MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f), CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            Icon(Icons.Filled.AddComment, null, tint = PureWhite, modifier = Modifier.size(28.dp))
+            Icon(Icons.Filled.AddComment, null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(28.dp))
         }
     }
 }
@@ -145,8 +145,8 @@ fun HomeSearchBar(query: String, onQueryChange: (String) -> Unit) {
             .fillMaxWidth()
             .padding(horizontal = 24.dp, vertical = 8.dp)
             .clip(RoundedCornerShape(25.dp))
-            .background(GlassCardBg)
-            .border(1.dp, GlassInputBorder, RoundedCornerShape(25.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), RoundedCornerShape(25.dp))
             .padding(horizontal = 16.dp, vertical = 4.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -202,12 +202,12 @@ fun ChatList(chats: List<ChatItemUiModel>, navController: NavController, viewMod
                     imageVector = Icons.Filled.AddComment,
                     contentDescription = null,
                     modifier = Modifier.size(64.dp),
-                    tint = SoftGray.copy(alpha = 0.5f)
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = "No recent chats",
-                    color = SoftGray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodyLarge
                 )
             }

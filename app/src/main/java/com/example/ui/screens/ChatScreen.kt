@@ -112,17 +112,38 @@ fun ChatHeader(navController: NavController, title: String) {
             }
         }
 
-        Row(horizontalArrangement = Arrangement.spacedBy(0.dp)) {
-            IconButton(onClick = {  }) {
-                Icon(Icons.Filled.Videocam, contentDescription = "Video Call", tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(28.dp))
-            }
-            IconButton(onClick = {  }) {
-                Icon(Icons.Filled.Call, contentDescription = "Audio Call", tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(24.dp))
-            }
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                Icons.Filled.Videocam, 
+                contentDescription = "Video Call", 
+                tint = MaterialTheme.colorScheme.onSurface, 
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .clickable { }
+                    .padding(8.dp)
+            )
+            Icon(
+                Icons.Filled.Call, 
+                contentDescription = "Audio Call", 
+                tint = MaterialTheme.colorScheme.onSurface, 
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .clickable { }
+                    .padding(8.dp)
+            )
             Box {
-                IconButton(onClick = { showMenu = !showMenu }) {
-                    Icon(Icons.Filled.MoreVert, contentDescription = "Options", tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(28.dp))
-                }
+                Icon(
+                    Icons.Filled.MoreVert, 
+                    contentDescription = "Options", 
+                    tint = MaterialTheme.colorScheme.onSurface, 
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .clickable { showMenu = !showMenu }
+                        .padding(8.dp)
+                )
                 DropdownMenu(
                     expanded = showMenu,
                     onDismissRequest = { showMenu = false },

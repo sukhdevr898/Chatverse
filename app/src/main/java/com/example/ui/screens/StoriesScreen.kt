@@ -24,26 +24,26 @@ fun StoriesScreen(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(DeepBlack),
+            .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
                 imageVector = Icons.Filled.Panorama,
                 contentDescription = null,
-                tint = PinkGradient,
+                tint = MaterialTheme.colorScheme.tertiary,
                 modifier = Modifier.size(64.dp)
             )
             Spacer(modifier = Modifier.height(24.dp))
             Text(
                 "Futuristic Stories",
-                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold, color = PureWhite)
+                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 "See what your friends are up to.",
                 style = MaterialTheme.typography.bodyLarge,
-                color = SoftGray
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }

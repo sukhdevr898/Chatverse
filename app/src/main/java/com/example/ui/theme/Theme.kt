@@ -73,19 +73,9 @@ fun MyApplicationTheme(
           window.statusBarColor = android.graphics.Color.TRANSPARENT
           window.navigationBarColor = android.graphics.Color.TRANSPARENT
           val insetsController = WindowCompat.getInsetsController(window, view)
-          insetsController.isAppearanceLightStatusBars = false
-          insetsController.isAppearanceLightNavigationBars = false
+          insetsController.isAppearanceLightStatusBars = !darkTheme
+          insetsController.isAppearanceLightNavigationBars = !darkTheme
       }
-    }
-    
-    DisposableEffect(view) {
-      val window = view.context.findActivity()?.window
-      if (window != null) {
-          val insetsController = WindowCompat.getInsetsController(window, view)
-          insetsController.systemBarsBehavior = androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-          insetsController.hide(androidx.core.view.WindowInsetsCompat.Type.systemBars())
-      }
-      onDispose {}
     }
   }
 

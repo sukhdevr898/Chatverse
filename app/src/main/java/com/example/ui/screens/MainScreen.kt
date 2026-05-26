@@ -34,7 +34,7 @@ fun MainScreen(rootNavController: NavController) {
     val bottomNavController = rememberNavController()
     
     Scaffold(
-        containerColor = DeepBlack,
+        containerColor = MaterialTheme.colorScheme.background,
         bottomBar = { PremiumBottomNavBar(bottomNavController) }
     ) { paddingValues ->
         Box(
@@ -87,7 +87,7 @@ fun PremiumBottomNavBar(navController: NavHostController) {
                 .fillMaxWidth()
                 .height(72.dp)
                 .clip(RoundedCornerShape(36.dp))
-                .background(GlassCardBg)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
                 .padding(horizontal = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
@@ -121,13 +121,13 @@ private fun NavBarItem(
     
     // Animation for width expansion
     val backgroundAlpha by animateFloatAsState(if (isSelected) 0.15f else 0f)
-    val iconColor = if (isSelected) NeonBlue else SoftGray
+    val iconColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
     
     Box(
         modifier = Modifier
             .clip(CircleShape)
             .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
-            .background(if (isSelected) NeonBlue.copy(alpha = backgroundAlpha) else Color.Transparent)
+            .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = backgroundAlpha) else Color.Transparent)
             .padding(horizontal = 16.dp, vertical = 10.dp),
         contentAlignment = Alignment.Center
     ) {

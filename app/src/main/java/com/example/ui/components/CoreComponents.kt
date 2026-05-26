@@ -101,10 +101,10 @@ fun GlassCard(
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(cornerRadius))
-            .background(GlassCardBg)
+            .background(MaterialTheme.colorScheme.surfaceVariant)
             .border(
                 width = 1.dp,
-                color = GlassInputBorder,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
                 shape = RoundedCornerShape(cornerRadius)
             )
             .drawBehind {
@@ -139,16 +139,16 @@ fun PremiumTextField(
 
     val borderColor by animateColorAsState(
         targetValue = when {
-            isError -> ErrorRed
-            isFocused -> GlassInputFocusBorder
-            else -> GlassInputBorder
+            isError -> MaterialTheme.colorScheme.error
+            isFocused -> MaterialTheme.colorScheme.primary
+            else -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
         }, label = "borderColor"
     )
 
     val bgColor by animateColorAsState(
         targetValue = when {
-            isFocused -> GlassInputFocusBg
-            else -> GlassInputBg
+            isFocused -> MaterialTheme.colorScheme.surfaceVariant
+            else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
         }, label = "bgColor"
     )
 
@@ -174,7 +174,7 @@ fun PremiumTextField(
                 Box(modifier = Modifier.weight(1f)) {
                     Text(
                         text = label,
-                        color = if (isError) ErrorRed else StitchSurfaceVariant,
+                        color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = labelSize.sp,
                         fontWeight = if (isFocused || value.isNotEmpty()) FontWeight.SemiBold else FontWeight.Normal,
                         modifier = Modifier.offset(y = labelOffset.dp)
@@ -184,7 +184,7 @@ fun PremiumTextField(
                         value = value,
                         onValueChange = onValueChange,
                         textStyle = TextStyle(
-                            color = TextPrimary,
+                            color = MaterialTheme.colorScheme.onSurface,
                             fontSize = 16.sp,
                             fontFamily = MaterialTheme.typography.bodyLarge.fontFamily
                         ),
@@ -192,7 +192,7 @@ fun PremiumTextField(
                         keyboardOptions = keyboardOptions,
                         visualTransformation = visualTransformation,
                         interactionSource = interactionSource,
-                        cursorBrush = SolidColor(StitchPrimary),
+                        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = if (isFocused || value.isNotEmpty()) 8.dp else 0.dp)
@@ -200,9 +200,9 @@ fun PremiumTextField(
                 }
 
                 if (isError) {
-                    Icon(Icons.Filled.Error, "Error", tint = ErrorRed, modifier = Modifier.padding(start = 8.dp).size(20.dp))
+                    Icon(Icons.Filled.Error, "Error", tint = MaterialTheme.colorScheme.error, modifier = Modifier.padding(start = 8.dp).size(20.dp))
                 } else if (isSuccess) {
-                    Icon(Icons.Filled.CheckCircle, "Success", tint = SuccessGreen, modifier = Modifier.padding(start = 8.dp).size(20.dp))
+                    Icon(Icons.Filled.CheckCircle, "Success", tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.padding(start = 8.dp).size(20.dp))
                 }
                 
                 if (trailingIcon != null) {
@@ -216,7 +216,7 @@ fun PremiumTextField(
         if (isError && errorMessage != null) {
             Text(
                 text = errorMessage,
-                color = ErrorRed,
+                color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.labelMedium,
                 modifier = Modifier.padding(start = 16.dp, top = 4.dp)
             )
@@ -250,7 +250,7 @@ fun GlowButton(
             .clip(CircleShape)
             .background(
                 brush = Brush.linearGradient(
-                    colors = listOf(StitchGradient1, StitchGradient2)
+                    colors = listOf(MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.primary)
                 )
             )
             .clickable(interactionSource = interactionSource, indication = null, onClick = {
@@ -260,7 +260,7 @@ fun GlowButton(
     ) {
         if (isLoading) {
             CircularProgressIndicator(
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier.size(24.dp),
                 strokeWidth = 2.dp
             )
@@ -268,7 +268,7 @@ fun GlowButton(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = text,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     style = MaterialTheme.typography.bodyLarge.copy(
                         fontWeight = FontWeight.SemiBold,
                         letterSpacing = 0.5.sp
@@ -290,7 +290,7 @@ fun SocialButton(
     val isPressed by interactionSource.collectIsPressedAsState()
     
     val bgColor by animateColorAsState(
-        targetValue = if (isPressed) GlassInputFocusBg else GlassInputBg,
+        targetValue = if (isPressed) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surfaceVariant.copy(alpha=0.5f),
         label = "bg"
     )
 
@@ -299,7 +299,7 @@ fun SocialButton(
             .height(48.dp)
             .clip(CircleShape)
             .background(bgColor)
-            .border(1.dp, GlassInputBorder, CircleShape)
+            .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha=0.05f), CircleShape)
             .clickable(interactionSource = interactionSource, indication = null, onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
@@ -311,7 +311,7 @@ fun SocialButton(
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = text,
-                color = TextPrimary,
+                color = MaterialTheme.colorScheme.onSurface,
                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium)
             )
         }

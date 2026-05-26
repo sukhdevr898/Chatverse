@@ -23,26 +23,26 @@ fun CallsScreen(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(DeepBlack),
+            .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
                 imageVector = Icons.Filled.Call,
                 contentDescription = null,
-                tint = NeonBlue,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(64.dp)
             )
             Spacer(modifier = Modifier.height(24.dp))
             Text(
                 "Crystal Clear Calls",
-                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold, color = PureWhite)
+                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 "Your recent calls will appear here.",
                 style = MaterialTheme.typography.bodyLarge,
-                color = SoftGray
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }

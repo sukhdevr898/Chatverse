@@ -45,7 +45,7 @@ fun DynamicIslandMessage(messages: List<IslandMessage>) {
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(32.dp))
-                        .background(DarkSurface.copy(alpha = 0.95f))
+                        .background(MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.95f))
                         .padding(horizontal = 20.dp, vertical = 12.dp)
                 ) {
                     Row(
@@ -53,9 +53,9 @@ fun DynamicIslandMessage(messages: List<IslandMessage>) {
                         horizontalArrangement = Arrangement.Center
                     ) {
                         val iconColor = when (message.type) {
-                            MessageType.SUCCESS -> Color(0xFF00FF88)
-                            MessageType.ERROR -> ErrorRed
-                            MessageType.INFO -> NeonBlue
+                            MessageType.SUCCESS -> MaterialTheme.colorScheme.tertiary
+                            MessageType.ERROR -> MaterialTheme.colorScheme.error
+                            MessageType.INFO -> MaterialTheme.colorScheme.primary
                         }
                         val icon = when (message.type) {
                             MessageType.SUCCESS -> Icons.Filled.CheckCircle
@@ -72,7 +72,7 @@ fun DynamicIslandMessage(messages: List<IslandMessage>) {
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(
                             text = message.text,
-                            color = TextPrimary,
+                            color = MaterialTheme.colorScheme.onSurface,
                             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold)
                         )
                     }

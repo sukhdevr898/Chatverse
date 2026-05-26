@@ -27,7 +27,7 @@ fun SettingsScreen(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(DeepBlack)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         val context = androidx.compose.ui.platform.LocalContext.current
         LazyColumn(
@@ -36,7 +36,7 @@ fun SettingsScreen(navController: NavController) {
             item {
                 Text(
                     "Settings",
-                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold, color = PureWhite),
+                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground),
                     modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
                 )
             }
@@ -95,8 +95,8 @@ fun SettingsProfileCard() {
             .fillMaxWidth()
             .padding(horizontal = 24.dp, vertical = 16.dp)
             .clip(RoundedCornerShape(24.dp))
-            .background(GlassCardBg)
-            .border(1.dp, GlassInputBorder, RoundedCornerShape(24.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha=0.05f), RoundedCornerShape(24.dp))
             .padding(20.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -104,11 +104,11 @@ fun SettingsProfileCard() {
                 modifier = Modifier
                     .size(64.dp)
                     .clip(CircleShape)
-                    .background(Graphite)
-                    .border(2.dp, NeonBlue, CircleShape)
+                    .background(MaterialTheme.colorScheme.surface)
+                    .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
             ) {
                 // Placeholder avatar inside
-                Icon(Icons.Filled.Person, contentDescription = null, modifier = Modifier.fillMaxSize().padding(12.dp), tint = SoftGray)
+                Icon(Icons.Filled.Person, contentDescription = null, modifier = Modifier.fillMaxSize().padding(12.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             
             Spacer(modifier = Modifier.width(16.dp))
@@ -118,11 +118,11 @@ fun SettingsProfileCard() {
                 val username = email.substringBefore("@")
                 Text(
                     username,
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold, color = PureWhite)
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                 )
                 Text(
                     "@$username",
-                    style = MaterialTheme.typography.bodyMedium.copy(color = NeonBlue)
+                    style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.primary)
                 )
             }
 
@@ -130,11 +130,11 @@ fun SettingsProfileCard() {
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(Color.White.copy(0.1f))
+                    .background(MaterialTheme.colorScheme.onSurface.copy(0.1f))
                     .clickable {  },
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Filled.Edit, contentDescription = "Edit Profile", tint = PureWhite, modifier = Modifier.size(20.dp))
+                Icon(Icons.Filled.Edit, contentDescription = "Edit Profile", tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(20.dp))
             }
         }
     }
@@ -144,7 +144,7 @@ fun SettingsProfileCard() {
 fun SettingsCategory(title: String) {
     Text(
         text = title,
-        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold, color = NeonBlue),
+        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary),
         modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
     )
 }
@@ -157,8 +157,8 @@ fun SettingsMenuItem(
     isDanger: Boolean = false,
     onClick: () -> Unit = {}
 ) {
-    val color = if (isDanger) Color(0xFFEF4444) else PureWhite
-    val iconColor = if (isDanger) Color(0xFFEF4444) else SoftGray
+    val color = if (isDanger) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onBackground
+    val iconColor = if (isDanger) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
 
     Row(
         modifier = Modifier
@@ -171,8 +171,8 @@ fun SettingsMenuItem(
             modifier = Modifier
                 .size(48.dp)
                 .clip(CircleShape)
-                .background(GlassCardBg)
-                .border(1.dp, GlassInputBorder, CircleShape),
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha=0.05f), CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Icon(icon, contentDescription = null, tint = iconColor, modifier = Modifier.size(20.dp))
@@ -184,10 +184,10 @@ fun SettingsMenuItem(
             Text(title, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold, color = color))
             if (subtitle.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(2.dp))
-                Text(subtitle, style = MaterialTheme.typography.bodySmall.copy(color = SoftGray))
+                Text(subtitle, style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant))
             }
         }
         
-        Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = SoftGray)
+        Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }

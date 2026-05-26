@@ -46,12 +46,12 @@ fun FriendsScreen(navController: NavController, viewModel: FriendsViewModel = vi
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(DeepBlack)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             Text(
                 "Friends",
-                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold, color = PureWhite),
+                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground),
                 modifier = Modifier.padding(24.dp)
             )
 
@@ -62,8 +62,8 @@ fun FriendsScreen(navController: NavController, viewModel: FriendsViewModel = vi
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp)
                     .clip(RoundedCornerShape(20.dp))
-                    .background(GlassCardBg)
-                    .border(1.dp, GlassInputBorder, RoundedCornerShape(20.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha=0.05f), RoundedCornerShape(20.dp))
                     .padding(horizontal = 16.dp, vertical = 2.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -71,7 +71,7 @@ fun FriendsScreen(navController: NavController, viewModel: FriendsViewModel = vi
                         viewModel.searchUsers(query)
                         keyboardController?.hide()
                     }) {
-                        Icon(Icons.Filled.Search, contentDescription = "Search", tint = NeonBlue)
+                        Icon(Icons.Filled.Search, contentDescription = "Search", tint = MaterialTheme.colorScheme.primary)
                     }
                     Spacer(modifier = Modifier.width(12.dp))
                     TextField(
@@ -80,7 +80,7 @@ fun FriendsScreen(navController: NavController, viewModel: FriendsViewModel = vi
                             query = it
                         },
                         singleLine = true,
-                        placeholder = { Text("Add Friend by Username...", color = SoftGray) },
+                        placeholder = { Text("Add Friend by Username...", color = MaterialTheme.colorScheme.onSurfaceVariant) },
                         keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
                             imeAction = androidx.compose.ui.text.input.ImeAction.Search
                         ),
@@ -95,8 +95,8 @@ fun FriendsScreen(navController: NavController, viewModel: FriendsViewModel = vi
                             unfocusedContainerColor = Color.Transparent,
                             focusedIndicatorColor = Color.Transparent,
                             unfocusedIndicatorColor = Color.Transparent,
-                            focusedTextColor = PureWhite,
-                            unfocusedTextColor = PureWhite
+                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                         ),
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -108,30 +108,30 @@ fun FriendsScreen(navController: NavController, viewModel: FriendsViewModel = vi
             if (query.isNotEmpty()) {
                 Text(
                     "Search Results",
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold, color = PureWhite),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground),
                     modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
                 )
                 
                 if (isSearching) {
                     Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(color = NeonBlue)
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                     }
                 } else if (errorMessage != null) {
                     Text(
                         errorMessage ?: "",
-                        style = MaterialTheme.typography.bodyMedium.copy(color = androidx.compose.ui.graphics.Color.Red),
+                        style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.error),
                         modifier = Modifier.padding(horizontal = 24.dp)
                     )
                 } else if (searchResults.isEmpty()) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
                         Text(
                             "No users found",
-                            style = MaterialTheme.typography.bodyMedium.copy(color = SoftGray)
+                            style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
                             "Hint: Ensure your Firestore 'users' collection has data. If you just enabled Firestore, log out & sign up again to create your user profile, and sign up a test account to search for.",
-                            style = MaterialTheme.typography.bodySmall.copy(color = SoftGray, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                            style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
                         )
                     }
                 } else {
@@ -148,14 +148,14 @@ fun FriendsScreen(navController: NavController, viewModel: FriendsViewModel = vi
             } else {
                 Text(
                     "Friend Requests",
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold, color = PureWhite),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground),
                     modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
                 )
                 
                 if (friendRequests.isEmpty()) {
                     Text(
                         "No pending requests",
-                        style = MaterialTheme.typography.bodyMedium.copy(color = SoftGray),
+                        style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant),
                         modifier = Modifier.padding(horizontal = 24.dp)
                     )
                 } else {
@@ -183,8 +183,8 @@ fun UserSearchCard(user: UserSearchItem, onAddFriend: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(GlassCardBg)
-            .border(1.dp, GlassInputBorder, RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha=0.05f), RoundedCornerShape(16.dp))
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -193,7 +193,7 @@ fun UserSearchCard(user: UserSearchItem, onAddFriend: () -> Unit) {
             modifier = Modifier
                 .size(50.dp)
                 .clip(CircleShape)
-                .background(Brush.linearGradient(listOf(StitchGradient3, ElectricPurple)))
+                .background(Brush.linearGradient(listOf(MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.primary)))
         )
 
         Spacer(modifier = Modifier.width(16.dp))
@@ -202,31 +202,31 @@ fun UserSearchCard(user: UserSearchItem, onAddFriend: () -> Unit) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = user.username,
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, color = PureWhite)
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
             )
         }
 
         Spacer(modifier = Modifier.width(12.dp))
 
         if (user.isSelf) {
-            Text("(You)", color = SoftGray, style = MaterialTheme.typography.labelLarge)
+            Text("(You)", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelLarge)
         } else if (user.isFriend) {
-            Icon(Icons.Filled.Check, contentDescription = "Friends", tint = NeonBlue)
+            Icon(Icons.Filled.Check, contentDescription = "Friends", tint = MaterialTheme.colorScheme.primary)
             Spacer(modifier = Modifier.width(4.dp))
-            Text("Friends", color = NeonBlue, style = MaterialTheme.typography.labelLarge)
+            Text("Friends", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge)
         } else if (user.requestSent) {
-            Text("Request Sent", color = SoftGray, style = MaterialTheme.typography.labelLarge)
+            Text("Request Sent", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelLarge)
         } else {
             // Add Friend action
             Box(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(NeonBlue.copy(alpha = 0.2f))
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
                     .clickable { onAddFriend() },
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Filled.PersonAdd, contentDescription = "Add Friend", tint = NeonBlue)
+                Icon(Icons.Filled.PersonAdd, contentDescription = "Add Friend", tint = MaterialTheme.colorScheme.primary)
             }
         }
     }
@@ -238,8 +238,8 @@ fun FriendRequestCard(req: FriendRequestData, onAccept: () -> Unit, onDecline: (
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(GlassCardBg)
-            .border(1.dp, GlassInputBorder, RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), RoundedCornerShape(16.dp))
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -248,7 +248,7 @@ fun FriendRequestCard(req: FriendRequestData, onAccept: () -> Unit, onDecline: (
             modifier = Modifier
                 .size(50.dp)
                 .clip(CircleShape)
-                .background(Brush.linearGradient(listOf(StitchGradient3, ElectricPurple)))
+                .background(Brush.linearGradient(listOf(MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.primary)))
         )
 
         Spacer(modifier = Modifier.width(16.dp))
@@ -258,7 +258,7 @@ fun FriendRequestCard(req: FriendRequestData, onAccept: () -> Unit, onDecline: (
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = req.senderUsername,
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, color = PureWhite)
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                 )
             }
         }
@@ -272,22 +272,22 @@ fun FriendRequestCard(req: FriendRequestData, onAccept: () -> Unit, onDecline: (
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFF10B981).copy(alpha = 0.2f))
+                    .background(MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f))
                     .clickable { onAccept() },
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Filled.Check, contentDescription = "Accept", tint = Color(0xFF10B981))
+                Icon(Icons.Filled.Check, contentDescription = "Accept", tint = MaterialTheme.colorScheme.tertiary)
             }
             // Decline
             Box(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFFEF4444).copy(alpha = 0.2f))
+                    .background(MaterialTheme.colorScheme.error.copy(alpha = 0.2f))
                     .clickable { onDecline() },
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Filled.Close, contentDescription = "Decline", tint = Color(0xFFEF4444))
+                Icon(Icons.Filled.Close, contentDescription = "Decline", tint = MaterialTheme.colorScheme.error)
             }
         }
     }

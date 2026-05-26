@@ -66,7 +66,7 @@ fun SplashScreen(navController: NavController) {
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(DeepBlack, Graphite)
+                    colors = listOf(MaterialTheme.colorScheme.background, MaterialTheme.colorScheme.surface)
                 )
             ),
         contentAlignment = Alignment.Center
@@ -78,7 +78,7 @@ fun SplashScreen(navController: NavController) {
                 .scale(scale)
                 .background(
                     Brush.radialGradient(
-                        colors = listOf(NeonBlue.copy(alpha = 0.2f), Color.Transparent),
+                        colors = listOf(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), Color.Transparent),
                         radius = 300f
                     ),
                     shape = CircleShape
@@ -98,14 +98,14 @@ fun SplashScreen(navController: NavController) {
             Text(
                 text = "ChatVerse",
                 style = MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.ExtraBold),
-                color = PureWhite
+                color = MaterialTheme.colorScheme.onBackground
             )
         }
 
         Text(
             text = "Connecting People Beyond Limits",
             style = MaterialTheme.typography.bodyMedium,
-            color = SoftGray,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 48.dp)
@@ -122,7 +122,7 @@ fun OnboardingScreen(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(DeepBlack)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         HorizontalPager(
             state = pagerState,
@@ -140,7 +140,7 @@ fun OnboardingScreen(navController: NavController) {
         ) {
             Text(
                 text = "Skip",
-                color = SoftGray,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                 modifier = Modifier.clickable {
                     navController.navigate("login") {
@@ -164,7 +164,7 @@ fun OnboardingScreen(navController: NavController) {
                 repeat(3) { index ->
                     val isSelected = pagerState.currentPage == index
                     val width by animateDpAsState(targetValue = if (isSelected) 24.dp else 8.dp)
-                    val color by animateColorAsState(targetValue = if (isSelected) NeonBlue else SoftDark)
+                    val color by animateColorAsState(targetValue = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f))
                     
                     Box(
                         modifier = Modifier
@@ -182,7 +182,7 @@ fun OnboardingScreen(navController: NavController) {
                     .clip(RoundedCornerShape(30.dp))
                     .background(
                         Brush.linearGradient(
-                            colors = listOf(ElectricPurple, NeonBlue)
+                            colors = listOf(MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.primary)
                         )
                     )
                     .clickable {
@@ -201,7 +201,7 @@ fun OnboardingScreen(navController: NavController) {
             ) {
                 Text(
                     text = if (pagerState.currentPage == 2) "Get Started" else "Next",
-                    color = PureWhite,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
                 )
             }
@@ -230,9 +230,9 @@ fun OnboardingPage(page: Int) {
     }
     
     val iconColor = when (page) {
-        0 -> PinkGradient
-        1 -> CyanGlow
-        else -> NeonBlue
+        0 -> MaterialTheme.colorScheme.tertiary
+        1 -> MaterialTheme.colorScheme.secondary
+        else -> MaterialTheme.colorScheme.primary
     }
 
     Column(
@@ -258,7 +258,7 @@ fun OnboardingPage(page: Int) {
                 modifier = Modifier
                     .size(100.dp)
                     .clip(CircleShape)
-                    .background(Graphite.copy(alpha = 0.8f))
+                    .background(MaterialTheme.colorScheme.surface)
                     .padding(24.dp),
                 contentAlignment = Alignment.Center
             ) {
@@ -284,7 +284,7 @@ fun OnboardingPage(page: Int) {
         Text(
             text = title,
             style = MaterialTheme.typography.headlineLarge,
-            color = PureWhite,
+            color = MaterialTheme.colorScheme.onBackground,
             textAlign = TextAlign.Center
         )
         
@@ -293,7 +293,7 @@ fun OnboardingPage(page: Int) {
         Text(
             text = subtitle,
             style = MaterialTheme.typography.bodyLarge,
-            color = SoftGray,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
     }
