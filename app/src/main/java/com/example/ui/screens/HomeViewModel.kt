@@ -5,9 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.example.data.FirestoreService
 import com.example.data.UserSession
 import com.example.data.toUser
+import com.example.data.toChatMessage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 class HomeViewModel : ViewModel() {
@@ -19,8 +21,11 @@ class HomeViewModel : ViewModel() {
 
     private var allChats = listOf<ChatItemUiModel>()
 
+    private var isFirstPoll = true
+    private var lastSeenMessageTimestamps = mutableMapOf<String, Long>()
+
     init {
-        loadUsers()
+        startPolling()
     }
     
     fun updateSearchQuery(query: String) {
@@ -36,41 +41,88 @@ class HomeViewModel : ViewModel() {
             _chats.value = allChats.filter { it.username.lowercase().contains(q) }
         }
     }
+    
+    private fun startPolling() {
+        viewModelScope.launch {
+            while(isActive) {
+                loadUsersAndMessages()
+                kotlinx.coroutines.delay(5000)
+            }
+        }
+    }
 
-    private fun loadUsers() {
+    private suspend fun loadUsersAndMessages() {
         val token = UserSession.idToken ?: return
         val currentUserId = UserSession.userId ?: return
-        viewModelScope.launch {
-            try {
-                val projectId = FirestoreService.getProjectIdFromToken(token)
-                // Get friends first
-                val friendsResponse = FirestoreService.api.getFriends(projectId, currentUserId, "Bearer $token")
-                val friendsList = if (friendsResponse.isSuccessful) {
-                    friendsResponse.body()?.documents?.mapNotNull { it.name?.substringAfterLast("/") }?.toSet() ?: emptySet()
-                } else emptySet()
+        
+        try {
+            val projectId = FirestoreService.getProjectIdFromToken(token)
+            // Get friends first
+            val friendsResponse = FirestoreService.api.getFriends(projectId, currentUserId, "Bearer $token")
+            val friendsList = if (friendsResponse.isSuccessful) {
+                friendsResponse.body()?.documents?.mapNotNull { it.name?.substringAfterLast("/") }?.toSet() ?: emptySet()
+            } else emptySet()
 
-                val response = FirestoreService.api.getUsers(projectId, "Bearer $token")
-                if (response.isSuccessful) {
-                    val usersList = response.body()?.documents?.mapNotNull { it.toUser() } ?: emptyList()
-                    val chatItems = usersList
-                        .filter { friendsList.contains(it.id) }
-                        .map { user ->
-                            ChatItemUiModel(
-                                id = user.id,
-                                username = user.username,
-                                lastMessage = "Tap to chat",
-                                time = "",
-                                unreadCount = 0,
-                                isOnline = user.isOnline,
-                                isTyping = false
-                            )
+            val response = FirestoreService.api.getUsers(projectId, "Bearer $token")
+            if (response.isSuccessful) {
+                val usersList = response.body()?.documents?.mapNotNull { it.toUser() } ?: emptyList()
+                val friendsData = usersList.filter { friendsList.contains(it.id) }
+                
+                val chatItems = mutableListOf<ChatItemUiModel>()
+                
+                for (user in friendsData) {
+                    val chatId = if (currentUserId < user.id) "${currentUserId}_${user.id}" else "${user.id}_${currentUserId}"
+                    val msgResp = FirestoreService.api.getMessages(projectId, chatId, "Bearer $token")
+                    
+                    var lastMsgText = "Tap to chat"
+                    var lastTime = ""
+                    var unread = 0
+                    var timestamp = 0L
+                    
+                    if (msgResp.isSuccessful) {
+                        val msgs = msgResp.body()?.documents?.mapNotNull { it.toChatMessage() } ?: emptyList()
+                        if (msgs.isNotEmpty()) {
+                            val sorted = msgs.sortedBy { it.timestamp }
+                            val latest = sorted.last()
+                            timestamp = latest.timestamp
+                            lastMsgText = latest.text
+                            lastTime = java.text.SimpleDateFormat("hh:mm a", java.util.Locale.getDefault()).format(java.util.Date(latest.timestamp))
+                            
+                            // Check notification
+                            if (!isFirstPoll) {
+                                val prevTime = lastSeenMessageTimestamps[user.id] ?: 0L
+                                if (latest.senderId != currentUserId && latest.timestamp > prevTime) { // new message from them
+                                    val context = UserSession.appContext
+                                    if (context != null) {
+                                        com.example.NotificationHelper.showSystemNotification(context, user.username, latest.text)
+                                    }
+                                }
+                            }
+                            lastSeenMessageTimestamps[user.id] = latest.timestamp
                         }
-                    allChats = chatItems
-                    filterChats()
+                    }
+                    
+                    chatItems.add(
+                        ChatItemUiModel(
+                            id = user.id,
+                            username = user.username,
+                            lastMessage = lastMsgText,
+                            time = lastTime,
+                            timestamp = timestamp,
+                            unreadCount = unread,
+                            isOnline = user.isOnline,
+                            isTyping = false
+                        )
+                    )
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
+                
+                isFirstPoll = false
+                
+                allChats = chatItems.sortedByDescending { it.timestamp }
+                filterChats()
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 }

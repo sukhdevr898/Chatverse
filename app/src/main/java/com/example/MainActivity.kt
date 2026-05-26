@@ -140,9 +140,10 @@ fun ChatVerseApp(authViewModel: AuthViewModel = viewModel()) {
             composable("signup") { SignupScreen(navController, authViewModel) }
             composable("forgotPassword") { ForgotPasswordScreen(navController, authViewModel) }
             composable("main") { MainScreen(navController) }
-            composable("chat/{chatId}") { backStackEntry ->
+            composable("chat/{chatId}/{username}") { backStackEntry ->
                 val chatId = backStackEntry.arguments?.getString("chatId") ?: ""
-                ChatScreen(navController, chatId)
+                val username = java.net.URLDecoder.decode(backStackEntry.arguments?.getString("username") ?: "", "UTF-8")
+                ChatScreen(navController, chatId, username)
             }
         }
 

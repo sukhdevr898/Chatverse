@@ -181,6 +181,7 @@ data class ChatItemUiModel(
     val username: String,
     val lastMessage: String,
     val time: String,
+    val timestamp: Long = 0L,
     val unreadCount: Int = 0,
     val isOnline: Boolean = false,
     val isTyping: Boolean = false
@@ -217,7 +218,10 @@ fun ChatList(chats: List<ChatItemUiModel>, navController: NavController) {
             items(chats, key = { it.id }) { chat ->
                 ChatItem(
                     chat = chat,
-                    onClick = { navController.navigate("chat/${chat.id}") }
+                    onClick = { 
+                        val encodedUsername = java.net.URLEncoder.encode(chat.username, "UTF-8")
+                        navController.navigate("chat/${chat.id}/$encodedUsername") 
+                    }
                 )
             }
         }

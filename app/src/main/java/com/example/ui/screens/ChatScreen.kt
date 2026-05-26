@@ -28,7 +28,7 @@ import com.example.ui.theme.*
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun ChatScreen(navController: NavController, chatId: String) {
+fun ChatScreen(navController: NavController, chatId: String, username: String) {
     val viewModel: ChatViewModel = viewModel(factory = ChatViewModelFactory(chatId))
     val messages by viewModel.messages.collectAsState()
 
@@ -37,8 +37,8 @@ fun ChatScreen(navController: NavController, chatId: String) {
             .fillMaxSize()
             .background(DeepBlack)
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            ChatHeader(navController, "User $chatId")
+        Column(modifier = Modifier.fillMaxSize().imePadding()) {
+            ChatHeader(navController, username)
             ChatMessagesArea(messages = messages, modifier = Modifier.weight(1f))
             ChatInputArea { viewModel.sendMessage(it) }
         }
@@ -74,7 +74,9 @@ fun ChatHeader(navController: NavController, title: String) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title, 
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, color = PureWhite)
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, color = PureWhite),
+                maxLines = 1,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
             )
             Text(
                 text = "Online", 
@@ -150,10 +152,21 @@ fun MessageBubble(msg: MessageUiModel) {
                     style = MaterialTheme.typography.bodyLarge.copy(color = PureWhite)
                 )
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = msg.time,
-                    style = MaterialTheme.typography.labelSmall.copy(color = SoftGray, fontSize = 10.sp)
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = msg.time,
+                        style = MaterialTheme.typography.labelSmall.copy(color = SoftGray, fontSize = 10.sp)
+                    )
+                    if (msg.isMine) {
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Icon(
+                            imageVector = Icons.Filled.DoneAll,
+                            contentDescription = "Read",
+                            tint = Color(0xFF10B981), // Green ticks to indicate read
+                            modifier = Modifier.size(14.dp)
+                        )
+                    }
+                }
             }
         }
     }
