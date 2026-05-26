@@ -47,7 +47,15 @@ class AuthViewModel : ViewModel() {
                 val errorBody = response.errorBody()?.string()
                 val errorMsg = try {
                     val json = JSONObject(errorBody ?: "")
-                    json.getJSONObject("error").getString("message")
+                    val msg = json.getJSONObject("error").getString("message")
+                    when (msg) {
+                        "CONFIGURATION_NOT_FOUND" -> "Firebase Email/Password Auth is disabled. Please enable it in Firebase Console."
+                        "INVALID_LOGIN_CREDENTIALS" -> "Invalid email or password."
+                        "EMAIL_EXISTS" -> "This email is already registered."
+                        "WEAK_PASSWORD" -> "Password is too weak."
+                        "EMAIL_NOT_FOUND" -> "This email is not registered."
+                        else -> msg
+                    }
                 } catch (e: Exception) {
                     "An unknown error occurred."
                 }
