@@ -54,11 +54,16 @@ class AuthViewModel : ViewModel() {
                 Result.failure(Exception(errorMsg))
             }
         } catch (e: Exception) {
-            Result.failure(Exception("Network error. Please try again."))
+            e.printStackTrace()
+            Result.failure(Exception("Network error: ${e.message}"))
         }
     }
 
     fun login(email: String, password: String, onSuccess: () -> Unit) {
+        if (apiKey.isEmpty() || apiKey == "MY_FIREBASE_API_KEY") {
+            showMessage("Please configure FIREBASE_API_KEY in the Secrets panel.", MessageType.ERROR)
+            return
+        }
         if (email.isBlank() || password.isBlank()) {
             showMessage("Please fill all fields", MessageType.ERROR)
             return
@@ -79,6 +84,10 @@ class AuthViewModel : ViewModel() {
     }
 
     fun signup(email: String, password: String, onSuccess: () -> Unit) {
+        if (apiKey.isEmpty() || apiKey == "MY_FIREBASE_API_KEY") {
+            showMessage("Please configure FIREBASE_API_KEY in the Secrets panel.", MessageType.ERROR)
+            return
+        }
         if (email.isBlank() || password.isBlank()) {
             showMessage("Please fill all fields", MessageType.ERROR)
             return
@@ -103,6 +112,10 @@ class AuthViewModel : ViewModel() {
     }
 
     fun resetPassword(email: String, onSuccess: () -> Unit) {
+        if (apiKey.isEmpty() || apiKey == "MY_FIREBASE_API_KEY") {
+            showMessage("Please configure FIREBASE_API_KEY in the Secrets panel.", MessageType.ERROR)
+            return
+        }
         if (email.isBlank()) {
             showMessage("Please enter your email", MessageType.ERROR)
             return
