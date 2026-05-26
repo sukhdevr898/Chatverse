@@ -22,11 +22,17 @@ class HomeViewModel : ViewModel() {
         val currentUserId = UserSession.userId ?: return
         viewModelScope.launch {
             try {
+                // Get friends first
+                val friendsResponse = FirebaseDatabaseService.api.getFriends(currentUserId, token)
+                val friendsList = if (friendsResponse.isSuccessful) {
+                    friendsResponse.body()?.filterValues { it }?.keys ?: emptySet()
+                } else emptySet()
+
                 val response = FirebaseDatabaseService.api.getUsers(token)
                 if (response.isSuccessful) {
                     val usersMap = response.body() ?: emptyMap()
                     val chatItems = usersMap.values
-                        .filter { it.id != currentUserId }
+                        .filter { friendsList.contains(it.id) }
                         .map { user ->
                             ChatItemUiModel(
                                 id = user.id,

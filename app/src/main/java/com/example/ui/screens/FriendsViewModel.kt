@@ -82,7 +82,7 @@ class FriendsViewModel : ViewModel() {
         _searchResults.value = filtered
     }
 
-    fun sendFriendRequest(targetUserId: String) {
+    fun sendFriendRequest(targetUserId: String, context: android.content.Context) {
         val auth = UserSession.idToken ?: return
         val currentUserId = UserSession.userId ?: return
         val username = UserSession.email?.substringBefore("@") ?: "Unknown User"
@@ -100,6 +100,8 @@ class FriendsViewModel : ViewModel() {
                     if (it.id == targetUserId) it.copy(requestSent = true) else it
                 }
                 _searchResults.value = updated
+                
+                android.widget.Toast.makeText(context, "Friend Request Sent!", android.widget.Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
                 e.printStackTrace()
             }

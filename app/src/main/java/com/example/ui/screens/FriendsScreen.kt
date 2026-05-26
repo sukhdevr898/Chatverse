@@ -33,6 +33,8 @@ fun FriendsScreen(navController: NavController, viewModel: FriendsViewModel = vi
     val searchResults by viewModel.searchResults.collectAsState()
     val friendRequests by viewModel.friendRequests.collectAsState()
 
+    val context = androidx.compose.ui.platform.LocalContext.current
+
     DisposableEffect(Unit) {
         viewModel.loadData()
         onDispose { }
@@ -68,9 +70,15 @@ fun FriendsScreen(navController: NavController, viewModel: FriendsViewModel = vi
                         value = query,
                         onValueChange = { 
                             query = it
-                            viewModel.searchUsers(it)
                         },
+                        singleLine = true,
                         placeholder = { Text("Add Friend by Username...", color = SoftGray) },
+                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                            imeAction = androidx.compose.ui.text.input.ImeAction.Search
+                        ),
+                        keyboardActions = androidx.compose.foundation.text.KeyboardActions(
+                            onSearch = { viewModel.searchUsers(query) }
+                        ),
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = Color.Transparent,
                             unfocusedContainerColor = Color.Transparent,
@@ -98,7 +106,7 @@ fun FriendsScreen(navController: NavController, viewModel: FriendsViewModel = vi
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     items(searchResults) { user ->
-                        UserSearchCard(user) { viewModel.sendFriendRequest(user.id) }
+                        UserSearchCard(user) { viewModel.sendFriendRequest(user.id, context) }
                     }
                 }
             } else {
