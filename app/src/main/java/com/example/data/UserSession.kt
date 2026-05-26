@@ -5,8 +5,10 @@ import android.content.SharedPreferences
 
 object UserSession {
     private var prefs: SharedPreferences? = null
+    var appContext: Context? = null
 
     fun init(context: Context) {
+        appContext = context.applicationContext
         prefs = context.getSharedPreferences("user_session", Context.MODE_PRIVATE)
     }
 

@@ -110,12 +110,20 @@ fun FriendsScreen(navController: NavController, viewModel: FriendsViewModel = vi
                     modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
                 )
                 
-                LazyColumn(
-                    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    items(searchResults) { user ->
-                        UserSearchCard(user) { viewModel.sendFriendRequest(user.id, context) }
+                if (searchResults.isEmpty()) {
+                    Text(
+                        "No users found",
+                        style = MaterialTheme.typography.bodyMedium.copy(color = SoftGray),
+                        modifier = Modifier.padding(horizontal = 24.dp)
+                    )
+                } else {
+                    LazyColumn(
+                        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items(searchResults) { user ->
+                            UserSearchCard(user) { viewModel.sendFriendRequest(user.id, context) }
+                        }
                     }
                 }
             } else {

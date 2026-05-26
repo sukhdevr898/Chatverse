@@ -49,7 +49,24 @@ class FriendsViewModel : ViewModel() {
                 // Load friend requests
                 val reqResponse = FirebaseDatabaseService.api.getFriendRequests(currentUserId, auth)
                 if (reqResponse.isSuccessful) {
-                    _friendRequests.value = reqResponse.body()?.values?.toList() ?: emptyList()
+                    val newRequests = reqResponse.body()?.values?.toList() ?: emptyList()
+                    val oldRequests = _friendRequests.value
+                    _friendRequests.value = newRequests
+                    
+                    // Show notification for new requests
+                    val newOnes = newRequests.filter { newReq -> oldRequests.none { it.senderId == newReq.senderId } }
+                    if (newOnes.isNotEmpty()) {
+                        val notificationContext = UserSession.appContext
+                        if (notificationContext != null) {
+                            newOnes.forEach { req ->
+                                com.example.NotificationHelper.showSystemNotification(
+                                    notificationContext,
+                                    "New Friend Request",
+                                    "${req.senderUsername} sent you a friend request!"
+                                )
+                            }
+                        }
+                    }
                 }
 
                 // Load users map for searching
@@ -64,22 +81,40 @@ class FriendsViewModel : ViewModel() {
     }
 
     fun searchUsers(query: String) {
-        if (query.isBlank()) {
+        val cleanQuery = query.trim()
+        if (cleanQuery.isBlank()) {
             _searchResults.value = emptyList()
             return
         }
         val currentUserId = UserSession.userId ?: return
+        val auth = UserSession.idToken ?: return
         
-        val filtered = allUsersCache.values.filter {
-            it.id != currentUserId && it.username.contains(query, ignoreCase = true)
-        }.map {
-            UserSearchItem(
-                id = it.id,
-                username = it.username,
-                isFriend = _friends.value.contains(it.id)
-            )
+        viewModelScope.launch {
+            try {
+                // Fetch fresh users to ensure we have everyone
+                val usersResponse = FirebaseDatabaseService.api.getUsers(auth)
+                if (usersResponse.isSuccessful) {
+                    allUsersCache = usersResponse.body() ?: emptyMap()
+                } else {
+                    val errorBody = usersResponse.errorBody()?.string()
+                    println("Search Failed: $errorBody")
+                }
+                
+                val filtered = allUsersCache.values.filter {
+                    it.id != currentUserId && it.username.contains(cleanQuery, ignoreCase = true)
+                }.map {
+                    UserSearchItem(
+                        id = it.id,
+                        username = it.username,
+                        isFriend = _friends.value.contains(it.id),
+                        requestSent = _friendRequests.value.any { req -> req.senderId == it.id }
+                    )
+                }
+                _searchResults.value = filtered
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
-        _searchResults.value = filtered
     }
 
     fun sendFriendRequest(targetUserId: String, context: android.content.Context) {
