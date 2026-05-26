@@ -83,9 +83,18 @@ class AuthViewModel : ViewModel() {
             }
             _isLoading.value = false
             result.onSuccess {
-                com.example.data.UserSession.userId = it.localId
-                com.example.data.UserSession.idToken = it.idToken
+                val token = it.idToken
+                val uid = it.localId
+                com.example.data.UserSession.userId = uid
+                com.example.data.UserSession.idToken = token
                 com.example.data.UserSession.email = it.email
+                if (uid != null && token != null && it.email != null) {
+                    try {
+                        com.example.data.FirebaseDatabaseService.api.createUser(uid, token, com.example.data.User(uid, it.email.substringBefore("@")))
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
                 showMessage("Login Successful!", MessageType.SUCCESS)
                 onSuccess()
             }.onFailure {

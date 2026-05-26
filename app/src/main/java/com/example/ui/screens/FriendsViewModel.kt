@@ -14,7 +14,8 @@ data class UserSearchItem(
     val id: String,
     val username: String,
     val requestSent: Boolean = false,
-    val isFriend: Boolean = false
+    val isFriend: Boolean = false,
+    val isSelf: Boolean = false
 )
 
 class FriendsViewModel : ViewModel() {
@@ -26,6 +27,9 @@ class FriendsViewModel : ViewModel() {
     
     private val _friends = MutableStateFlow<Set<String>>(emptySet())
     val friends: StateFlow<Set<String>> = _friends.asStateFlow()
+
+    private val _isSearching = MutableStateFlow(false)
+    val isSearching: StateFlow<Boolean> = _isSearching.asStateFlow()
 
     private var allUsersCache = emptyMap<String, com.example.data.User>()
 
@@ -90,6 +94,7 @@ class FriendsViewModel : ViewModel() {
         val auth = UserSession.idToken ?: return
         
         viewModelScope.launch {
+            _isSearching.value = true
             try {
                 // Fetch fresh users to ensure we have everyone
                 val usersResponse = FirebaseDatabaseService.api.getUsers(auth)
@@ -101,18 +106,21 @@ class FriendsViewModel : ViewModel() {
                 }
                 
                 val filtered = allUsersCache.values.filter {
-                    it.id != currentUserId && it.username.contains(cleanQuery, ignoreCase = true)
+                    it.username.contains(cleanQuery, ignoreCase = true)
                 }.map {
                     UserSearchItem(
                         id = it.id,
                         username = it.username,
                         isFriend = _friends.value.contains(it.id),
-                        requestSent = _friendRequests.value.any { req -> req.senderId == it.id }
+                        requestSent = _friendRequests.value.any { req -> req.senderId == it.id },
+                        isSelf = it.id == currentUserId
                     )
                 }
                 _searchResults.value = filtered
             } catch (e: Exception) {
                 e.printStackTrace()
+            } finally {
+                _isSearching.value = false
             }
         }
     }

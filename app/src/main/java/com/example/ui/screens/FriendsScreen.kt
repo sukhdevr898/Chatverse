@@ -32,6 +32,7 @@ import com.example.ui.theme.*
 fun FriendsScreen(navController: NavController, viewModel: FriendsViewModel = viewModel()) {
     val searchResults by viewModel.searchResults.collectAsState()
     val friendRequests by viewModel.friendRequests.collectAsState()
+    val isSearching by viewModel.isSearching.collectAsState()
 
     val context = androidx.compose.ui.platform.LocalContext.current
     val keyboardController = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
@@ -110,7 +111,11 @@ fun FriendsScreen(navController: NavController, viewModel: FriendsViewModel = vi
                     modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
                 )
                 
-                if (searchResults.isEmpty()) {
+                if (isSearching) {
+                    Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = NeonBlue)
+                    }
+                } else if (searchResults.isEmpty()) {
                     Text(
                         "No users found",
                         style = MaterialTheme.typography.bodyMedium.copy(color = SoftGray),
@@ -188,7 +193,9 @@ fun UserSearchCard(user: UserSearchItem, onAddFriend: () -> Unit) {
 
         Spacer(modifier = Modifier.width(12.dp))
 
-        if (user.isFriend) {
+        if (user.isSelf) {
+            Text("(You)", color = SoftGray, style = MaterialTheme.typography.labelLarge)
+        } else if (user.isFriend) {
             Icon(Icons.Filled.Check, contentDescription = "Friends", tint = NeonBlue)
             Spacer(modifier = Modifier.width(4.dp))
             Text("Friends", color = NeonBlue, style = MaterialTheme.typography.labelLarge)
