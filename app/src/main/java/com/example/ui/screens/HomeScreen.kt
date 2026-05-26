@@ -80,15 +80,13 @@ fun HomeTopHeader(onNavigateToFriends: () -> Unit) {
             modifier = Modifier
                 .size(48.dp)
                 .clip(CircleShape)
-                .background(Graphite)
+                .background(PureWhite)
                 .border(2.dp, NeonBlue, CircleShape)
         ) {
-            // Placeholder Avatar
-            Icon(
-                Icons.Filled.Circle, 
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize().padding(12.dp),
-                tint = SoftGray
+            androidx.compose.foundation.Image(
+                painter = androidx.compose.ui.res.painterResource(id = com.example.R.drawable.ic_launcher_foreground), 
+                contentDescription = "User Avatar",
+                modifier = Modifier.fillMaxSize()
             )
             
             // Online Pulse

@@ -33,15 +33,22 @@ fun ChatScreen(navController: NavController, chatId: String, username: String) {
     val messages by viewModel.messages.collectAsState()
 
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().imePadding(),
         containerColor = DeepBlack,
         topBar = { ChatHeader(navController, username) },
         bottomBar = { ChatInputArea { viewModel.sendMessage(it) } }
     ) { paddingValues ->
-        ChatMessagesArea(
-            messages = messages,
-            modifier = Modifier.padding(paddingValues)
-        )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .background(Brush.verticalGradient(listOf(DeepBlack, Graphite.copy(alpha = 0.5f), DeepBlack)))
+        ) {
+            ChatMessagesArea(
+                messages = messages,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
     }
 }
 
@@ -65,9 +72,15 @@ fun ChatHeader(navController: NavController, title: String) {
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape)
-                .background(Graphite)
+                .background(PureWhite)
                 .border(1.dp, NeonBlue, CircleShape)
-        )
+        ) {
+             androidx.compose.foundation.Image(
+                 painter = androidx.compose.ui.res.painterResource(id = com.example.R.drawable.ic_launcher_foreground), 
+                 contentDescription = "Contact Avatar",
+                 modifier = Modifier.fillMaxSize()
+             )
+        }
         
         Spacer(modifier = Modifier.width(12.dp))
         

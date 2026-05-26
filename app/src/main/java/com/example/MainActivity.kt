@@ -51,10 +51,21 @@ import com.example.ui.theme.*
 import kotlinx.coroutines.delay
 import com.example.data.toFriendRequest
 
+import android.content.Intent
+import com.example.services.MessagePollingService
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         com.example.data.UserSession.init(this)
+        
+        val serviceIntent = Intent(this, MessagePollingService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent)
+        } else {
+            startService(serviceIntent)
+        }
+
         enableEdgeToEdge()
         setContent {
             MyApplicationTheme {

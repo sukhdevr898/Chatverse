@@ -2,6 +2,7 @@ package com.example.ui.screens
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -26,6 +27,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.ui.theme.*
 import kotlinx.coroutines.launch
+
+import androidx.compose.ui.res.painterResource
+import com.example.R
 
 @Composable
 fun SplashScreen(navController: NavController) {
@@ -85,11 +89,10 @@ fun SplashScreen(navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.scale(scale).alpha(alpha)
         ) {
-            Icon(
-                imageVector = Icons.Filled.BubbleChart,
+            Image(
+                painter = painterResource(id = R.drawable.ic_launcher_foreground),
                 contentDescription = "Logo",
-                tint = NeonBlue,
-                modifier = Modifier.size(80.dp)
+                modifier = Modifier.size(100.dp)
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
@@ -259,12 +262,20 @@ fun OnboardingPage(page: Int) {
                     .padding(24.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = iconColor,
-                    modifier = Modifier.fillMaxSize()
-                )
+                if (page == 0) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = iconColor,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
             }
         }
         
