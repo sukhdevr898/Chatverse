@@ -32,8 +32,12 @@ import androidx.navigation.NavController
 import com.example.ui.theme.*
 import kotlinx.coroutines.delay
 
+import androidx.lifecycle.viewmodel.compose.viewModel
+
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen(navController: NavController, viewModel: HomeViewModel = viewModel()) {
+    val chats by viewModel.chats.collectAsState()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -42,7 +46,7 @@ fun HomeScreen(navController: NavController) {
         Column(modifier = Modifier.fillMaxSize()) {
             HomeTopHeader()
             HomeSearchBar()
-            ChatList(navController)
+            ChatList(chats, navController)
         }
         
         FloatingActionButton(
@@ -173,16 +177,7 @@ data class ChatItemUiModel(
 )
 
 @Composable
-fun ChatList(navController: NavController) {
-    val chats = listOf(
-        ChatItemUiModel("1", "Aria X", "I'll send the files securely.", "2m", 3, true),
-        ChatItemUiModel("2", "Nexus Protocol", "System update completed.", "15m", 0, false, true),
-        ChatItemUiModel("3", "Cyber Squad", "Are we meeting in VR tonight?", "1h", 12, true),
-        ChatItemUiModel("4", "Kaelen", "Voice note (0:45)", "2h", 0, true),
-        ChatItemUiModel("5", "Nova", "Thanks for the access key!", "Yesterday", 0, false),
-        ChatItemUiModel("6", "Zero", "Encryption active. Safe to talk.", "Yesterday", 0, false)
-    )
-
+fun ChatList(chats: List<ChatItemUiModel>, navController: NavController) {
     LazyColumn(
         contentPadding = PaddingValues(top = 16.dp, bottom = 120.dp)
     ) {

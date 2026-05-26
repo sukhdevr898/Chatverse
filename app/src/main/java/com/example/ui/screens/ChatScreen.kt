@@ -25,15 +25,12 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.ui.theme.*
 
+import androidx.lifecycle.viewmodel.compose.viewModel
+
 @Composable
 fun ChatScreen(navController: NavController, chatId: String) {
-    // Generate dummy messages
-    val messages = listOf(
-        MessageUiModel("msg1", "Hello! Are the files ready?", "10:00 AM", false),
-        MessageUiModel("msg2", "Yes, just uploading them to the secure node.", "10:02 AM", true),
-        MessageUiModel("msg3", "Perfect. Encryption keys attached?", "10:03 AM", false),
-        MessageUiModel("msg4", "All set. Sending now.", "10:05 AM", true)
-    )
+    val viewModel: ChatViewModel = viewModel(factory = ChatViewModelFactory(chatId))
+    val messages by viewModel.messages.collectAsState()
 
     Box(
         modifier = Modifier
@@ -43,7 +40,7 @@ fun ChatScreen(navController: NavController, chatId: String) {
         Column(modifier = Modifier.fillMaxSize()) {
             ChatHeader(navController, "User $chatId")
             ChatMessagesArea(messages = messages, modifier = Modifier.weight(1f))
-            ChatInputArea()
+            ChatInputArea { viewModel.sendMessage(it) }
         }
     }
 }
@@ -163,7 +160,7 @@ fun MessageBubble(msg: MessageUiModel) {
 }
 
 @Composable
-fun ChatInputArea() {
+fun ChatInputArea(onSendMessage: (String) -> Unit) {
     var text by remember { mutableStateOf("") }
     
     Row(
@@ -190,8 +187,12 @@ fun ChatInputArea() {
             if (text.isEmpty()) {
                 Text("Type a message...", color = SoftGray)
             }
-            // Usually represented by BasicTextField in Compose
-            Text(text, color = PureWhite) 
+            androidx.compose.foundation.text.BasicTextField(
+                value = text,
+                onValueChange = { text = it },
+                textStyle = MaterialTheme.typography.bodyLarge.copy(color = PureWhite),
+                modifier = Modifier.fillMaxWidth()
+            )
         }
         
         Spacer(modifier = Modifier.width(8.dp))
@@ -201,7 +202,10 @@ fun ChatInputArea() {
                 .size(48.dp)
                 .clip(CircleShape)
                 .background(Brush.linearGradient(listOf(ElectricPurple, NeonBlue)))
-                .clickable { /* Send message */ },
+                .clickable {
+                    onSendMessage(text)
+                    text = ""
+                },
             contentAlignment = Alignment.Center
         ) {
             Icon(if (text.isEmpty()) Icons.Filled.Mic else Icons.AutoMirrored.Filled.Send, contentDescription = "Send", tint = PureWhite)

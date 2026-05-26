@@ -100,12 +100,14 @@ fun SettingsProfileCard() {
             Spacer(modifier = Modifier.width(16.dp))
             
             Column(modifier = Modifier.weight(1f)) {
+                val email = com.example.data.UserSession.email ?: "Unknown User"
+                val username = email.substringBefore("@")
                 Text(
-                    "Alex Denton",
+                    username,
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold, color = PureWhite)
                 )
                 Text(
-                    "@alex_cyber",
+                    "@$username",
                     style = MaterialTheme.typography.bodyMedium.copy(color = NeonBlue)
                 )
             }
