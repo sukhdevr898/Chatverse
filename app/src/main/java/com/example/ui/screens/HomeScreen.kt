@@ -47,18 +47,21 @@ fun HomeScreen(navController: NavController, onNavigateToFriends: () -> Unit, vi
         Column(modifier = Modifier.fillMaxSize()) {
             HomeTopHeader(onNavigateToFriends)
             HomeSearchBar(searchQuery, viewModel::updateSearchQuery)
-            ChatList(chats, navController)
+            ChatList(chats, navController, viewModel, modifier = Modifier.weight(1f))
         }
         
-        FloatingActionButton(
-            onClick = onNavigateToFriends,
-            containerColor = NeonBlue,
-            contentColor = PureWhite,
+        Box(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(end = 24.dp, bottom = 112.dp) // above bottom bar
+                .padding(end = 24.dp, bottom = 112.dp)
+                .size(64.dp)
+                .clip(CircleShape)
+                .background(Brush.linearGradient(listOf(ElectricPurple, NeonBlue)))
+                .clickable { onNavigateToFriends() }
+                .border(1.dp, PureWhite.copy(alpha = 0.2f), CircleShape),
+            contentAlignment = Alignment.Center
         ) {
-            Icon(Icons.Filled.AddComment, null)
+            Icon(Icons.Filled.AddComment, null, tint = PureWhite, modifier = Modifier.size(28.dp))
         }
     }
 }
@@ -188,10 +191,10 @@ data class ChatItemUiModel(
 )
 
 @Composable
-fun ChatList(chats: List<ChatItemUiModel>, navController: NavController) {
+fun ChatList(chats: List<ChatItemUiModel>, navController: NavController, viewModel: HomeViewModel, modifier: Modifier = Modifier) {
     if (chats.isEmpty()) {
         Box(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
                 .padding(bottom = 120.dp),
             contentAlignment = Alignment.Center
@@ -213,12 +216,14 @@ fun ChatList(chats: List<ChatItemUiModel>, navController: NavController) {
         }
     } else {
         LazyColumn(
+            modifier = modifier,
             contentPadding = PaddingValues(top = 16.dp, bottom = 120.dp)
         ) {
             items(chats, key = { it.id }) { chat ->
                 ChatItem(
                     chat = chat,
                     onClick = { 
+                        viewModel.resetUnreadCount(chat.id)
                         val encodedUsername = java.net.URLEncoder.encode(chat.username, "UTF-8")
                         navController.navigate("chat/${chat.id}/$encodedUsername") 
                     }
@@ -230,10 +235,12 @@ fun ChatList(chats: List<ChatItemUiModel>, navController: NavController) {
 
 @Composable
 fun ChatItem(chat: ChatItemUiModel, onClick: () -> Unit) {
+    val hasUnread = chat.unreadCount > 0
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
+            .then(if (hasUnread) Modifier.background(Brush.horizontalGradient(listOf(GlassCardBg, Color.Transparent))) else Modifier)
             .padding(horizontal = 24.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -242,8 +249,25 @@ fun ChatItem(chat: ChatItemUiModel, onClick: () -> Unit) {
             modifier = Modifier
                 .size(56.dp)
                 .clip(CircleShape)
-                .background(Graphite)
+                .background(Brush.linearGradient(listOf(StitchGradient3, ElectricPurple.copy(alpha=0.5f))))
+                .border(
+                    width = if (hasUnread) 2.dp else 0.dp,
+                    brush = if (hasUnread) Brush.linearGradient(listOf(NeonBlue, ElectricPurple)) else Brush.linearGradient(listOf(Color.Transparent, Color.Transparent)),
+                    shape = CircleShape
+                )
         ) {
+            // Unread Dot on Avatar
+            if (hasUnread) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .offset(x = (-2).dp, y = (2).dp)
+                        .size(14.dp)
+                        .clip(CircleShape)
+                        .background(NeonBlue)
+                        .border(2.dp, DeepBlack, CircleShape)
+                )
+            }
             if (chat.isOnline) {
                 Box(
                     modifier = Modifier

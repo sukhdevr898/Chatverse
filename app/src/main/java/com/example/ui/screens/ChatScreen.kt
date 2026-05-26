@@ -32,16 +32,16 @@ fun ChatScreen(navController: NavController, chatId: String, username: String) {
     val viewModel: ChatViewModel = viewModel(factory = ChatViewModelFactory(chatId))
     val messages by viewModel.messages.collectAsState()
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(DeepBlack)
-    ) {
-        Column(modifier = Modifier.fillMaxSize().imePadding()) {
-            ChatHeader(navController, username)
-            ChatMessagesArea(messages = messages, modifier = Modifier.weight(1f))
-            ChatInputArea { viewModel.sendMessage(it) }
-        }
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        containerColor = DeepBlack,
+        topBar = { ChatHeader(navController, username) },
+        bottomBar = { ChatInputArea { viewModel.sendMessage(it) } }
+    ) { paddingValues ->
+        ChatMessagesArea(
+            messages = messages,
+            modifier = Modifier.padding(paddingValues)
+        )
     }
 }
 

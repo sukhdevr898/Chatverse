@@ -23,9 +23,16 @@ class HomeViewModel : ViewModel() {
 
     private var isFirstPoll = true
     private var lastSeenMessageTimestamps = mutableMapOf<String, Long>()
+    private val unreadCounts = mutableMapOf<String, Int>()
 
     init {
         startPolling()
+    }
+    
+    fun resetUnreadCount(userId: String) {
+        unreadCounts[userId] = 0
+        allChats = allChats.map { if (it.id == userId) it.copy(unreadCount = 0) else it }
+        filterChats()
     }
     
     fun updateSearchQuery(query: String) {
@@ -88,19 +95,25 @@ class HomeViewModel : ViewModel() {
                             lastMsgText = latest.text
                             lastTime = java.text.SimpleDateFormat("hh:mm a", java.util.Locale.getDefault()).format(java.util.Date(latest.timestamp))
                             
-                            // Check notification
-                            if (!isFirstPoll) {
+                            if (isFirstPoll) {
+                                lastSeenMessageTimestamps[user.id] = latest.timestamp
+                            } else {
                                 val prevTime = lastSeenMessageTimestamps[user.id] ?: 0L
-                                if (latest.senderId != currentUserId && latest.timestamp > prevTime) { // new message from them
+                                val newMsgsCount = sorted.count { it.senderId != currentUserId && it.timestamp > prevTime }
+                                if (newMsgsCount > 0) {
                                     val context = UserSession.appContext
                                     if (context != null) {
                                         com.example.NotificationHelper.showSystemNotification(context, user.username, latest.text)
                                     }
+                                    val currentUnread = unreadCounts[user.id] ?: 0
+                                    unreadCounts[user.id] = currentUnread + newMsgsCount
                                 }
+                                lastSeenMessageTimestamps[user.id] = latest.timestamp
                             }
-                            lastSeenMessageTimestamps[user.id] = latest.timestamp
                         }
                     }
+                    
+                    unread = unreadCounts[user.id] ?: 0
                     
                     chatItems.add(
                         ChatItemUiModel(

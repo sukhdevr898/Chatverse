@@ -136,6 +136,7 @@ fun FriendsScreen(navController: NavController, viewModel: FriendsViewModel = vi
                     }
                 } else {
                     LazyColumn(
+                        modifier = Modifier.weight(1f),
                         contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
@@ -159,6 +160,7 @@ fun FriendsScreen(navController: NavController, viewModel: FriendsViewModel = vi
                     )
                 } else {
                     LazyColumn(
+                        modifier = Modifier.weight(1f),
                         contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
