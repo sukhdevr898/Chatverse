@@ -2,8 +2,9 @@ package com.example.ui.screens
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.data.FirebaseDatabaseService
+import com.example.data.FirestoreService
 import com.example.data.UserSession
+import com.example.data.toUser
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,16 +23,17 @@ class HomeViewModel : ViewModel() {
         val currentUserId = UserSession.userId ?: return
         viewModelScope.launch {
             try {
+                val projectId = FirestoreService.getProjectIdFromToken(token)
                 // Get friends first
-                val friendsResponse = FirebaseDatabaseService.api.getFriends(currentUserId, token)
+                val friendsResponse = FirestoreService.api.getFriends(projectId, currentUserId, "Bearer $token")
                 val friendsList = if (friendsResponse.isSuccessful) {
-                    friendsResponse.body()?.filterValues { it }?.keys ?: emptySet()
+                    friendsResponse.body()?.documents?.mapNotNull { it.name?.substringAfterLast("/") }?.toSet() ?: emptySet()
                 } else emptySet()
 
-                val response = FirebaseDatabaseService.api.getUsers(token)
+                val response = FirestoreService.api.getUsers(projectId, "Bearer $token")
                 if (response.isSuccessful) {
-                    val usersMap = response.body() ?: emptyMap()
-                    val chatItems = usersMap.values
+                    val usersList = response.body()?.documents?.mapNotNull { it.toUser() } ?: emptyList()
+                    val chatItems = usersList
                         .filter { friendsList.contains(it.id) }
                         .map { user ->
                             ChatItemUiModel(

@@ -49,6 +49,7 @@ import com.example.ui.components.*
 import com.example.ui.screens.*
 import com.example.ui.theme.*
 import kotlinx.coroutines.delay
+import com.example.data.toFriendRequest
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -75,6 +76,49 @@ fun ChatVerseApp(authViewModel: AuthViewModel = viewModel()) {
     LaunchedEffect(Unit) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+        
+        var lastSeenRequests = emptySet<String>()
+        var isFirstPoll = true
+        while(true) {
+            val auth = com.example.data.UserSession.idToken
+            val currentUserId = com.example.data.UserSession.userId
+            if (auth != null && currentUserId != null) {
+                try {
+                    val projectId = com.example.data.FirestoreService.getProjectIdFromToken(auth)
+                    val reqResponse = com.example.data.FirestoreService.api.getFriendRequests(projectId, currentUserId, "Bearer $auth")
+                    if (reqResponse.isSuccessful) {
+                        val currentRequests = reqResponse.body()?.documents?.mapNotNull { it.toFriendRequest() } ?: emptyList()
+                        val currentSenderIds = currentRequests.map { it.senderId }.toSet()
+                        
+                        if (!isFirstPoll) {
+                            val newSenderIds = currentSenderIds - lastSeenRequests
+                            if (newSenderIds.isNotEmpty()) {
+                                newSenderIds.forEach { senderId ->
+                                    val req = currentRequests.find { it.senderId == senderId }
+                                    if (req != null) {
+                                        com.example.NotificationHelper.showSystemNotification(
+                                            com.example.data.UserSession.appContext!!,
+                                            "New Friend Request",
+                                            "${req.senderUsername} sent you a friend request!"
+                                        )
+                                        authViewModel.showMessage("${req.senderUsername} sent you a friend request!", com.example.ui.MessageType.INFO)
+                                    }
+                                }
+                            }
+                        }
+                        
+                        lastSeenRequests = currentSenderIds
+                        isFirstPoll = false
+                    }
+                } catch (e: Exception) {
+                    // Ignore network errors in polling
+                }
+            } else {
+                isFirstPoll = true
+                lastSeenRequests = emptySet()
+            }
+            delay(10000)
         }
     }
 

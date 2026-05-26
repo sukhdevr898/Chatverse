@@ -67,7 +67,41 @@ fun FirestoreDocument.toFriendRequest(): FriendRequestData? {
     return FriendRequestData(senderId, senderUsername, timestamp)
 }
 
+fun ChatMessageData.toFirestore(): FirestoreDocument {
+    return FirestoreDocument(
+        fields = mapOf(
+            "senderId" to FirestoreValue(stringValue = this.senderId),
+            "text" to FirestoreValue(stringValue = this.text),
+            "timestamp" to FirestoreValue(integerValue = this.timestamp.toString())
+        )
+    )
+}
+
+fun FirestoreDocument.toChatMessage(): ChatMessageData? {
+    val fields = this.fields ?: return null
+    val senderId = fields["senderId"]?.stringValue ?: return null
+    val text = fields["text"]?.stringValue ?: return null
+    val timestamp = fields["timestamp"]?.integerValue?.toLongOrNull() ?: System.currentTimeMillis()
+    return ChatMessageData(senderId, text, timestamp)
+}
+
 interface FirestoreApi {
+    @POST("projects/{projectId}/databases/(default)/documents/chats/{chatId}/messages")
+    suspend fun sendMessage(
+        @Path("projectId") projectId: String,
+        @Path("chatId") chatId: String,
+        @Header("Authorization") auth: String,
+        @Body document: FirestoreDocument
+    ): Response<FirestoreDocument>
+
+    @GET("projects/{projectId}/databases/(default)/documents/chats/{chatId}/messages")
+    suspend fun getMessages(
+        @Path("projectId") projectId: String,
+        @Path("chatId") chatId: String,
+        @Header("Authorization") auth: String,
+        @Query("pageSize") pageSize: Int = 1000
+    ): Response<FirestoreListResponse>
+
     @PATCH("projects/{projectId}/databases/(default)/documents/users/{userId}")
     suspend fun createUser(
         @Path("projectId") projectId: String,

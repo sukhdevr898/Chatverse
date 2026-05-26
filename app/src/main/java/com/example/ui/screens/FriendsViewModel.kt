@@ -2,10 +2,12 @@ package com.example.ui.screens
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.data.FirebaseDatabaseService
+import com.example.data.FirestoreService
 import com.example.data.FriendRequestData
 import com.example.data.UserSession
 import com.example.data.toUser
+import com.example.data.toFriendRequest
+import com.example.data.toFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -47,40 +49,27 @@ class FriendsViewModel : ViewModel() {
         
         viewModelScope.launch {
             try {
+                val projectId = FirestoreService.getProjectIdFromToken(auth)
                 // Load friends
-                val friendsResponse = FirebaseDatabaseService.api.getFriends(currentUserId, auth)
+                val friendsResponse = FirestoreService.api.getFriends(projectId, currentUserId, "Bearer $auth")
                 if (friendsResponse.isSuccessful) {
-                    val friendsMap = friendsResponse.body() ?: emptyMap()
-                    _friends.value = friendsMap.filterValues { it }.keys
+                    val friendsMap = friendsResponse.body()?.documents?.mapNotNull { it.name?.substringAfterLast("/") }?.toSet() ?: emptySet()
+                    _friends.value = friendsMap
                 }
             
                 // Load friend requests
-                val reqResponse = FirebaseDatabaseService.api.getFriendRequests(currentUserId, auth)
+                val reqResponse = FirestoreService.api.getFriendRequests(projectId, currentUserId, "Bearer $auth")
                 if (reqResponse.isSuccessful) {
-                    val newRequests = reqResponse.body()?.values?.toList() ?: emptyList()
-                    val oldRequests = _friendRequests.value
+                    val newRequests = reqResponse.body()?.documents?.mapNotNull { it.toFriendRequest() } ?: emptyList()
                     _friendRequests.value = newRequests
-                    
-                    // Show notification for new requests
-                    val newOnes = newRequests.filter { newReq -> oldRequests.none { it.senderId == newReq.senderId } }
-                    if (newOnes.isNotEmpty()) {
-                        val notificationContext = UserSession.appContext
-                        if (notificationContext != null) {
-                            newOnes.forEach { req ->
-                                com.example.NotificationHelper.showSystemNotification(
-                                    notificationContext,
-                                    "New Friend Request",
-                                    "${req.senderUsername} sent you a friend request!"
-                                )
-                            }
-                        }
-                    }
                 }
 
                 // Load users map for searching
-                val usersResponse = FirebaseDatabaseService.api.getUsers(auth)
+                val usersResponse = FirestoreService.api.getUsers(projectId, "Bearer $auth")
                 if (usersResponse.isSuccessful) {
-                    allUsersCache = usersResponse.body() ?: emptyMap()
+                    val docs = usersResponse.body()?.documents ?: emptyList()
+                    val usersList = docs.mapNotNull { it.toUser() }
+                    allUsersCache = usersList.associateBy { it.id }
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -148,7 +137,8 @@ class FriendsViewModel : ViewModel() {
                     senderUsername = username,
                     timestamp = System.currentTimeMillis()
                 )
-                FirebaseDatabaseService.api.sendFriendRequest(targetUserId, currentUserId, auth, requestData)
+                val projectId = com.example.data.FirestoreService.getProjectIdFromToken(auth)
+                com.example.data.FirestoreService.api.sendFriendRequest(projectId, targetUserId, currentUserId, "Bearer $auth", requestData.toFirestore())
                 // Mark locally
                 val updated = _searchResults.value.map {
                     if (it.id == targetUserId) it.copy(requestSent = true) else it
@@ -157,12 +147,7 @@ class FriendsViewModel : ViewModel() {
                 
                 kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
                     val targetUsername = _searchResults.value.find { it.id == targetUserId }?.username ?: "your friend"
-                    android.widget.Toast.makeText(context, "Friend Request Sent!", android.widget.Toast.LENGTH_SHORT).show()
-                    com.example.NotificationHelper.showSystemNotification(
-                        context, 
-                        "Friend Request Sent", 
-                        "Notification sent to $targetUsername that you've added them!"
-                    )
+                    android.widget.Toast.makeText(context, "Friend Request Sent to $targetUsername!", android.widget.Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -176,12 +161,14 @@ class FriendsViewModel : ViewModel() {
 
         viewModelScope.launch {
             try {
+                val projectId = com.example.data.FirestoreService.getProjectIdFromToken(auth)
+                val friendDoc = com.example.data.FirestoreDocument(fields = mapOf("isFriend" to com.example.data.FirestoreValue(booleanValue = true)))
                 // Add to my friends
-                FirebaseDatabaseService.api.addFriend(currentUserId, senderId, auth, true)
+                com.example.data.FirestoreService.api.addFriend(projectId, currentUserId, senderId, "Bearer $auth", friendDoc)
                 // Add to their friends
-                FirebaseDatabaseService.api.addFriend(senderId, currentUserId, auth, true)
+                com.example.data.FirestoreService.api.addFriend(projectId, senderId, currentUserId, "Bearer $auth", friendDoc)
                 // Remove friend request
-                FirebaseDatabaseService.api.removeFriendRequest(currentUserId, senderId, auth)
+                com.example.data.FirestoreService.api.removeFriendRequest(projectId, currentUserId, senderId, "Bearer $auth")
                 
                 loadData()
             } catch (e: Exception) {
@@ -196,8 +183,9 @@ class FriendsViewModel : ViewModel() {
 
         viewModelScope.launch {
             try {
+                val projectId = com.example.data.FirestoreService.getProjectIdFromToken(auth)
                 // Remove friend request
-                FirebaseDatabaseService.api.removeFriendRequest(currentUserId, senderId, auth)
+                com.example.data.FirestoreService.api.removeFriendRequest(projectId, currentUserId, senderId, "Bearer $auth")
                 loadData()
             } catch (e: Exception) {
                 e.printStackTrace()

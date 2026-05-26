@@ -139,7 +139,7 @@ fun FriendsScreen(navController: NavController, viewModel: FriendsViewModel = vi
                         contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        items(searchResults) { user ->
+                        items(searchResults, key = { it.id }) { user ->
                             UserSearchCard(user) { viewModel.sendFriendRequest(user.id, context) }
                         }
                     }
@@ -162,7 +162,7 @@ fun FriendsScreen(navController: NavController, viewModel: FriendsViewModel = vi
                         contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        items(friendRequests) { req ->
+                        items(friendRequests, key = { it.senderId }) { req ->
                             FriendRequestCard(req, 
                                 onAccept = { viewModel.acceptFriendRequest(req.senderId) },
                                 onDecline = { viewModel.declineFriendRequest(req.senderId) }
