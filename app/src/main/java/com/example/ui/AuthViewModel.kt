@@ -93,13 +93,22 @@ class AuthViewModel : ViewModel() {
                     try {
                         val userObj = com.example.data.User(uid, it.email.substringBefore("@"))
                         val projectId = com.example.data.FirestoreService.getProjectIdFromToken(token)
-                        com.example.data.FirestoreService.api.createUser(projectId, uid, "Bearer $token", userObj.toFirestore())
+                        val firestoreResponse = com.example.data.FirestoreService.api.createUser(projectId, uid, "Bearer $token", userObj.toFirestore())
+                        if (!firestoreResponse.isSuccessful) {
+                            val errorBody = firestoreResponse.errorBody()?.string()
+                            showMessage("DB Error: ${firestoreResponse.code()} $errorBody", MessageType.ERROR)
+                        } else {
+                            showMessage("Login Successful!", MessageType.SUCCESS)
+                            onSuccess()
+                        }
                     } catch (e: Exception) {
                         e.printStackTrace()
+                        showMessage("Failed to create user in DB: ${e.message}", MessageType.ERROR)
                     }
+                } else {
+                    showMessage("Login Successful, but missing token/uid", MessageType.SUCCESS)
+                    onSuccess()
                 }
-                showMessage("Login Successful!", MessageType.SUCCESS)
-                onSuccess()
             }.onFailure {
                 showMessage(it.message ?: "Login Failed", MessageType.ERROR)
             }
@@ -135,13 +144,22 @@ class AuthViewModel : ViewModel() {
                     try {
                         val userObj = com.example.data.User(uid, email.substringBefore("@"))
                         val projectId = com.example.data.FirestoreService.getProjectIdFromToken(token)
-                        com.example.data.FirestoreService.api.createUser(projectId, uid, "Bearer $token", userObj.toFirestore())
+                        val firestoreResponse = com.example.data.FirestoreService.api.createUser(projectId, uid, "Bearer $token", userObj.toFirestore())
+                        if (!firestoreResponse.isSuccessful) {
+                            val errorBody = firestoreResponse.errorBody()?.string()
+                            showMessage("DB Error: ${firestoreResponse.code()} $errorBody", MessageType.ERROR)
+                        } else {
+                            showMessage("Account Created Successfully!", MessageType.SUCCESS)
+                            onSuccess()
+                        }
                     } catch (e: Exception) {
                         e.printStackTrace()
+                        showMessage("Failed to create user in DB: ${e.message}", MessageType.ERROR)
                     }
+                } else {
+                    showMessage("Account Created Successfully, but missing token", MessageType.SUCCESS)
+                    onSuccess()
                 }
-                showMessage("Account Created Successfully!", MessageType.SUCCESS)
-                onSuccess()
             }.onFailure {
                 showMessage(it.message ?: "Signup Failed", MessageType.ERROR)
             }

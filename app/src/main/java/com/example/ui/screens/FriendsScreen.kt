@@ -123,11 +123,17 @@ fun FriendsScreen(navController: NavController, viewModel: FriendsViewModel = vi
                         modifier = Modifier.padding(horizontal = 24.dp)
                     )
                 } else if (searchResults.isEmpty()) {
-                    Text(
-                        "No users found",
-                        style = MaterialTheme.typography.bodyMedium.copy(color = SoftGray),
-                        modifier = Modifier.padding(horizontal = 24.dp)
-                    )
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
+                        Text(
+                            "No users found",
+                            style = MaterialTheme.typography.bodyMedium.copy(color = SoftGray)
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            "Hint: Ensure your Firestore 'users' collection has data. If you just enabled Firestore, log out & sign up again to create your user profile, and sign up a test account to search for.",
+                            style = MaterialTheme.typography.bodySmall.copy(color = SoftGray, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                        )
+                    }
                 } else {
                     LazyColumn(
                         contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
