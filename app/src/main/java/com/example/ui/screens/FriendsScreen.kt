@@ -23,11 +23,21 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.data.FriendRequestData
 import com.example.ui.theme.*
 
 @Composable
-fun FriendsScreen(navController: NavController) {
+fun FriendsScreen(navController: NavController, viewModel: FriendsViewModel = viewModel()) {
+    val searchResults by viewModel.searchResults.collectAsState()
+    val friendRequests by viewModel.friendRequests.collectAsState()
+
+    DisposableEffect(Unit) {
+        viewModel.loadData()
+        onDispose { }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -41,69 +51,142 @@ fun FriendsScreen(navController: NavController) {
             )
 
             // Search / Add Friend Field
-            AddFriendSearchField()
+            var query by remember { mutableStateOf("") }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(GlassCardBg)
+                    .border(1.dp, GlassInputBorder, RoundedCornerShape(20.dp))
+                    .padding(horizontal = 16.dp, vertical = 2.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Filled.Search, contentDescription = null, tint = NeonBlue)
+                    Spacer(modifier = Modifier.width(12.dp))
+                    TextField(
+                        value = query,
+                        onValueChange = { 
+                            query = it
+                            viewModel.searchUsers(it)
+                        },
+                        placeholder = { Text("Add Friend by Username...", color = SoftGray) },
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            focusedTextColor = PureWhite,
+                            unfocusedTextColor = PureWhite
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Pending requests
-            Text(
-                "Friend Requests",
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold, color = PureWhite),
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
-            )
-            
-            FriendRequestList()
+            if (query.isNotEmpty()) {
+                Text(
+                    "Search Results",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold, color = PureWhite),
+                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
+                )
+                
+                LazyColumn(
+                    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(searchResults) { user ->
+                        UserSearchCard(user) { viewModel.sendFriendRequest(user.id) }
+                    }
+                }
+            } else {
+                Text(
+                    "Friend Requests",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold, color = PureWhite),
+                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
+                )
+                
+                if (friendRequests.isEmpty()) {
+                    Text(
+                        "No pending requests",
+                        style = MaterialTheme.typography.bodyMedium.copy(color = SoftGray),
+                        modifier = Modifier.padding(horizontal = 24.dp)
+                    )
+                } else {
+                    LazyColumn(
+                        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items(friendRequests) { req ->
+                            FriendRequestCard(req, 
+                                onAccept = { viewModel.acceptFriendRequest(req.senderId) },
+                                onDecline = { viewModel.declineFriendRequest(req.senderId) }
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
 
 @Composable
-fun AddFriendSearchField() {
-    var query by remember { mutableStateOf("") }
-
-    Box(
+fun UserSearchCard(user: UserSearchItem, onAddFriend: () -> Unit) {
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp)
-            .clip(RoundedCornerShape(20.dp))
+            .clip(RoundedCornerShape(16.dp))
             .background(GlassCardBg)
-            .border(1.dp, GlassInputBorder, RoundedCornerShape(20.dp))
-            .padding(horizontal = 16.dp, vertical = 14.dp)
+            .border(1.dp, GlassInputBorder, RoundedCornerShape(16.dp))
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Filled.Search, contentDescription = null, tint = NeonBlue)
-            Spacer(modifier = Modifier.width(12.dp))
-            Text("Add Friend by Username...", color = SoftGray)
+        // Avatar
+        Box(
+            modifier = Modifier
+                .size(50.dp)
+                .clip(CircleShape)
+                .background(Brush.linearGradient(listOf(StitchGradient3, ElectricPurple)))
+        )
+
+        Spacer(modifier = Modifier.width(16.dp))
+
+        // Info
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = user.username,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, color = PureWhite)
+            )
+        }
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        if (user.isFriend) {
+            Icon(Icons.Filled.Check, contentDescription = "Friends", tint = NeonBlue)
+            Spacer(modifier = Modifier.width(4.dp))
+            Text("Friends", color = NeonBlue, style = MaterialTheme.typography.labelLarge)
+        } else if (user.requestSent) {
+            Text("Request Sent", color = SoftGray, style = MaterialTheme.typography.labelLarge)
+        } else {
+            // Add Friend action
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(NeonBlue.copy(alpha = 0.2f))
+                    .clickable { onAddFriend() },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(Icons.Filled.PersonAdd, contentDescription = "Add Friend", tint = NeonBlue)
+            }
         }
     }
 }
 
-data class FriendRequest(
-    val id: String,
-    val username: String,
-    val mutuals: Int,
-    val isVerified: Boolean = false
-)
-
 @Composable
-fun FriendRequestList() {
-    val requests = listOf(
-        FriendRequest("1", "Kaelen", 5, true),
-        FriendRequest("2", "Nova", 2, false)
-    )
-
-    LazyColumn(
-        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        items(requests) { req ->
-            FriendRequestCard(req)
-        }
-    }
-}
-
-@Composable
-fun FriendRequestCard(req: FriendRequest) {
+fun FriendRequestCard(req: FriendRequestData, onAccept: () -> Unit, onDecline: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -127,19 +210,10 @@ fun FriendRequestCard(req: FriendRequest) {
         Column(modifier = Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = req.username,
+                    text = req.senderUsername,
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, color = PureWhite)
                 )
-                if (req.isVerified) {
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Icon(Icons.Filled.Verified, contentDescription = "Verified", tint = NeonBlue, modifier = Modifier.size(16.dp))
-                }
             }
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "${req.mutuals} mutual friends",
-                style = MaterialTheme.typography.bodySmall.copy(color = SoftGray)
-            )
         }
 
         Spacer(modifier = Modifier.width(12.dp))
@@ -152,7 +226,7 @@ fun FriendRequestCard(req: FriendRequest) {
                     .size(40.dp)
                     .clip(CircleShape)
                     .background(Color(0xFF10B981).copy(alpha = 0.2f))
-                    .clickable {  },
+                    .clickable { onAccept() },
                 contentAlignment = Alignment.Center
             ) {
                 Icon(Icons.Filled.Check, contentDescription = "Accept", tint = Color(0xFF10B981))
@@ -163,7 +237,7 @@ fun FriendRequestCard(req: FriendRequest) {
                     .size(40.dp)
                     .clip(CircleShape)
                     .background(Color(0xFFEF4444).copy(alpha = 0.2f))
-                    .clickable {  },
+                    .clickable { onDecline() },
                 contentAlignment = Alignment.Center
             ) {
                 Icon(Icons.Filled.Close, contentDescription = "Decline", tint = Color(0xFFEF4444))

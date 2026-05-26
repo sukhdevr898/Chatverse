@@ -6,7 +6,9 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -23,6 +25,12 @@ data class ChatMessageData(
     val timestamp: Long
 )
 
+data class FriendRequestData(
+    val senderId: String,
+    val senderUsername: String,
+    val timestamp: Long
+)
+
 interface FirebaseDatabaseApi {
     @PUT("users/{userId}.json")
     suspend fun createUser(
@@ -36,7 +44,7 @@ interface FirebaseDatabaseApi {
         @Query("auth") auth: String
     ): Response<Map<String, User>?>
 
-    @retrofit2.http.POST("messages/{chatId}.json")
+    @POST("messages/{chatId}.json")
     suspend fun sendMessage(
         @Path("chatId") chatId: String,
         @Query("auth") auth: String,
@@ -48,6 +56,41 @@ interface FirebaseDatabaseApi {
         @Path("chatId") chatId: String,
         @Query("auth") auth: String
     ): Response<Map<String, ChatMessageData>?>
+
+    @PUT("friend_requests/{targetUserId}/{senderId}.json")
+    suspend fun sendFriendRequest(
+        @Path("targetUserId") targetUserId: String,
+        @Path("senderId") senderId: String,
+        @Query("auth") auth: String,
+        @Body requestData: FriendRequestData
+    ): Response<FriendRequestData>
+
+    @GET("friend_requests/{userId}.json")
+    suspend fun getFriendRequests(
+        @Path("userId") userId: String,
+        @Query("auth") auth: String
+    ): Response<Map<String, FriendRequestData>?>
+
+    @DELETE("friend_requests/{userId}/{senderId}.json")
+    suspend fun removeFriendRequest(
+        @Path("userId") userId: String,
+        @Path("senderId") senderId: String,
+        @Query("auth") auth: String
+    ): Response<Any>
+
+    @PUT("friends/{userId}/{friendId}.json")
+    suspend fun addFriend(
+        @Path("userId") userId: String,
+        @Path("friendId") friendId: String,
+        @Query("auth") auth: String,
+        @Body isFriend: Boolean
+    ): Response<Boolean>
+    
+    @GET("friends/{userId}.json")
+    suspend fun getFriends(
+        @Path("userId") userId: String,
+        @Query("auth") auth: String
+    ): Response<Map<String, Boolean>?>
 }
 
 object FirebaseDatabaseService {
