@@ -42,7 +42,7 @@ fun HomeScreen(navController: NavController, onNavigateToFriends: () -> Unit, vi
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(DeepBlack)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             HomeTopHeader(onNavigateToFriends)
@@ -80,8 +80,8 @@ fun HomeTopHeader(onNavigateToFriends: () -> Unit) {
             modifier = Modifier
                 .size(48.dp)
                 .clip(CircleShape)
-                .background(PureWhite)
-                .border(2.dp, NeonBlue, CircleShape)
+                .background(MaterialTheme.colorScheme.surface)
+                .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
         ) {
             androidx.compose.foundation.Image(
                 painter = androidx.compose.ui.res.painterResource(id = com.example.R.drawable.ic_launcher_foreground), 
@@ -108,7 +108,7 @@ fun HomeTopHeader(onNavigateToFriends: () -> Unit) {
                     .size(12.dp)
                     .clip(CircleShape)
                     .background(Color(0xFF10B981).copy(alpha = alpha))
-                    .border(2.dp, DeepBlack, CircleShape)
+                    .border(2.dp, MaterialTheme.colorScheme.background, CircleShape)
             )
         }
 
@@ -118,7 +118,7 @@ fun HomeTopHeader(onNavigateToFriends: () -> Unit) {
             style = MaterialTheme.typography.titleLarge.copy(
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = 24.sp,
-                brush = Brush.linearGradient(listOf(NeonBlue, ElectricPurple))
+                brush = Brush.linearGradient(listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.secondary))
             )
         )
 
@@ -130,7 +130,7 @@ fun HomeTopHeader(onNavigateToFriends: () -> Unit) {
                 Icon(
                     Icons.Filled.Notifications,
                     contentDescription = "Notifications",
-                    tint = SoftGray,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -150,7 +150,7 @@ fun HomeSearchBar(query: String, onQueryChange: (String) -> Unit) {
             .padding(horizontal = 16.dp, vertical = 4.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Filled.Search, contentDescription = null, tint = SoftGray)
+            Icon(Icons.Filled.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(modifier = Modifier.width(4.dp))
             TextField(
                 value = query,
@@ -158,7 +158,7 @@ fun HomeSearchBar(query: String, onQueryChange: (String) -> Unit) {
                 placeholder = {
                     Text(
                         "Search chats, friends, media...",
-                        color = SoftGray,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodyMedium
                     )
                 },
@@ -167,9 +167,9 @@ fun HomeSearchBar(query: String, onQueryChange: (String) -> Unit) {
                     unfocusedContainerColor = Color.Transparent,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
-                    focusedTextColor = PureWhite,
-                    unfocusedTextColor = PureWhite,
-                    cursorColor = NeonBlue
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    cursorColor = MaterialTheme.colorScheme.primary
                 ),
                 modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
             )
@@ -238,7 +238,7 @@ fun ChatItem(chat: ChatItemUiModel, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .then(if (hasUnread) Modifier.background(Brush.horizontalGradient(listOf(GlassCardBg, Color.Transparent))) else Modifier)
+            .then(if (hasUnread) Modifier.background(Brush.horizontalGradient(listOf(MaterialTheme.colorScheme.surfaceVariant, Color.Transparent))) else Modifier)
             .padding(horizontal = 24.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -247,10 +247,10 @@ fun ChatItem(chat: ChatItemUiModel, onClick: () -> Unit) {
             modifier = Modifier
                 .size(56.dp)
                 .clip(CircleShape)
-                .background(Brush.linearGradient(listOf(StitchGradient3, ElectricPurple.copy(alpha=0.5f))))
+                .background(Brush.linearGradient(listOf(MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.primary.copy(alpha=0.5f))))
                 .border(
                     width = if (hasUnread) 2.dp else 0.dp,
-                    brush = if (hasUnread) Brush.linearGradient(listOf(NeonBlue, ElectricPurple)) else Brush.linearGradient(listOf(Color.Transparent, Color.Transparent)),
+                    brush = if (hasUnread) Brush.linearGradient(listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.secondary)) else Brush.linearGradient(listOf(Color.Transparent, Color.Transparent)),
                     shape = CircleShape
                 )
         ) {
@@ -262,8 +262,8 @@ fun ChatItem(chat: ChatItemUiModel, onClick: () -> Unit) {
                         .offset(x = (-2).dp, y = (2).dp)
                         .size(14.dp)
                         .clip(CircleShape)
-                        .background(NeonBlue)
-                        .border(2.dp, DeepBlack, CircleShape)
+                        .background(MaterialTheme.colorScheme.primary)
+                        .border(2.dp, MaterialTheme.colorScheme.background, CircleShape)
                 )
             }
             if (chat.isOnline) {
@@ -273,8 +273,8 @@ fun ChatItem(chat: ChatItemUiModel, onClick: () -> Unit) {
                         .offset(x = (-4).dp, y = (-4).dp)
                         .size(12.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFF10B981))
-                        .border(2.dp, DeepBlack, CircleShape)
+                        .background(MaterialTheme.colorScheme.tertiary)
+                        .border(2.dp, MaterialTheme.colorScheme.background, CircleShape)
                 )
             }
         }
@@ -287,18 +287,18 @@ fun ChatItem(chat: ChatItemUiModel, onClick: () -> Unit) {
         ) {
             Text(
                 text = chat.username,
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, color = PureWhite)
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
             )
             Spacer(modifier = Modifier.height(4.dp))
             if (chat.isTyping) {
                 Text(
                     text = "typing...",
-                    style = MaterialTheme.typography.bodyMedium.copy(color = NeonBlue, fontWeight = FontWeight.SemiBold)
+                    style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
                 )
             } else {
                 Text(
                     text = chat.lastMessage,
-                    style = MaterialTheme.typography.bodyMedium.copy(color = if (chat.unreadCount > 0) PureWhite else MutedGray),
+                    style = MaterialTheme.typography.bodyMedium.copy(color = if (chat.unreadCount > 0) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurfaceVariant),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -313,7 +313,7 @@ fun ChatItem(chat: ChatItemUiModel, onClick: () -> Unit) {
         ) {
             Text(
                 text = chat.time,
-                style = MaterialTheme.typography.labelSmall.copy(color = if (chat.unreadCount > 0) NeonBlue else MutedGray, fontWeight = FontWeight.SemiBold)
+                style = MaterialTheme.typography.labelSmall.copy(color = if (chat.unreadCount > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.SemiBold)
             )
             Spacer(modifier = Modifier.height(6.dp))
             if (chat.unreadCount > 0) {
@@ -321,12 +321,12 @@ fun ChatItem(chat: ChatItemUiModel, onClick: () -> Unit) {
                     modifier = Modifier
                         .size(24.dp)
                         .clip(CircleShape)
-                        .background(Brush.linearGradient(listOf(NeonBlue, ElectricPurple))),
+                        .background(Brush.linearGradient(listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.secondary))),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = if (chat.unreadCount > 99) "99+" else chat.unreadCount.toString(),
-                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, color = PureWhite, fontSize = 10.sp)
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimary, fontSize = 10.sp)
                     )
                 }
             }

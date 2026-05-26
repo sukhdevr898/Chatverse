@@ -12,23 +12,42 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import android.content.ContextWrapper
 import android.content.Context
 
-private val ChatVerseColorScheme = darkColorScheme(
+private val ChatVerseDarkColorScheme = darkColorScheme(
     primary = NeonBlue,
     secondary = ElectricPurple,
-    tertiary = CyanGlow,
+    tertiary = SuccessGreen,
     background = DeepBlack,
     surface = Graphite,
-    onPrimary = DeepBlack,
-    onSecondary = DeepBlack,
-    onTertiary = DeepBlack,
+    surfaceVariant = SoftDark,
+    onPrimary = PureWhite,
+    onSecondary = PureWhite,
+    onTertiary = PureWhite,
     onBackground = PureWhite,
     onSurface = PureWhite,
+    onSurfaceVariant = SoftGray,
+    error = ErrorRed
+)
+
+private val ChatVerseLightColorScheme = lightColorScheme(
+    primary = Color(0xFF006A60),
+    secondary = Color(0xFF008f82),
+    tertiary = Color(0xFF23C16B),
+    background = Color(0xFFF4F7F6),
+    surface = Color(0xFFFBFDF9),
+    surfaceVariant = Color(0xFFDAE5E1),
+    onPrimary = PureWhite,
+    onSecondary = PureWhite,
+    onTertiary = PureWhite,
+    onBackground = Color(0xFF191C1B),
+    onSurface = Color(0xFF191C1B),
+    onSurfaceVariant = Color(0xFF56605E),
     error = ErrorRed
 )
 
@@ -40,11 +59,11 @@ tailrec fun Context.findActivity(): Activity? = when (this) {
 
 @Composable
 fun MyApplicationTheme(
-  darkTheme: Boolean = true, // Lock to dark theme for AMOLED
-  dynamicColor: Boolean = false, // Disable dynamic colors
+  darkTheme: Boolean = isSystemInDarkTheme(),
+  dynamicColor: Boolean = false,
   content: @Composable () -> Unit,
 ) {
-  val colorScheme = ChatVerseColorScheme
+  val colorScheme = if (darkTheme) ChatVerseDarkColorScheme else ChatVerseLightColorScheme
 
   val view = LocalView.current
   if (!view.isInEditMode) {
