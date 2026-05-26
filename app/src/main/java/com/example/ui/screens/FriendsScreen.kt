@@ -33,6 +33,7 @@ fun FriendsScreen(navController: NavController, viewModel: FriendsViewModel = vi
     val searchResults by viewModel.searchResults.collectAsState()
     val friendRequests by viewModel.friendRequests.collectAsState()
     val isSearching by viewModel.isSearching.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
 
     val context = androidx.compose.ui.platform.LocalContext.current
     val keyboardController = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
@@ -115,6 +116,12 @@ fun FriendsScreen(navController: NavController, viewModel: FriendsViewModel = vi
                     Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator(color = NeonBlue)
                     }
+                } else if (errorMessage != null) {
+                    Text(
+                        errorMessage ?: "",
+                        style = MaterialTheme.typography.bodyMedium.copy(color = androidx.compose.ui.graphics.Color.Red),
+                        modifier = Modifier.padding(horizontal = 24.dp)
+                    )
                 } else if (searchResults.isEmpty()) {
                     Text(
                         "No users found",

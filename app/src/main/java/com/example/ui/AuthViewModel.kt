@@ -7,6 +7,7 @@ import com.example.BuildConfig
 import com.example.data.AuthRequest
 import com.example.data.FirebaseAuthService
 import com.example.data.OobCodeRequest
+import com.example.data.toFirestore
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -90,7 +91,9 @@ class AuthViewModel : ViewModel() {
                 com.example.data.UserSession.email = it.email
                 if (uid != null && token != null && it.email != null) {
                     try {
-                        com.example.data.FirebaseDatabaseService.api.createUser(uid, token, com.example.data.User(uid, it.email.substringBefore("@")))
+                        val userObj = com.example.data.User(uid, it.email.substringBefore("@"))
+                        val projectId = com.example.data.FirestoreService.getProjectIdFromToken(token)
+                        com.example.data.FirestoreService.api.createUser(projectId, uid, "Bearer $token", userObj.toFirestore())
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -129,7 +132,13 @@ class AuthViewModel : ViewModel() {
                 com.example.data.UserSession.idToken = token
                 com.example.data.UserSession.email = it.email
                 if (uid != null && token != null) {
-                    com.example.data.FirebaseDatabaseService.api.createUser(uid, token, com.example.data.User(uid, email.substringBefore("@")))
+                    try {
+                        val userObj = com.example.data.User(uid, email.substringBefore("@"))
+                        val projectId = com.example.data.FirestoreService.getProjectIdFromToken(token)
+                        com.example.data.FirestoreService.api.createUser(projectId, uid, "Bearer $token", userObj.toFirestore())
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
                 }
                 showMessage("Account Created Successfully!", MessageType.SUCCESS)
                 onSuccess()

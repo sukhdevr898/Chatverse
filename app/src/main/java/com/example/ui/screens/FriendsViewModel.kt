@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.data.FirebaseDatabaseService
 import com.example.data.FriendRequestData
 import com.example.data.UserSession
+import com.example.data.toUser
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,6 +31,9 @@ class FriendsViewModel : ViewModel() {
 
     private val _isSearching = MutableStateFlow(false)
     val isSearching: StateFlow<Boolean> = _isSearching.asStateFlow()
+
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
     private var allUsersCache = emptyMap<String, com.example.data.User>()
 
@@ -97,11 +101,17 @@ class FriendsViewModel : ViewModel() {
             _isSearching.value = true
             try {
                 // Fetch fresh users to ensure we have everyone
-                val usersResponse = FirebaseDatabaseService.api.getUsers(auth)
+                val projectId = com.example.data.FirestoreService.getProjectIdFromToken(auth)
+                val usersResponse = com.example.data.FirestoreService.api.getUsers(projectId, "Bearer $auth")
+                
                 if (usersResponse.isSuccessful) {
-                    allUsersCache = usersResponse.body() ?: emptyMap()
+                    val docs = usersResponse.body()?.documents ?: emptyList()
+                    val usersList = docs.mapNotNull { it.toUser() }
+                    allUsersCache = usersList.associateBy { it.id }
+                    _errorMessage.value = null
                 } else {
                     val errorBody = usersResponse.errorBody()?.string()
+                    _errorMessage.value = "DB Error: ${usersResponse.code()} - $errorBody"
                     println("Search Failed: $errorBody")
                 }
                 
@@ -118,6 +128,7 @@ class FriendsViewModel : ViewModel() {
                 }
                 _searchResults.value = filtered
             } catch (e: Exception) {
+                _errorMessage.value = e.message
                 e.printStackTrace()
             } finally {
                 _isSearching.value = false
