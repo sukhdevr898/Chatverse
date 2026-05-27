@@ -125,46 +125,51 @@ fun DynamicIslandLocal(messageText: String, messageType: MessageType) {
         visible = isVisible,
         enter = fadeIn(animationSpec = tween(500)) + slideInVertically(initialOffsetY = { -it }, animationSpec = tween(500)),
         exit = fadeOut(animationSpec = tween(500)) + slideOutVertically(targetOffsetY = { -it }, animationSpec = tween(500)),
-        modifier = Modifier.padding(top = 12.dp)
+        modifier = Modifier.padding(top = 48.dp, start = 24.dp, end = 24.dp)
     ) {
         Box(
             modifier = Modifier
-                .background(Color.Black, RoundedCornerShape(32.dp))
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .shadow(elevation = 16.dp, shape = RoundedCornerShape(50))
+                .background(Color.Black, shape = RoundedCornerShape(50))
+                .padding(horizontal = 24.dp, vertical = 16.dp)
+                .fillMaxWidth(),
             contentAlignment = Alignment.Center
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
                 if (messageType == MessageType.LOADING) {
-                    CircularProgressIndicator(modifier = Modifier.size(18.dp), color = Color.White, strokeWidth = 2.dp)
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Color.White, strokeWidth = 2.dp)
+                    Spacer(modifier = Modifier.width(12.dp))
                     Text(
                         text = messageText,
                         color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 15.sp
                     )
                 } else {
                     if (messageType == MessageType.SUCCESS) {
-                        Box(modifier = Modifier.size(36.dp).background(Color(0xFF22C55E), CircleShape), contentAlignment = Alignment.Center) {
-                            Icon(Icons.Filled.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+                        Box(modifier = Modifier.size(24.dp).background(Color(0xFF22C55E), CircleShape), contentAlignment = Alignment.Center) {
+                            Icon(Icons.Filled.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
                         }
                     } else if (messageType == MessageType.ERROR) {
-                        Box(modifier = Modifier.size(36.dp).background(Color(0xFFEF4444), CircleShape), contentAlignment = Alignment.Center) {
-                            Icon(Icons.Filled.Close, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+                        Box(modifier = Modifier.size(24.dp).background(Color(0xFFEF4444), CircleShape), contentAlignment = Alignment.Center) {
+                            Icon(Icons.Filled.Close, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
                         }
                     }
+                    
+                    Spacer(modifier = Modifier.width(12.dp))
 
                     Column {
                         Text(
                             text = if (messageText.contains("|")) messageText.substringBefore("|") else if (messageType == MessageType.SUCCESS) "Success" else "Error", 
                             color = if (messageType == MessageType.SUCCESS) Color(0xFF4ADE80) else Color(0xFFF87171),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 12.sp
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 14.sp
                         )
                         Text(
                             text = if (messageText.contains("|")) messageText.substringAfter("|") else messageText,
                             color = Color(0xFFE5E7EB),
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 13.sp,
                             maxLines = 1
                         )
                     }
@@ -262,42 +267,23 @@ fun AuthScreen(navController: NavController, authViewModel: AuthViewModel) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     
-    val infiniteTransition = rememberInfiniteTransition()
-    val purpleBlobY by infiniteTransition.animateFloat(
-        initialValue = -10f,
-        targetValue = 50f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(4000, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "purpleBlobY"
-    )
-    val blueBlobX by infiniteTransition.animateFloat(
-        initialValue = 10f,
-        targetValue = -40f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(5000, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "blueBlobX"
+    val backgroundGradient = Brush.verticalGradient(
+        colors = listOf(
+            Color(0xFFF9F5FF), // Pale purple
+            Color(0xFFF0F9FF)  // Pale blue
+        )
     )
     
-    Box(modifier = Modifier.fillMaxSize().background(Color.White)) {
-        // Decorative Blobs
-        Box(modifier = Modifier.offset(x = 0.dp, y = purpleBlobY.dp - 60.dp).size(280.dp).background(Color(0xFFE9D5FF), CircleShape).alpha(0.4f))
-        Box(modifier = Modifier.align(Alignment.BottomEnd).offset(x = blueBlobX.dp, y = 0.dp).size(320.dp).background(Color(0xFFBFDBFE), CircleShape).alpha(0.4f))
-
+    Box(modifier = Modifier.fillMaxSize().background(backgroundGradient)) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(28.dp),
+            modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 48.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Spacer(modifier = Modifier.weight(1f))
             
             // Logo
-            Box(contentAlignment = Alignment.Center) {
-                ChatVerseLogo(modifier = Modifier.size(100.dp))
-            }
+            ChatVerseLogo(modifier = Modifier.size(100.dp))
             
             Spacer(modifier = Modifier.height(32.dp))
             
@@ -307,7 +293,7 @@ fun AuthScreen(navController: NavController, authViewModel: AuthViewModel) {
                 fontSize = 32.sp,
                 color = Color(0xFF111827),
                 textAlign = TextAlign.Center,
-                lineHeight = 38.sp
+                lineHeight = 36.sp
             )
             
             Spacer(modifier = Modifier.height(16.dp))
@@ -377,35 +363,34 @@ fun AuthScreen(navController: NavController, authViewModel: AuthViewModel) {
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(64.dp)
-                    .padding(bottom = 0.dp)
-                    .border(1.dp, Color(0xFFF3F4F6), RoundedCornerShape(20.dp))
-                    .shadow(12.dp, RoundedCornerShape(20.dp), spotColor = Color(0x33000000), ambientColor = Color(0x11000000)),
+                    .height(60.dp)
+                    .shadow(elevation = 4.dp, shape = RoundedCornerShape(16.dp))
+                    .border(1.dp, Color(0xFFF3F4F6), RoundedCornerShape(16.dp)),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.White),
-                shape = RoundedCornerShape(20.dp),
+                shape = RoundedCornerShape(16.dp),
                 contentPadding = PaddingValues(0.dp)
             ) {
                 if (isLoading) {
-                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color(0xFF111111), strokeWidth = 2.dp)
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color(0xFF4B5563), strokeWidth = 3.dp)
                 } else {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
-                        Icon(painter = painterResource(id = R.drawable.ic_google), contentDescription = "Google", tint = Color.Unspecified, modifier = Modifier.size(26.dp))
+                        Icon(painter = painterResource(id = R.drawable.ic_google), contentDescription = "Google", tint = Color.Unspecified, modifier = Modifier.size(24.dp))
                         Spacer(modifier = Modifier.width(12.dp))
-                        Text(if (isLoading) "Please wait..." else "Continue with Google", color = Color(0xFF111827), fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        Text("Continue with Google", color = Color(0xFF111827), fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     }
                 }
             }
             
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(40.dp))
             
             Text(
                 text = buildAnnotatedString {
                     append("By continuing, you agree to our ")
-                    withStyle(style = SpanStyle(color = Color(0xFFA855F7), fontWeight = FontWeight.SemiBold)) {
+                    withStyle(style = SpanStyle(color = Color(0xFFA855F7), fontWeight = FontWeight.Medium)) {
                         append("Terms")
                     }
                     append(" and ")
-                    withStyle(style = SpanStyle(color = Color(0xFFA855F7), fontWeight = FontWeight.SemiBold)) {
+                    withStyle(style = SpanStyle(color = Color(0xFFA855F7), fontWeight = FontWeight.Medium)) {
                         append("Privacy\nPolicy")
                     }
                     append(".")
