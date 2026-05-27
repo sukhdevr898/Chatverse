@@ -34,7 +34,7 @@ fun ChatScreen(navController: NavController, chatId: String, username: String) {
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = Color(0xFFF8F9FA),
         topBar = { ChatHeader(navController, username) },
         bottomBar = { ChatInputArea { viewModel.sendMessage(it) } }
     ) { paddingValues ->
@@ -58,13 +58,14 @@ fun ChatHeader(navController: NavController, title: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f))
+            .background(Color.White)
+            .border(1.dp, Color(0xFFF3F4F6))
             .statusBarsPadding()
             .padding(horizontal = 12.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(onClick = { navController.popBackStack() }) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface)
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color(0xFF111827))
         }
         
         Spacer(modifier = Modifier.width(4.dp))
@@ -78,21 +79,17 @@ fun ChatHeader(navController: NavController, title: String) {
                 modifier = Modifier
                     .size(44.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surface)
+                    .background(Color(0xFFF3F4F6))
             ) {
-                 androidx.compose.foundation.Image(
-                     painter = androidx.compose.ui.res.painterResource(id = com.example.R.drawable.ic_launcher_foreground), 
-                     contentDescription = "Contact Avatar",
-                     modifier = Modifier.fillMaxSize()
-                 )
+                 Icon(Icons.Filled.Person, contentDescription = null, tint = Color.Gray, modifier = Modifier.fillMaxSize().padding(8.dp))
                  // Online dot
                  Box(
                      modifier = Modifier
                          .align(Alignment.BottomEnd)
                          .size(12.dp)
                          .clip(CircleShape)
-                         .background(MaterialTheme.colorScheme.tertiary)
-                         .border(2.dp, MaterialTheme.colorScheme.surface, CircleShape)
+                         .background(Color(0xFF10B981))
+                         .border(2.dp, Color.White, CircleShape)
                  )
             }
             
@@ -101,75 +98,27 @@ fun ChatHeader(navController: NavController, title: String) {
             Column {
                 Text(
                     text = title, 
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface, letterSpacing = 0.2.sp),
+                    fontWeight = FontWeight.ExtraBold, 
+                    color = Color(0xFF111827), 
+                    fontSize = 16.sp,
                     maxLines = 1,
                     overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                 )
                 Text(
                     text = "Online", 
-                    style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Medium)
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color(0xFF10B981),
+                    fontSize = 12.sp
                 )
             }
         }
 
         Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                Icons.Filled.Videocam, 
-                contentDescription = "Video Call", 
-                tint = MaterialTheme.colorScheme.onSurface, 
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .clickable { }
-                    .padding(8.dp)
-            )
-            Icon(
-                Icons.Filled.Call, 
-                contentDescription = "Audio Call", 
-                tint = MaterialTheme.colorScheme.onSurface, 
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .clickable { }
-                    .padding(8.dp)
-            )
-            Box {
-                Icon(
-                    Icons.Filled.MoreVert, 
-                    contentDescription = "Options", 
-                    tint = MaterialTheme.colorScheme.onSurface, 
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .clickable { showMenu = !showMenu }
-                        .padding(8.dp)
-                )
-                DropdownMenu(
-                    expanded = showMenu,
-                    onDismissRequest = { showMenu = false },
-                    modifier = Modifier.background(MaterialTheme.colorScheme.surface)
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("Search", color = MaterialTheme.colorScheme.onSurface) },
-                        onClick = { showMenu = false },
-                        leadingIcon = { Icon(Icons.Filled.Search, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Mute notifications", color = MaterialTheme.colorScheme.onSurface) },
-                        onClick = { showMenu = false },
-                        leadingIcon = { Icon(Icons.Filled.NotificationsOff, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Clear chat", color = MaterialTheme.colorScheme.onSurface) },
-                        onClick = { showMenu = false },
-                        leadingIcon = { Icon(Icons.Filled.DeleteSweep, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Block user", color = MaterialTheme.colorScheme.error) },
-                        onClick = { showMenu = false },
-                        leadingIcon = { Icon(Icons.Filled.Block, null, tint = MaterialTheme.colorScheme.error) }
-                    )
-                }
+            Box(modifier = Modifier.size(40.dp).background(Color(0xFFF3F4F6), CircleShape), contentAlignment = Alignment.Center) {
+                Icon(Icons.Filled.Videocam, contentDescription = "Video Call", tint = Color.Gray, modifier = Modifier.size(20.dp).clickable { })
+            }
+            Box(modifier = Modifier.size(40.dp).background(Color(0xFFF3F4F6), CircleShape), contentAlignment = Alignment.Center) {
+                Icon(Icons.Filled.Call, contentDescription = "Audio Call", tint = Color.Gray, modifier = Modifier.size(20.dp).clickable { })
             }
         }
     }
@@ -198,10 +147,11 @@ fun ChatMessagesArea(messages: List<MessageUiModel>, modifier: Modifier = Modifi
             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Text(
                     text = "Today",
-                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 12.sp,
+                    color = Color.Gray,
                     modifier = Modifier
-                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), RoundedCornerShape(12.dp))
+                        .background(Color(0xFFE5E7EB), RoundedCornerShape(12.dp))
                         .padding(horizontal = 12.dp, vertical = 4.dp)
                 )
             }
@@ -229,15 +179,22 @@ fun MessageBubble(msg: MessageUiModel) {
                 )
                 .then(
                     if (msg.isMine)
-                        Modifier.background(Brush.linearGradient(listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.secondary)))
+                        Modifier.background(Brush.linearGradient(listOf(Color(0xFFA855F7), Color(0xFF3B82F6))))
                     else
-                        Modifier.background(MaterialTheme.colorScheme.surface)
+                        Modifier.background(Color.White).border(1.dp, Color(0xFFF3F4F6), RoundedCornerShape(
+                            topStart = 20.dp,
+                            topEnd = 20.dp,
+                            bottomStart = 4.dp,
+                            bottomEnd = 20.dp
+                        ))
                 )
                 .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
             Text(
                 text = msg.text,
-                style = MaterialTheme.typography.bodyLarge.copy(color = if (msg.isMine) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface, lineHeight = 21.sp)
+                fontSize = 15.sp,
+                color = if (msg.isMine) Color.White else Color(0xFF111827), 
+                lineHeight = 21.sp
             )
         }
         
@@ -249,14 +206,16 @@ fun MessageBubble(msg: MessageUiModel) {
         ) {
             Text(
                 text = msg.time,
-                style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                color = Color.Gray, 
+                fontSize = 11.sp, 
+                fontWeight = FontWeight.Bold
             )
             if (msg.isMine) {
                 Spacer(modifier = Modifier.width(4.dp))
                 Icon(
                     imageVector = Icons.Filled.DoneAll,
                     contentDescription = "Read",
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = Color(0xFF3B82F6),
                     modifier = Modifier.size(16.dp)
                 )
             }
@@ -271,14 +230,15 @@ fun ChatInputArea(onSendMessage: (String) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f))
+            .background(Color.White)
+            .border(1.dp, Color(0xFFF3F4F6))
             .imePadding()
             .navigationBarsPadding()
-            .padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 24.dp),
+            .padding(start = 12.dp, end = 12.dp, top = 12.dp, bottom = 24.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = { /* Attachment */ }) {
-            Icon(Icons.Filled.AddCircle, contentDescription = "Add", tint = MaterialTheme.colorScheme.primary)
+        Box(modifier = Modifier.size(40.dp).background(Color(0xFFF3F4F6), CircleShape).clickable { }, contentAlignment = Alignment.Center) {
+            Icon(Icons.Filled.Add, contentDescription = "Add", tint = Color.Gray)
         }
         
         Spacer(modifier = Modifier.width(8.dp))
@@ -287,28 +247,22 @@ fun ChatInputArea(onSendMessage: (String) -> Unit) {
             modifier = Modifier
                 .weight(1f)
                 .clip(RoundedCornerShape(24.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-                .padding(horizontal = 12.dp, vertical = 4.dp),
+                .background(Color(0xFFF3F4F6))
+                .padding(horizontal = 16.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             androidx.compose.foundation.text.BasicTextField(
                 value = text,
                 onValueChange = { text = it },
-                textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
-                modifier = Modifier.weight(1f).padding(vertical = 10.dp),
+                textStyle = LocalTextStyle.current.copy(color = Color(0xFF111827), fontSize = 15.sp),
+                modifier = Modifier.weight(1f).padding(vertical = 12.dp),
                 decorationBox = { innerTextField ->
                     if (text.isEmpty()) {
-                        Text("Message", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("Message...", color = Color.Gray, fontSize = 15.sp)
                     }
                     innerTextField()
                 }
             )
-            IconButton(onClick = { }, modifier = Modifier.size(32.dp)) {
-                Icon(Icons.Filled.AttachFile, contentDescription = "Attach", tint = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-            IconButton(onClick = { }, modifier = Modifier.size(32.dp)) {
-                Icon(Icons.Filled.SentimentSatisfied, contentDescription = "Emoji", tint = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
         }
         
         Spacer(modifier = Modifier.width(8.dp))
@@ -317,7 +271,7 @@ fun ChatInputArea(onSendMessage: (String) -> Unit) {
             modifier = Modifier
                 .size(48.dp)
                 .clip(CircleShape)
-                .background(Brush.linearGradient(listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.secondary)))
+                .background(Brush.linearGradient(listOf(Color(0xFFA855F7), Color(0xFF3B82F6))))
                 .clickable {
                     if (text.isNotBlank()) {
                         onSendMessage(text)
@@ -326,7 +280,7 @@ fun ChatInputArea(onSendMessage: (String) -> Unit) {
                 },
             contentAlignment = Alignment.Center
         ) {
-            Icon(if (text.isEmpty()) Icons.Filled.Mic else Icons.AutoMirrored.Filled.Send, contentDescription = "Send", tint = MaterialTheme.colorScheme.onPrimary)
+            Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Send", tint = Color.White, modifier = Modifier.size(20.dp).offset(x = 2.dp))
         }
     }
 }

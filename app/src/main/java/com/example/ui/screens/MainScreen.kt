@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.compose.foundation.border
@@ -57,9 +58,8 @@ fun MainScreen(rootNavController: NavController) {
                         restoreState = true
                     }
                 }) }
-                composable("friends") { FriendsScreen(rootNavController) }
+                composable("friends") { FriendsScreen(rootNavController, viewModel = androidx.lifecycle.viewmodel.compose.viewModel()) }
                 composable("calls") { CallsScreen(rootNavController) }
-                composable("stories") { StoriesScreen(rootNavController) }
                 composable("settings") { SettingsScreen(rootNavController) }
             }
         }
@@ -75,22 +75,21 @@ fun PremiumBottomNavBar(navController: NavHostController) {
         NavItem("chats", "Chats", Icons.Outlined.ChatBubbleOutline, Icons.Filled.ChatBubble),
         NavItem("friends", "Friends", Icons.Outlined.PeopleOutline, Icons.Filled.People),
         NavItem("calls", "Calls", Icons.Outlined.Call, Icons.Filled.Call),
-        NavItem("stories", "Stories", Icons.Outlined.Panorama, Icons.Filled.Panorama),
         NavItem("settings", "Settings", Icons.Outlined.Settings, Icons.Filled.Settings)
     )
     
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.95f))
-            .border(width = 1.dp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+            .background(Color.White)
+            .border(width = 1.dp, color = Color(0xFFF3F4F6))
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(80.dp)
-                .padding(start = 8.dp, end = 8.dp, bottom = 12.dp),
-            horizontalArrangement = Arrangement.SpaceAround,
+                .padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             items.forEach { item ->
@@ -120,39 +119,32 @@ private fun NavBarItem(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     
-    val iconColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-    val textColor = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
-    val fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium
+    val iconColor = if (isSelected) Color(0xFFA855F7) else Color(0xFF9CA3AF)
+    val textColor = if (isSelected) Color(0xFFA855F7) else Color(0xFF9CA3AF)
     
     Column(
         modifier = Modifier
-            .width(64.dp)
-            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick),
+            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
+            .padding(horizontal = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Box(
-            modifier = Modifier
-                .width(64.dp)
-                .height(32.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(if (isSelected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = if (isSelected) item.activeIcon else item.icon,
-                contentDescription = item.label,
-                tint = iconColor,
-                modifier = Modifier.size(24.dp)
-            )
-        }
+        Icon(
+            imageVector = item.activeIcon, // Using filled icons by default in this design style
+            contentDescription = item.label,
+            tint = iconColor,
+            modifier = Modifier.size(24.dp)
+        )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = item.label,
-            style = MaterialTheme.typography.labelSmall.copy(fontWeight = fontWeight, color = textColor)
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.Bold, 
+                color = textColor,
+                fontSize = 10.sp
+            )
         )
     }
 }
-
 
 data class NavItem(val route: String, val label: String, val icon: ImageVector, val activeIcon: ImageVector)
