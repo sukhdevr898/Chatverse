@@ -296,11 +296,10 @@ fun AuthScreen(navController: NavController, authViewModel: AuthViewModel) {
             
             // Logo
             Box(contentAlignment = Alignment.Center) {
-                Box(modifier = Modifier.size(80.dp).blur(20.dp).background(Color(0x33A855F7), CircleShape).offset(y = 10.dp))
-                ChatVerseLogo(modifier = Modifier.size(96.dp))
+                ChatVerseLogo(modifier = Modifier.size(100.dp))
             }
             
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(32.dp))
             
             Text(
                 text = "Welcome to\nChatVerse",
@@ -308,7 +307,7 @@ fun AuthScreen(navController: NavController, authViewModel: AuthViewModel) {
                 fontSize = 32.sp,
                 color = Color(0xFF111827),
                 textAlign = TextAlign.Center,
-                lineHeight = 36.sp
+                lineHeight = 38.sp
             )
             
             Spacer(modifier = Modifier.height(16.dp))
@@ -316,9 +315,10 @@ fun AuthScreen(navController: NavController, authViewModel: AuthViewModel) {
             Text(
                 text = "Connect securely and seamlessly.\nSign in to continue.",
                 fontWeight = FontWeight.Medium,
-                color = Color.Gray,
+                color = Color(0xFF6B7280),
                 textAlign = TextAlign.Center,
-                fontSize = 16.sp
+                fontSize = 16.sp,
+                lineHeight = 24.sp
             )
             
             Spacer(modifier = Modifier.weight(1f))
@@ -375,10 +375,15 @@ fun AuthScreen(navController: NavController, authViewModel: AuthViewModel) {
                         }
                     }
                 },
-                modifier = Modifier.fillMaxWidth().height(64.dp).padding(bottom = 20.dp).border(1.dp, Color(0xFFE5E7EB), RoundedCornerShape(22.dp)),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(64.dp)
+                    .padding(bottom = 0.dp)
+                    .border(1.dp, Color(0xFFF3F4F6), RoundedCornerShape(20.dp))
+                    .shadow(12.dp, RoundedCornerShape(20.dp), spotColor = Color(0x33000000), ambientColor = Color(0x11000000)),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.White),
-                shape = RoundedCornerShape(22.dp),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
+                shape = RoundedCornerShape(20.dp),
+                contentPadding = PaddingValues(0.dp)
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color(0xFF111111), strokeWidth = 2.dp)
@@ -386,30 +391,31 @@ fun AuthScreen(navController: NavController, authViewModel: AuthViewModel) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
                         Icon(painter = painterResource(id = R.drawable.ic_google), contentDescription = "Google", tint = Color.Unspecified, modifier = Modifier.size(26.dp))
                         Spacer(modifier = Modifier.width(12.dp))
-                        Text(if (isLoading) "Please wait..." else "Continue with Google", color = Color(0xFF111111), fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                        Text(if (isLoading) "Please wait..." else "Continue with Google", color = Color(0xFF111827), fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     }
                 }
             }
             
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(32.dp))
             
             Text(
                 text = buildAnnotatedString {
                     append("By continuing, you agree to our ")
-                    withStyle(style = SpanStyle(color = Color(0xFFA855F7), fontWeight = FontWeight.Bold)) {
+                    withStyle(style = SpanStyle(color = Color(0xFFA855F7), fontWeight = FontWeight.SemiBold)) {
                         append("Terms")
                     }
                     append(" and ")
-                    withStyle(style = SpanStyle(color = Color(0xFFA855F7), fontWeight = FontWeight.Bold)) {
-                        append("Privacy Policy")
+                    withStyle(style = SpanStyle(color = Color(0xFFA855F7), fontWeight = FontWeight.SemiBold)) {
+                        append("Privacy\nPolicy")
                     }
                     append(".")
                 },
-                fontWeight = FontWeight.Medium,
-                fontSize = 12.sp,
+                fontWeight = FontWeight.Normal,
+                fontSize = 13.sp,
                 color = Color(0xFF9CA3AF),
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(bottom = 12.dp)
+                modifier = Modifier.padding(bottom = 12.dp),
+                lineHeight = 20.sp
             )
         }
         
