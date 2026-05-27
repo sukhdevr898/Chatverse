@@ -56,7 +56,7 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun ChatVerseLogo(modifier: Modifier = Modifier) {
-    val gradientColors = listOf(Color(0xFFE13BFF), Color(0xFF8E44FF), Color(0xFF2FA1FF))
+    val gradientColors = listOf(Color(0xFFE81CFF), Color(0xFF8E44FF), Color(0xFF41B5FF))
     val brush = Brush.linearGradient(
         colors = gradientColors,
         start = Offset(10f, 90f),
@@ -123,53 +123,55 @@ fun DynamicIslandLocal(messageText: String, messageType: MessageType) {
 
     AnimatedVisibility(
         visible = isVisible,
-        enter = fadeIn(animationSpec = tween(500)) + slideInVertically(initialOffsetY = { -it }, animationSpec = tween(500)),
-        exit = fadeOut(animationSpec = tween(500)) + slideOutVertically(targetOffsetY = { -it }, animationSpec = tween(500)),
-        modifier = Modifier.padding(top = 48.dp, start = 24.dp, end = 24.dp)
+        enter = fadeIn() + slideInVertically(initialOffsetY = { -50 }) + expandVertically(expandFrom = Alignment.Top),
+        exit = fadeOut() + slideOutVertically(targetOffsetY = { -50 }) + shrinkVertically(shrinkTowards = Alignment.Top),
+        modifier = Modifier.padding(top = 24.dp)
     ) {
         Box(
             modifier = Modifier
-                .shadow(elevation = 16.dp, shape = RoundedCornerShape(50))
-                .background(Color.Black, shape = RoundedCornerShape(50))
-                .padding(horizontal = 24.dp, vertical = 16.dp)
-                .fillMaxWidth(),
+                .widthIn(min = 120.dp, max = 340.dp)
+                .height(64.dp)
+                .shadow(elevation = 16.dp, shape = RoundedCornerShape(32.dp))
+                .background(Color.Black, shape = RoundedCornerShape(32.dp))
+                .padding(horizontal = 16.dp, vertical = 8.dp),
             contentAlignment = Alignment.Center
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
                 if (messageType == MessageType.LOADING) {
                     CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Color.White, strokeWidth = 2.dp)
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
                         text = messageText,
                         color = Color.White,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 15.sp
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp
                     )
                 } else {
                     if (messageType == MessageType.SUCCESS) {
-                        Box(modifier = Modifier.size(24.dp).background(Color(0xFF22C55E), CircleShape), contentAlignment = Alignment.Center) {
-                            Icon(Icons.Filled.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                        Box(modifier = Modifier.size(36.dp).background(Color(0xFF22C55E), CircleShape), contentAlignment = Alignment.Center) {
+                            Icon(Icons.Filled.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
                         }
                     } else if (messageType == MessageType.ERROR) {
-                        Box(modifier = Modifier.size(24.dp).background(Color(0xFFEF4444), CircleShape), contentAlignment = Alignment.Center) {
-                            Icon(Icons.Filled.Close, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                        Box(modifier = Modifier.size(36.dp).background(Color(0xFFEF4444), CircleShape), contentAlignment = Alignment.Center) {
+                            Icon(Icons.Filled.Close, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
                         }
                     }
                     
                     Spacer(modifier = Modifier.width(12.dp))
 
-                    Column {
+                    Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = if (messageText.contains("|")) messageText.substringBefore("|") else if (messageType == MessageType.SUCCESS) "Success" else "Error", 
                             color = if (messageType == MessageType.SUCCESS) Color(0xFF4ADE80) else Color(0xFFF87171),
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 14.sp
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp,
+                            maxLines = 1
                         )
                         Text(
                             text = if (messageText.contains("|")) messageText.substringAfter("|") else messageText,
                             color = Color(0xFFE5E7EB),
-                            fontWeight = FontWeight.Normal,
-                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 14.sp,
                             maxLines = 1
                         )
                     }
@@ -267,25 +269,31 @@ fun AuthScreen(navController: NavController, authViewModel: AuthViewModel) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     
-    val backgroundGradient = Brush.verticalGradient(
-        colors = listOf(
-            Color(0xFFF9F5FF), // Pale purple
-            Color(0xFFF0F9FF)  // Pale blue
-        )
-    )
-    
-    Box(modifier = Modifier.fillMaxSize().background(backgroundGradient)) {
+    Box(modifier = Modifier.fillMaxSize().background(Color.White)) {
+        Canvas(modifier = Modifier.fillMaxSize().blur(80.dp)) {
+            drawCircle(
+                color = Color(0xFFE9D5FF).copy(alpha = 0.5f), // Purple-200
+                radius = 500f,
+                center = Offset(0f, 0f)
+            )
+            drawCircle(
+                color = Color(0xFFBFDBFE).copy(alpha = 0.5f), // Blue-200
+                radius = 600f,
+                center = Offset(size.width, size.height * 0.6f)
+            )
+        }
+
         Column(
-            modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 48.dp),
+            modifier = Modifier.fillMaxSize().padding(horizontal = 32.dp, vertical = 48.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Spacer(modifier = Modifier.weight(1f))
             
             // Logo
-            ChatVerseLogo(modifier = Modifier.size(100.dp))
+            ChatVerseLogo(modifier = Modifier.size(96.dp))
             
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(24.dp))
             
             Text(
                 text = "Welcome to\nChatVerse",
@@ -364,7 +372,7 @@ fun AuthScreen(navController: NavController, authViewModel: AuthViewModel) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp)
-                    .shadow(elevation = 4.dp, shape = RoundedCornerShape(16.dp))
+                    .shadow(elevation = 8.dp, shape = RoundedCornerShape(16.dp), spotColor = Color(0x26000000), ambientColor = Color(0x14000000))
                     .border(1.dp, Color(0xFFF3F4F6), RoundedCornerShape(16.dp)),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.White),
                 shape = RoundedCornerShape(16.dp),
@@ -376,27 +384,27 @@ fun AuthScreen(navController: NavController, authViewModel: AuthViewModel) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
                         Icon(painter = painterResource(id = R.drawable.ic_google), contentDescription = "Google", tint = Color.Unspecified, modifier = Modifier.size(24.dp))
                         Spacer(modifier = Modifier.width(12.dp))
-                        Text("Continue with Google", color = Color(0xFF111827), fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        Text("Continue with Google", color = Color(0xFF1F2937), fontWeight = FontWeight.Bold, fontSize = 15.sp)
                     }
                 }
             }
             
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(24.dp))
             
             Text(
                 text = buildAnnotatedString {
                     append("By continuing, you agree to our ")
-                    withStyle(style = SpanStyle(color = Color(0xFFA855F7), fontWeight = FontWeight.Medium)) {
+                    withStyle(style = SpanStyle(color = Color(0xFF9333EA), fontWeight = FontWeight.Bold)) {
                         append("Terms")
                     }
                     append(" and ")
-                    withStyle(style = SpanStyle(color = Color(0xFFA855F7), fontWeight = FontWeight.Medium)) {
+                    withStyle(style = SpanStyle(color = Color(0xFF9333EA), fontWeight = FontWeight.Bold)) {
                         append("Privacy\nPolicy")
                     }
                     append(".")
                 },
-                fontWeight = FontWeight.Normal,
-                fontSize = 13.sp,
+                fontWeight = FontWeight.Medium,
+                fontSize = 12.sp,
                 color = Color(0xFF9CA3AF),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(bottom = 12.dp),
