@@ -28,6 +28,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.compose.ui.platform.LocalContext
+import android.widget.Toast
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.CustomCredential
+import androidx.credentials.exceptions.GetCredentialException
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import android.util.Log
+import com.example.BuildConfig
+import kotlinx.coroutines.launch
 import com.example.ui.AuthViewModel
 import com.example.ui.MessageType
 import com.example.ui.theme.*
@@ -106,46 +117,9 @@ fun SplashScreen(navController: NavController) {
 @Composable
 fun AuthScreen(navController: NavController, authViewModel: AuthViewModel) {
     val isLoading by authViewModel.isLoading.collectAsState(initial = false)
-    var showGoogleDialog by remember { mutableStateOf(false) }
-    var email by remember { mutableStateOf("") }
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     
-    if (showGoogleDialog) {
-        AlertDialog(
-            onDismissRequest = { showGoogleDialog = false },
-            title = { Text("Mock Google Login", fontWeight = FontWeight.Bold) },
-            text = {
-                Column {
-                    Text("Since this is a simulated environment, please enter your email to 'authenticate' with Google.")
-                    Spacer(modifier = Modifier.height(16.dp))
-                    OutlinedTextField(
-                        value = email,
-                        onValueChange = { email = it },
-                        label = { Text("Google Email") }
-                    )
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    showGoogleDialog = false
-                    val defaultPassword = "google_auth_123456"
-                    // Try to login first, if fail, signup
-                    authViewModel.login(email, defaultPassword) {
-                        navController.navigate("main") { popUpTo("auth") { inclusive = true } }
-                    }
-                    // For demo purpose, we assume signup is needed if login fails, but they should share flow.
-                    // We'll trust authViewModel login success logic or we can just send them to onboarding if needed.
-                    // Let's send them to onboarding immediately for the demo flow
-                    navController.navigate("onboarding_name")
-                }) {
-                    Text("Continue")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showGoogleDialog = false }) { Text("Cancel") }
-            }
-        )
-    }
-
     Box(modifier = Modifier.fillMaxSize().background(Color.White)) {
         // Decorative Blobs
         Box(modifier = Modifier.offset(x = (-80).dp, y = (-80).dp).size(280.dp).blur(60.dp).background(Color(0xFFE9D5FF), CircleShape).alpha(0.4f))
@@ -189,16 +163,54 @@ fun AuthScreen(navController: NavController, authViewModel: AuthViewModel) {
             Spacer(modifier = Modifier.weight(1f))
             
             Button(
-                onClick = { showGoogleDialog = true },
+                onClick = {
+                    if (BuildConfig.GOOGLE_WEB_CLIENT_ID.isEmpty()) {
+                        Toast.makeText(context, "Please configure GOOGLE_WEB_CLIENT_ID in the Secrets panel", Toast.LENGTH_LONG).show()
+                        return@Button
+                    }
+                    
+                    val credentialManager = CredentialManager.create(context)
+                    val googleIdOption = GetGoogleIdOption.Builder()
+                        .setFilterByAuthorizedAccounts(false)
+                        .setServerClientId(BuildConfig.GOOGLE_WEB_CLIENT_ID)
+                        .setAutoSelectEnabled(true)
+                        .build()
+
+                    val request = GetCredentialRequest.Builder()
+                        .addCredentialOption(googleIdOption)
+                        .build()
+
+                    coroutineScope.launch {
+                        try {
+                            val result = credentialManager.getCredential(context = context, request = request)
+                            val credential = result.credential
+                            if (credential is CustomCredential && credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+                                val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+                                // We simulate passing the token to backend
+                                val idToken = googleIdTokenCredential.idToken
+                                authViewModel.login(googleIdTokenCredential.id, "google_auth_123456") {
+                                    navController.navigate("onboarding_name")
+                                }
+                            }
+                        } catch (e: Exception) {
+                            Log.e("Auth", "Google Login failed", e)
+                            Toast.makeText(context, "Google Login failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.White),
                 shape = RoundedCornerShape(16.dp),
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
-                    Text("G", color = Color(0xFF4285F4), fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text("Continue with Google", color = Color(0xFF111827), fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                if (isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color(0xFFA855F7), strokeWidth = 2.dp)
+                } else {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+                        Text("G", color = Color(0xFF4285F4), fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text("Continue with Google", color = Color(0xFF111827), fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    }
                 }
             }
             
