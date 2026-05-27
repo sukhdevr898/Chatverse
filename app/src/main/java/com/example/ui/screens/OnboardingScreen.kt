@@ -21,6 +21,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
@@ -294,27 +296,29 @@ fun AuthScreen(navController: NavController, authViewModel: AuthViewModel) {
             
             // Logo
             Box(contentAlignment = Alignment.Center) {
-                // If you have a chatverse_logo.png in drawable, you can use Image(painterResource(id = R.drawable.chatverse_logo), ...)
-                // Using the requested placeholder compose icon based on chatverse_logo
-                ChatVerseLogo(modifier = Modifier.size(110.dp))
+                Box(modifier = Modifier.size(80.dp).blur(20.dp).background(Color(0x33A855F7), CircleShape).offset(y = 10.dp))
+                ChatVerseLogo(modifier = Modifier.size(96.dp))
             }
             
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(modifier = Modifier.height(24.dp))
             
             Text(
-                text = "ChatVerse",
-                fontWeight = FontWeight.Bold,
-                fontSize = 34.sp,
-                color = Color(0xFF111111)
+                text = "Welcome to\nChatVerse",
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 32.sp,
+                color = Color(0xFF111827),
+                textAlign = TextAlign.Center,
+                lineHeight = 36.sp
             )
             
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             
             Text(
-                text = "rista dil se dil tak",
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF777777),
-                fontSize = 13.sp
+                text = "Connect securely and seamlessly.\nSign in to continue.",
+                fontWeight = FontWeight.Medium,
+                color = Color.Gray,
+                textAlign = TextAlign.Center,
+                fontSize = 16.sp
             )
             
             Spacer(modifier = Modifier.weight(1f))
@@ -387,10 +391,24 @@ fun AuthScreen(navController: NavController, authViewModel: AuthViewModel) {
                 }
             }
             
+            Spacer(modifier = Modifier.height(24.dp))
+            
             Text(
-                text = "By continuing, you agree to Terms & Privacy Policy",
-                color = Color(0xFF999999),
+                text = buildAnnotatedString {
+                    append("By continuing, you agree to our ")
+                    withStyle(style = SpanStyle(color = Color(0xFFA855F7), fontWeight = FontWeight.Bold)) {
+                        append("Terms")
+                    }
+                    append(" and ")
+                    withStyle(style = SpanStyle(color = Color(0xFFA855F7), fontWeight = FontWeight.Bold)) {
+                        append("Privacy Policy")
+                    }
+                    append(".")
+                },
+                fontWeight = FontWeight.Medium,
                 fontSize = 12.sp,
+                color = Color(0xFF9CA3AF),
+                textAlign = TextAlign.Center,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
         }
@@ -408,11 +426,16 @@ fun OnboardingHeader(step: Int, onBack: () -> Unit) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            modifier = Modifier.size(40.dp).background(Color.White, CircleShape).clickable { onBack() },
-            contentAlignment = Alignment.Center
+        Surface(
+            onClick = onBack,
+            modifier = Modifier.size(40.dp),
+            shape = CircleShape,
+            color = Color.White,
+            shadowElevation = 1.dp
         ) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.Gray)
+            Box(contentAlignment = Alignment.Center) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.Gray, modifier = Modifier.size(20.dp))
+            }
         }
         
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -718,7 +741,7 @@ fun OnboardingBioScreen(navController: NavController, authViewModel: AuthViewMod
                             }
                         }
                     },
-                    modifier = Modifier.fillMaxWidth().height(56.dp).padding(bottom = 24.dp),
+                    modifier = Modifier.fillMaxWidth().height(56.dp).padding(bottom = 24.dp).shadow(8.dp, RoundedCornerShape(16.dp), spotColor = Color(0xFFA855F7), ambientColor = Color(0xFFA855F7)),
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
                     contentPadding = PaddingValues(0.dp),
                     shape = RoundedCornerShape(16.dp),
