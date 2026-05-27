@@ -56,11 +56,13 @@ fun DynamicIslandMessage(messages: List<IslandMessage>) {
                             MessageType.SUCCESS -> MaterialTheme.colorScheme.tertiary
                             MessageType.ERROR -> MaterialTheme.colorScheme.error
                             MessageType.INFO -> MaterialTheme.colorScheme.primary
+                            MessageType.LOADING -> MaterialTheme.colorScheme.primary
                         }
                         val icon = when (message.type) {
                             MessageType.SUCCESS -> Icons.Filled.CheckCircle
                             MessageType.ERROR -> Icons.Filled.Error
                             MessageType.INFO -> Icons.Filled.Info
+                            MessageType.LOADING -> Icons.Filled.Info // Or CircularProgressIndicator, but icon is fine here
                         }
 
                         Icon(

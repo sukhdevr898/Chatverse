@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 
-enum class MessageType { SUCCESS, ERROR, INFO }
+enum class MessageType { SUCCESS, ERROR, INFO, LOADING }
 
 data class IslandMessage(
     val id: Long,

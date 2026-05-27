@@ -2,6 +2,7 @@ package com.example.ui.screens
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,20 +21,26 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathOperation
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.compose.ui.platform.LocalContext
 import android.widget.Toast
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.CustomCredential
-import androidx.credentials.exceptions.GetCredentialException
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import android.util.Log
@@ -41,8 +48,119 @@ import com.example.BuildConfig
 import kotlinx.coroutines.launch
 import com.example.ui.AuthViewModel
 import com.example.ui.MessageType
-import com.example.ui.theme.*
 import kotlinx.coroutines.delay
+
+@Composable
+fun ChatVerseLogo(modifier: Modifier = Modifier) {
+    val gradientColors = listOf(Color(0xFFE13BFF), Color(0xFF8E44FF), Color(0xFF2FA1FF))
+    val brush = Brush.linearGradient(
+        colors = gradientColors,
+        start = Offset(10f, 90f),
+        end = Offset(90f, 10f)
+    )
+
+    Canvas(modifier = modifier) {
+        val w = size.width
+        val h = size.height
+        val s = minOf(w, h) / 100f
+        
+        val mainPath = Path().apply {
+            addOval(Rect(15f*s, 15f*s, 85f*s, 85f*s))
+            val tailPath = Path().apply {
+                moveTo(23f*s, 75f*s)
+                lineTo(12f*s, 94f*s)
+                lineTo(35f*s, 83f*s)
+                close()
+            }
+            addPath(tailPath)
+        }
+        
+        val cutOutPath = Path().apply {
+            addOval(Rect(27f*s, 27f*s, 73f*s, 73f*s))
+            addRect(Rect(50f*s, 27f*s, 100f*s, 73f*s))
+        }
+        
+        val savePath = Path().apply {
+            addOval(Rect(38.5f*s, 15.5f*s, 61.5f*s, 38.5f*s))
+            addOval(Rect(38.5f*s, 61.5f*s, 61.5f*s, 84.5f*s))
+        }
+        
+        val finalCutOut = Path().apply {
+            op(cutOutPath, savePath, PathOperation.Difference)
+        }
+        
+        val finalShape = Path().apply {
+            op(mainPath, finalCutOut, PathOperation.Difference)
+        }
+
+        drawPath(finalShape, brush)
+        
+        drawCircle(
+            brush = brush,
+            radius = 10f * s,
+            center = Offset(73f * s, 50f * s)
+        )
+    }
+}
+
+@Composable
+fun DynamicIslandNotification(authViewModel: AuthViewModel) {
+    val messages = authViewModel.messages
+    val currentMessage = messages.lastOrNull()
+    val messageText = currentMessage?.text ?: ""
+    val messageType = currentMessage?.type ?: MessageType.INFO
+
+    DynamicIslandLocal(messageText, messageType)
+}
+
+@Composable
+fun DynamicIslandLocal(messageText: String, messageType: MessageType) {
+    val isVisible = messageText.isNotEmpty()
+
+    AnimatedVisibility(
+        visible = isVisible,
+        enter = fadeIn(animationSpec = tween(500)) + slideInVertically(initialOffsetY = { -it }, animationSpec = tween(500)),
+        exit = fadeOut(animationSpec = tween(500)) + slideOutVertically(targetOffsetY = { -it }, animationSpec = tween(500)),
+        modifier = Modifier.padding(top = 12.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .background(Color.Black, RoundedCornerShape(32.dp))
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                if (messageType == MessageType.SUCCESS) {
+                    Box(modifier = Modifier.size(40.dp).background(Color(0xFF22C55E), CircleShape), contentAlignment = Alignment.Center) {
+                        Icon(Icons.Filled.Check, contentDescription = null, tint = Color.White)
+                    }
+                } else if (messageType == MessageType.ERROR) {
+                    Box(modifier = Modifier.size(40.dp).background(Color(0xFFEF4444), CircleShape), contentAlignment = Alignment.Center) {
+                        Icon(Icons.Filled.Close, contentDescription = null, tint = Color.White)
+                    }
+                } else {
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Color.White, strokeWidth = 2.dp)
+                }
+
+                Column {
+                    Text(
+                        text = if (messageType == MessageType.SUCCESS) "Success" else if (messageType == MessageType.ERROR) "Error" else "Loading...",
+                        color = if (messageType == MessageType.SUCCESS) Color(0xFF4ADE80) else if (messageType == MessageType.ERROR) Color(0xFFF87171) else Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.sp
+                    )
+                    Text(
+                        text = messageText,
+                        color = Color(0xFFE5E7EB),
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 14.sp,
+                        maxLines = 1
+                    )
+                }
+            }
+        }
+    }
+}
 
 @Composable
 fun SplashScreen(navController: NavController) {
@@ -62,10 +180,15 @@ fun SplashScreen(navController: NavController) {
         }
     }
 
-    val scale by animateFloatAsState(
-        targetValue = if (startAnimation) 1f else 0.8f,
-        animationSpec = tween(durationMillis = 1500, easing = FastOutSlowInEasing),
-        label = "logo_scale"
+    val infiniteTransition = rememberInfiniteTransition()
+    val pulse by infiniteTransition.animateFloat(
+        initialValue = 0.95f,
+        targetValue = 1.05f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "pulse"
     )
 
     val alpha by animateFloatAsState(
@@ -82,33 +205,40 @@ fun SplashScreen(navController: NavController) {
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.scale(scale).alpha(alpha)
+            modifier = Modifier.alpha(alpha)
         ) {
-            Box(
-                modifier = Modifier
-                    .size(120.dp)
-                    .background(
-                        Brush.linearGradient(listOf(Color(0xFFE81CFF), Color(0xFF41B5FF))),
-                        shape = CircleShape
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(Icons.Filled.ChatBubble, contentDescription = "Logo", tint = Color.White, modifier = Modifier.size(60.dp))
-            }
+            ChatVerseLogo(modifier = Modifier.size(128.dp).scale(pulse))
             Spacer(modifier = Modifier.height(24.dp))
             Text(
                 text = "ChatVerse",
-                style = MaterialTheme.typography.displayMedium.copy(
+                style = MaterialTheme.typography.displaySmall.copy(
                     fontWeight = FontWeight.ExtraBold,
-                    brush = Brush.linearGradient(listOf(Color(0xFFE81CFF), Color(0xFF41B5FF)))
+                    fontSize = 36.sp,
+                ),
+                color = Color.Transparent,
+                modifier = Modifier.background(
+                    Brush.linearGradient(listOf(Color(0xFFE81CFF), Color(0xFF41B5FF))), // Equivalent to text-transparent bg-clip-text
+                    alpha = 0.99f // Needed for compose text gradient blending trick sometimes but not always
                 )
+            )
+            // Properly implementing text gradient
+            Text(
+                text = "ChatVerse",
+                style = androidx.compose.ui.text.TextStyle(
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 36.sp,
+                    brush = Brush.linearGradient(listOf(Color(0xFFE81CFF), Color(0xFF41B5FF)))
+                ),
+                modifier = Modifier.offset(y = (-40).dp) // Laying over the transparent block or just remove the previous Text
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Rista dil se dil tak",
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold, letterSpacing = 1.sp),
+                text = "RISTA DIL SE DIL TAK",
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 14.sp,
                 color = Color.Gray,
-                modifier = Modifier.alpha(0.7f)
+                letterSpacing = 1.sp,
+                modifier = Modifier.offset(y = (-40).dp)
             )
         }
     }
@@ -132,20 +262,18 @@ fun AuthScreen(navController: NavController, authViewModel: AuthViewModel) {
         ) {
             Spacer(modifier = Modifier.weight(1f))
             
-            Box(
-                modifier = Modifier
-                    .size(96.dp)
-                    .background(Brush.linearGradient(listOf(Color(0xFFE81CFF), Color(0xFF41B5FF))), CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(Icons.Filled.ChatBubble, contentDescription = "Logo", tint = Color.White, modifier = Modifier.size(48.dp))
+            // Drop shadow effect logic for logo by rendering blur behind it
+            Box(contentAlignment = Alignment.Center) {
+                Box(modifier = Modifier.size(80.dp).blur(20.dp).background(Color(0x33A855F7), CircleShape).offset(y = 10.dp))
+                ChatVerseLogo(modifier = Modifier.size(96.dp))
             }
             
             Spacer(modifier = Modifier.height(24.dp))
             
             Text(
                 text = "Welcome to\nChatVerse",
-                style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.ExtraBold, fontSize = 32.sp),
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 32.sp,
                 color = Color(0xFF111827),
                 textAlign = TextAlign.Center,
                 lineHeight = 36.sp
@@ -155,9 +283,10 @@ fun AuthScreen(navController: NavController, authViewModel: AuthViewModel) {
             
             Text(
                 text = "Connect securely and seamlessly.\nSign in to continue.",
-                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
                 color = Color.Gray,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                fontSize = 16.sp
             )
             
             Spacer(modifier = Modifier.weight(1f))
@@ -165,10 +294,12 @@ fun AuthScreen(navController: NavController, authViewModel: AuthViewModel) {
             Button(
                 onClick = {
                     if (BuildConfig.GOOGLE_WEB_CLIENT_ID.isEmpty()) {
-                        Toast.makeText(context, "Please configure GOOGLE_WEB_CLIENT_ID in the Secrets panel", Toast.LENGTH_LONG).show()
+                        authViewModel.showMessage("Please configure GOOGLE_WEB_CLIENT_ID", MessageType.ERROR)
                         return@Button
                     }
                     
+                    authViewModel.showMessage("Verifying Account...", MessageType.LOADING)
+
                     val credentialManager = CredentialManager.create(context)
                     val googleIdOption = GetGoogleIdOption.Builder()
                         .setFilterByAuthorizedAccounts(false)
@@ -186,30 +317,46 @@ fun AuthScreen(navController: NavController, authViewModel: AuthViewModel) {
                             val credential = result.credential
                             if (credential is CustomCredential && credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
                                 val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
-                                // We simulate passing the token to backend
-                                val idToken = googleIdTokenCredential.idToken
-                                authViewModel.login(googleIdTokenCredential.id, "google_auth_123456") {
+                                val baseId = googleIdTokenCredential.id.replace(" ", "")
+                                val syntheticEmail = if (baseId.contains("@")) baseId else "$baseId@gmail.com"
+                                
+                                authViewModel.login(syntheticEmail, "google_auth_123456") {
+                                    authViewModel.showMessage("Google Account Linked", MessageType.SUCCESS)
                                     navController.navigate("onboarding_name")
+                                }
+                                
+                                // Since we are using a mock REST API behavior for standard email/pass but with a Google ID,
+                                // we should try signup if login fails due to it being a new account. (Simplest approach)
+                                coroutineScope.launch {
+                                    delay(2000)
+                                    val currentMessage = authViewModel.messages.lastOrNull()?.text ?: ""
+                                    if (currentMessage.contains("not registered") || currentMessage.contains("Failed") || currentMessage.contains("Invalid")) {
+                                        authViewModel.signup(syntheticEmail, "google_auth_123456") {
+                                            authViewModel.showMessage("Google Account Linked", MessageType.SUCCESS)
+                                            navController.navigate("onboarding_name")
+                                        }
+                                    }
                                 }
                             }
                         } catch (e: Exception) {
                             Log.e("Auth", "Google Login failed", e)
-                            Toast.makeText(context, "Google Login failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                            authViewModel.showMessage("Google Login failed", MessageType.ERROR)
                         }
                     }
                 },
-                modifier = Modifier.fillMaxWidth().height(56.dp),
+                modifier = Modifier.fillMaxWidth().height(56.dp).border(1.dp, Color(0xFFE5E7EB), RoundedCornerShape(16.dp)),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.White),
                 shape = RoundedCornerShape(16.dp),
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
             ) {
                 if (isLoading) {
-                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color(0xFFA855F7), strokeWidth = 2.dp)
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color(0xFF111827), strokeWidth = 2.dp)
                 } else {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+                        // Google G visual placeholder - using canvas to draw colorful G is complex, fallback to text logo or simple Icon
                         Text("G", color = Color(0xFF4285F4), fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
                         Spacer(modifier = Modifier.width(12.dp))
-                        Text("Continue with Google", color = Color(0xFF111827), fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        Text("Continue with Google", color = Color(0xFF111827), fontWeight = FontWeight.Bold, fontSize = 15.sp)
                     }
                 }
             }
@@ -217,13 +364,28 @@ fun AuthScreen(navController: NavController, authViewModel: AuthViewModel) {
             Spacer(modifier = Modifier.height(24.dp))
             
             Text(
-                text = "By continuing, you agree to our Terms and Privacy Policy.",
-                style = MaterialTheme.typography.labelSmall,
-                color = Color.Gray,
+                text = buildAnnotatedString {
+                    append("By continuing, you agree to our ")
+                    withStyle(style = SpanStyle(color = Color(0xFFA855F7), fontWeight = FontWeight.Bold)) {
+                        append("Terms")
+                    }
+                    append(" and ")
+                    withStyle(style = SpanStyle(color = Color(0xFFA855F7), fontWeight = FontWeight.Bold)) {
+                        append("Privacy Policy")
+                    }
+                    append(".")
+                },
+                fontWeight = FontWeight.Medium,
+                fontSize = 12.sp,
+                color = Color(0xFF9CA3AF),
                 textAlign = TextAlign.Center
             )
             
             Spacer(modifier = Modifier.height(16.dp))
+        }
+        
+        Box(modifier = Modifier.align(Alignment.TopCenter)) {
+            DynamicIslandNotification(authViewModel)
         }
     }
 }
@@ -245,7 +407,7 @@ fun OnboardingHeader(step: Int, onBack: () -> Unit) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             for (i in 1..4) {
                 val width = if (i == step) 24.dp else 8.dp
-                val color = if (i == step) Color(0xFFA855F7) else Color(0xFFE5E7EB)
+                val color = if (i == step) Color(0xFFA855F7) else if (i < step) Color(0xFFE9D5FF) else Color(0xFFE5E7EB)
                 Box(modifier = Modifier.height(6.dp).width(width).background(color, CircleShape))
             }
         }
@@ -254,43 +416,64 @@ fun OnboardingHeader(step: Int, onBack: () -> Unit) {
 
 @Composable
 fun OnboardingNameScreen(navController: NavController) {
-    var name by remember { mutableStateOf("Aryan Kapoor") }
+    var name by remember { mutableStateOf("") }
+    var localError by remember { mutableStateOf("") }
     
-    Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF8F9FA))) {
-        OnboardingHeader(step = 1) { navController.popBackStack() }
-        
-        Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-            Text("What's your name?", style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold, color = Color(0xFF111827)))
-            Spacer(modifier = Modifier.height(8.dp))
-            Text("This will be your display name on ChatVerse.", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+    LaunchedEffect(localError) {
+        if (localError.isNotEmpty()) {
+            delay(2500)
+            localError = ""
+        }
+    }
+    
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF8F9FA))) {
+            OnboardingHeader(step = 1) { navController.popBackStack() }
             
-            Spacer(modifier = Modifier.height(32.dp))
-            
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Full Name") },
-                leadingIcon = { Icon(Icons.Filled.Person, contentDescription = null, tint = Color.Gray) },
-                shape = RoundedCornerShape(16.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color(0xFFA855F7),
-                    unfocusedBorderColor = Color(0xFFE5E7EB),
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color(0xFFF9FAFB)
+            Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+                Text("What's your name?", style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold, color = Color(0xFF111827)))
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("This will be your display name on ChatVerse.", style = MaterialTheme.typography.bodyMedium, color = Color.Gray, fontWeight = FontWeight.Medium)
+                
+                Spacer(modifier = Modifier.height(32.dp))
+                
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text("Full Name", color = Color(0xFF9CA3AF)) },
+                    leadingIcon = { Icon(Icons.Filled.Person, contentDescription = null, tint = Color(0xFF9CA3AF)) },
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color(0xFFA855F7),
+                        unfocusedBorderColor = Color.Transparent,
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color(0xFFF9FAFB)
+                    ),
+                    textStyle = androidx.compose.ui.text.TextStyle(fontWeight = FontWeight.Bold, color = Color(0xFF111827), fontSize = 14.sp)
                 )
-            )
-            
-            Spacer(modifier = Modifier.weight(1f))
-            
-            Button(
-                onClick = { navController.navigate("onboarding_dob") },
-                modifier = Modifier.fillMaxWidth().height(56.dp).padding(bottom = 24.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF111827)),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Text("Continue", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                
+                Spacer(modifier = Modifier.weight(1f))
+                
+                Button(
+                    onClick = {
+                        if (name.isBlank()) {
+                            localError = "Please enter your name"
+                        } else {
+                            navController.navigate("onboarding_dob")
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth().height(56.dp).padding(bottom = 24.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF111827)),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text("Continue", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                }
             }
+        }
+        
+        Box(modifier = Modifier.align(Alignment.TopCenter)) {
+            DynamicIslandLocal(localError, MessageType.ERROR)
         }
     }
 }
@@ -298,42 +481,63 @@ fun OnboardingNameScreen(navController: NavController) {
 @Composable
 fun OnboardingDobScreen(navController: NavController) {
     var dob by remember { mutableStateOf("") }
+    var localError by remember { mutableStateOf("") }
     
-    Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF8F9FA))) {
-        OnboardingHeader(step = 2) { navController.popBackStack() }
-        
-        Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-            Text("When is your birthday?", style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold, color = Color(0xFF111827)))
-            Spacer(modifier = Modifier.height(8.dp))
-            Text("You must be at least 13 years old to use ChatVerse.", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+    LaunchedEffect(localError) {
+        if (localError.isNotEmpty()) {
+            delay(2500)
+            localError = ""
+        }
+    }
+    
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF8F9FA))) {
+            OnboardingHeader(step = 2) { navController.popBackStack() }
             
-            Spacer(modifier = Modifier.height(32.dp))
-            
-            OutlinedTextField(
-                value = dob,
-                onValueChange = { dob = it },
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("DD/MM/YYYY") },
-                leadingIcon = { Icon(Icons.Filled.EditCalendar, contentDescription = null, tint = Color.Gray) },
-                shape = RoundedCornerShape(16.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color(0xFFA855F7),
-                    unfocusedBorderColor = Color(0xFFE5E7EB),
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color(0xFFF9FAFB)
+            Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+                Text("When is your birthday?", style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold, color = Color(0xFF111827)))
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("You must be at least 13 years old to use ChatVerse.", style = MaterialTheme.typography.bodyMedium, color = Color.Gray, fontWeight = FontWeight.Medium)
+                
+                Spacer(modifier = Modifier.height(32.dp))
+                
+                OutlinedTextField(
+                    value = dob,
+                    onValueChange = { dob = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text("DD/MM/YYYY", color = Color(0xFF9CA3AF)) },
+                    leadingIcon = { Icon(Icons.Filled.CalendarToday, contentDescription = null, tint = Color(0xFF9CA3AF)) },
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color(0xFFA855F7),
+                        unfocusedBorderColor = Color.Transparent,
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color(0xFFF9FAFB)
+                    ),
+                    textStyle = androidx.compose.ui.text.TextStyle(fontWeight = FontWeight.Bold, color = Color(0xFF111827), fontSize = 14.sp)
                 )
-            )
-            
-            Spacer(modifier = Modifier.weight(1f))
-            
-            Button(
-                onClick = { navController.navigate("onboarding_mobile") },
-                modifier = Modifier.fillMaxWidth().height(56.dp).padding(bottom = 24.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF111827)),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Text("Continue", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                
+                Spacer(modifier = Modifier.weight(1f))
+                
+                Button(
+                    onClick = {
+                        if (dob.isBlank() || dob.length < 8) {
+                            localError = "Please enter a valid date"
+                        } else {
+                            navController.navigate("onboarding_mobile")
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth().height(56.dp).padding(bottom = 24.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF111827)),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text("Continue", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                }
             }
+        }
+        
+        Box(modifier = Modifier.align(Alignment.TopCenter)) {
+            DynamicIslandLocal(localError, MessageType.ERROR)
         }
     }
 }
@@ -341,62 +545,104 @@ fun OnboardingDobScreen(navController: NavController) {
 @Composable
 fun OnboardingMobileScreen(navController: NavController) {
     var mobile by remember { mutableStateOf("") }
+    var localError by remember { mutableStateOf("") }
     
-    Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF8F9FA))) {
-        OnboardingHeader(step = 3) { navController.popBackStack() }
-        
-        Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-            Text("Add mobile number", style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold, color = Color(0xFF111827)))
-            Spacer(modifier = Modifier.height(8.dp))
-            Text("Used to help friends find you.", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+    LaunchedEffect(localError) {
+        if (localError.isNotEmpty()) {
+            delay(2500)
+            localError = ""
+        }
+    }
+    
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF8F9FA))) {
+            OnboardingHeader(step = 3) { navController.popBackStack() }
             
-            Spacer(modifier = Modifier.height(32.dp))
-            
-            OutlinedTextField(
-                value = mobile,
-                onValueChange = { mobile = it },
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("9876543210") },
-                leadingIcon = { Text("+91", modifier = Modifier.padding(start=16.dp, end=8.dp), fontWeight = FontWeight.Bold) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                shape = RoundedCornerShape(16.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color(0xFFA855F7),
-                    unfocusedBorderColor = Color(0xFFE5E7EB),
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color(0xFFF9FAFB)
-                )
-            )
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            // Privacy selector mock
-            Box(modifier = Modifier.fillMaxWidth().background(Color.White, RoundedCornerShape(16.dp)).border(1.dp, Color(0xFFE5E7EB), RoundedCornerShape(16.dp)).padding(16.dp)) {
-                Column {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(modifier = Modifier.size(32.dp).background(Color(0xFFEFF6FF), CircleShape), contentAlignment = Alignment.Center) {
-                            Icon(Icons.Filled.Shield, contentDescription = null, tint = Color(0xFF3B82F6), modifier = Modifier.size(16.dp))
+            Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+                Text("Add mobile number", style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold, color = Color(0xFF111827)))
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Used to help friends find you.", style = MaterialTheme.typography.bodyMedium, color = Color.Gray, fontWeight = FontWeight.Medium)
+                
+                Spacer(modifier = Modifier.height(32.dp))
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth().background(Color(0xFFF9FAFB), RoundedCornerShape(16.dp)).border(1.dp, Color(0xFFE5E7EB), RoundedCornerShape(16.dp)),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "+91",
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF6B7280),
+                        modifier = Modifier.background(Color(0xFFF3F4F6), RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp)).padding(16.dp)
+                    )
+                    Box(modifier = Modifier.width(1.dp).height(50.dp).background(Color(0xFFE5E7EB)))
+                    androidx.compose.foundation.text.BasicTextField(
+                        value = mobile,
+                        onValueChange = {
+                            if (it.length <= 10 && it.all { char -> char.isDigit() }) {
+                                mobile = it
+                            }
+                        },
+                        textStyle = androidx.compose.ui.text.TextStyle(fontWeight = FontWeight.Bold, color = Color(0xFF111827), fontSize = 16.sp),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                        modifier = Modifier.weight(1f).padding(16.dp),
+                        decorationBox = { innerTextField ->
+                            if (mobile.isEmpty()) {
+                                Text("9876543210", color = Color(0xFFD1D5DB), fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                            }
+                            innerTextField()
                         }
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text("Number Privacy", fontWeight = FontWeight.Bold, color = Color(0xFF111827))
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                // Privacy selector mock
+                Box(modifier = Modifier.fillMaxWidth().background(Color.White, RoundedCornerShape(16.dp)).border(1.dp, Color(0xFFE5E7EB), RoundedCornerShape(16.dp)).padding(16.dp)) {
+                    Column {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(modifier = Modifier.size(32.dp).background(Color(0xFFEFF6FF), CircleShape), contentAlignment = Alignment.Center) {
+                                Icon(Icons.Filled.Shield, contentDescription = null, tint = Color(0xFF3B82F6), modifier = Modifier.size(16.dp))
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text("Number Privacy", fontWeight = FontWeight.Bold, color = Color(0xFF111827), fontSize = 14.sp)
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text("Who can see this number on your profile?", fontSize = 12.sp, color = Color.Gray, fontWeight = FontWeight.Medium)
+                        Spacer(modifier = Modifier.height(12.dp))
+                        
+                        Row(
+                            modifier = Modifier.fillMaxWidth().background(Color(0xFFF9FAFB), RoundedCornerShape(12.dp)).border(1.dp, Color(0xFFF3F4F6), RoundedCornerShape(12.dp)).padding(12.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("My Contacts Only", fontWeight = FontWeight.Bold, color = Color(0xFF111827), fontSize = 14.sp)
+                            Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = Color.Gray)
+                        }
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text("Who can see this number on your profile?", fontSize = 12.sp, color = Color.Gray)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text("My Contacts Only", fontWeight = FontWeight.SemiBold, color = Color(0xFF111827), modifier = Modifier.background(Color(0xFFF9FAFB), RoundedCornerShape(8.dp)).padding(8.dp).fillMaxWidth())
+                }
+                
+                Spacer(modifier = Modifier.weight(1f))
+                
+                Button(
+                    onClick = {
+                        if (mobile.length != 10) {
+                            localError = "Please enter a valid 10-digit number"
+                        } else {
+                            navController.navigate("onboarding_bio")
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth().height(56.dp).padding(bottom = 24.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF111827)),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text("Continue", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
                 }
             }
-            
-            Spacer(modifier = Modifier.weight(1f))
-            
-            Button(
-                onClick = { navController.navigate("onboarding_bio") },
-                modifier = Modifier.fillMaxWidth().height(56.dp).padding(bottom = 24.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF111827)),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Text("Continue", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-            }
+        }
+        
+        Box(modifier = Modifier.align(Alignment.TopCenter)) {
+            DynamicIslandLocal(localError, MessageType.ERROR)
         }
     }
 }
@@ -404,53 +650,86 @@ fun OnboardingMobileScreen(navController: NavController) {
 @Composable
 fun OnboardingBioScreen(navController: NavController, authViewModel: AuthViewModel) {
     var bio by remember { mutableStateOf("") }
+    var localError by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
     
-    Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF8F9FA))) {
-        OnboardingHeader(step = 4) { navController.popBackStack() }
-        
-        Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-            Text("Write a short bio", style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold, color = Color(0xFF111827)))
-            Spacer(modifier = Modifier.height(8.dp))
-            Text("Tell your friends a little about yourself.", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+    LaunchedEffect(localError) {
+        if (localError.isNotEmpty()) {
+            delay(2500)
+            localError = ""
+        }
+    }
+    
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF8F9FA))) {
+            OnboardingHeader(step = 4) { navController.popBackStack() }
             
-            Spacer(modifier = Modifier.height(32.dp))
-            
-            OutlinedTextField(
-                value = bio,
-                onValueChange = { bio = it },
-                modifier = Modifier.fillMaxWidth().height(120.dp),
-                placeholder = { Text("Living life, one cup of coffee at a time ☕") },
-                shape = RoundedCornerShape(16.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color(0xFFA855F7),
-                    unfocusedBorderColor = Color(0xFFE5E7EB),
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color(0xFFF9FAFB)
-                ),
-                maxLines = 4
-            )
-            
-            Spacer(modifier = Modifier.weight(1f))
-            
-            Button(
-                onClick = {
-                    authViewModel.showMessage("Profile Setup Complete!", MessageType.SUCCESS)
-                    navController.navigate("main") {
-                        popUpTo("auth") { inclusive = true }
-                    }
-                },
-                modifier = Modifier.fillMaxWidth().height(56.dp).padding(bottom = 24.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-                contentPadding = PaddingValues(0.dp),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxSize().background(Brush.linearGradient(listOf(Color(0xFFE81CFF), Color(0xFF41B5FF))), RoundedCornerShape(16.dp)),
-                    contentAlignment = Alignment.Center
+            Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+                Text("Write a short bio", style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold, color = Color(0xFF111827)))
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Tell your friends a little about yourself.", style = MaterialTheme.typography.bodyMedium, color = Color.Gray, fontWeight = FontWeight.Medium)
+                
+                Spacer(modifier = Modifier.height(32.dp))
+                
+                OutlinedTextField(
+                    value = bio,
+                    onValueChange = { bio = it },
+                    modifier = Modifier.fillMaxWidth().height(120.dp),
+                    placeholder = { Text("Living life, one cup of coffee at a time ☕", color = Color(0xFF9CA3AF), fontSize = 14.sp) },
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color(0xFFA855F7),
+                        unfocusedBorderColor = Color.Transparent,
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color(0xFFF9FAFB)
+                    ),
+                    textStyle = androidx.compose.ui.text.TextStyle(fontWeight = FontWeight.Bold, color = Color(0xFF111827), fontSize = 14.sp),
+                    maxLines = 4
+                )
+                
+                Spacer(modifier = Modifier.weight(1f))
+                
+                Button(
+                    onClick = {
+                        if (bio.isBlank()) {
+                            localError = "Please write a short bio"
+                            return@Button
+                        }
+                        isLoading = true
+                        authViewModel.showMessage("Setting up profile...", MessageType.LOADING)
+                        coroutineScope.launch {
+                            delay(1500)
+                            authViewModel.showMessage("Profile Setup Complete!", MessageType.SUCCESS)
+                            delay(1500)
+                            navController.navigate("main") {
+                                popUpTo("auth") { inclusive = true }
+                            }
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth().height(56.dp).padding(bottom = 24.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+                    contentPadding = PaddingValues(0.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    enabled = !isLoading
                 ) {
-                    Text("Finish Setup", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                    Box(
+                        modifier = Modifier.fillMaxSize().background(Brush.linearGradient(listOf(Color(0xFFE81CFF), Color(0xFF41B5FF))), RoundedCornerShape(16.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (isLoading) {
+                            CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White, strokeWidth = 2.dp)
+                        } else {
+                            Text("Finish Setup", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                        }
+                    }
                 }
             }
+        }
+        
+        Box(modifier = Modifier.align(Alignment.TopCenter)) {
+            DynamicIslandNotification(authViewModel)
+            DynamicIslandLocal(localError, MessageType.ERROR)
         }
     }
 }
