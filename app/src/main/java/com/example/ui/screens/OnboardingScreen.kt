@@ -46,6 +46,8 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import android.util.Log
 import com.example.BuildConfig
 import kotlinx.coroutines.launch
+import androidx.compose.ui.res.painterResource
+import com.example.R
 import com.example.ui.AuthViewModel
 import com.example.ui.MessageType
 import kotlinx.coroutines.delay
@@ -130,32 +132,40 @@ fun DynamicIslandLocal(messageText: String, messageType: MessageType) {
             contentAlignment = Alignment.Center
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                if (messageType == MessageType.SUCCESS) {
-                    Box(modifier = Modifier.size(40.dp).background(Color(0xFF22C55E), CircleShape), contentAlignment = Alignment.Center) {
-                        Icon(Icons.Filled.Check, contentDescription = null, tint = Color.White)
-                    }
-                } else if (messageType == MessageType.ERROR) {
-                    Box(modifier = Modifier.size(40.dp).background(Color(0xFFEF4444), CircleShape), contentAlignment = Alignment.Center) {
-                        Icon(Icons.Filled.Close, contentDescription = null, tint = Color.White)
-                    }
-                } else {
-                    CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Color.White, strokeWidth = 2.dp)
-                }
-
-                Column {
-                    Text(
-                        text = if (messageType == MessageType.SUCCESS) "Success" else if (messageType == MessageType.ERROR) "Error" else "Loading...",
-                        color = if (messageType == MessageType.SUCCESS) Color(0xFF4ADE80) else if (messageType == MessageType.ERROR) Color(0xFFF87171) else Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 12.sp
-                    )
+                if (messageType == MessageType.LOADING) {
+                    CircularProgressIndicator(modifier = Modifier.size(18.dp), color = Color.White, strokeWidth = 2.dp)
                     Text(
                         text = messageText,
-                        color = Color(0xFFE5E7EB),
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 14.sp,
-                        maxLines = 1
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp
                     )
+                } else {
+                    if (messageType == MessageType.SUCCESS) {
+                        Box(modifier = Modifier.size(36.dp).background(Color(0xFF22C55E), CircleShape), contentAlignment = Alignment.Center) {
+                            Icon(Icons.Filled.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+                        }
+                    } else if (messageType == MessageType.ERROR) {
+                        Box(modifier = Modifier.size(36.dp).background(Color(0xFFEF4444), CircleShape), contentAlignment = Alignment.Center) {
+                            Icon(Icons.Filled.Close, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+                        }
+                    }
+
+                    Column {
+                        Text(
+                            text = if (messageText.contains("|")) messageText.substringBefore("|") else if (messageType == MessageType.SUCCESS) "Success" else "Error", 
+                            color = if (messageType == MessageType.SUCCESS) Color(0xFF4ADE80) else Color(0xFFF87171),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp
+                        )
+                        Text(
+                            text = if (messageText.contains("|")) messageText.substringAfter("|") else messageText,
+                            color = Color(0xFFE5E7EB),
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 14.sp,
+                            maxLines = 1
+                        )
+                    }
                 }
             }
         }
@@ -250,50 +260,68 @@ fun AuthScreen(navController: NavController, authViewModel: AuthViewModel) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     
+    val infiniteTransition = rememberInfiniteTransition()
+    val purpleBlobY by infiniteTransition.animateFloat(
+        initialValue = -10f,
+        targetValue = 50f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(4000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "purpleBlobY"
+    )
+    val blueBlobX by infiniteTransition.animateFloat(
+        initialValue = 10f,
+        targetValue = -40f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(5000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "blueBlobX"
+    )
+    
     Box(modifier = Modifier.fillMaxSize().background(Color.White)) {
         // Decorative Blobs
-        Box(modifier = Modifier.offset(x = (-80).dp, y = (-80).dp).size(280.dp).blur(60.dp).background(Color(0xFFE9D5FF), CircleShape).alpha(0.4f))
-        Box(modifier = Modifier.align(Alignment.CenterEnd).offset(x = 80.dp, y = 100.dp).size(320.dp).blur(60.dp).background(Color(0xFFBFDBFE), CircleShape).alpha(0.4f))
+        Box(modifier = Modifier.offset(x = 0.dp, y = purpleBlobY.dp - 60.dp).size(280.dp).background(Color(0xFFE9D5FF), CircleShape).alpha(0.4f))
+        Box(modifier = Modifier.align(Alignment.BottomEnd).offset(x = blueBlobX.dp, y = 0.dp).size(320.dp).background(Color(0xFFBFDBFE), CircleShape).alpha(0.4f))
 
         Column(
-            modifier = Modifier.fillMaxSize().padding(32.dp),
+            modifier = Modifier.fillMaxSize().padding(28.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Spacer(modifier = Modifier.weight(1f))
             
-            // Drop shadow effect logic for logo by rendering blur behind it
+            // Logo
             Box(contentAlignment = Alignment.Center) {
-                Box(modifier = Modifier.size(80.dp).blur(20.dp).background(Color(0x33A855F7), CircleShape).offset(y = 10.dp))
-                ChatVerseLogo(modifier = Modifier.size(96.dp))
+                // If you have a chatverse_logo.png in drawable, you can use Image(painterResource(id = R.drawable.chatverse_logo), ...)
+                // Using the requested placeholder compose icon based on chatverse_logo
+                ChatVerseLogo(modifier = Modifier.size(110.dp))
             }
             
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(18.dp))
             
             Text(
-                text = "Welcome to\nChatVerse",
-                fontWeight = FontWeight.ExtraBold,
-                fontSize = 32.sp,
-                color = Color(0xFF111827),
-                textAlign = TextAlign.Center,
-                lineHeight = 36.sp
+                text = "ChatVerse",
+                fontWeight = FontWeight.Bold,
+                fontSize = 34.sp,
+                color = Color(0xFF111111)
             )
             
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(6.dp))
             
             Text(
-                text = "Connect securely and seamlessly.\nSign in to continue.",
-                fontWeight = FontWeight.Medium,
-                color = Color.Gray,
-                textAlign = TextAlign.Center,
-                fontSize = 16.sp
+                text = "rista dil se dil tak",
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF777777),
+                fontSize = 13.sp
             )
             
             Spacer(modifier = Modifier.weight(1f))
             
             Button(
                 onClick = {
-                    if (BuildConfig.GOOGLE_WEB_CLIENT_ID.isEmpty()) {
+                    if (BuildConfig.GOOGLE_WEB_CLIENT_ID.isEmpty() || BuildConfig.GOOGLE_WEB_CLIENT_ID == "MY_GOOGLE_WEB_CLIENT_ID") {
                         authViewModel.showMessage("Please configure GOOGLE_WEB_CLIENT_ID", MessageType.ERROR)
                         return@Button
                     }
@@ -320,19 +348,18 @@ fun AuthScreen(navController: NavController, authViewModel: AuthViewModel) {
                                 val baseId = googleIdTokenCredential.id.replace(" ", "")
                                 val syntheticEmail = if (baseId.contains("@")) baseId else "$baseId@gmail.com"
                                 
+                                authViewModel.showMessage("Welcome to ChatVerse", MessageType.SUCCESS)
+                                delay(1000)
                                 authViewModel.login(syntheticEmail, "google_auth_123456") {
-                                    authViewModel.showMessage("Google Account Linked", MessageType.SUCCESS)
                                     navController.navigate("onboarding_name")
                                 }
                                 
-                                // Since we are using a mock REST API behavior for standard email/pass but with a Google ID,
-                                // we should try signup if login fails due to it being a new account. (Simplest approach)
                                 coroutineScope.launch {
                                     delay(2000)
                                     val currentMessage = authViewModel.messages.lastOrNull()?.text ?: ""
                                     if (currentMessage.contains("not registered") || currentMessage.contains("Failed") || currentMessage.contains("Invalid")) {
                                         authViewModel.signup(syntheticEmail, "google_auth_123456") {
-                                            authViewModel.showMessage("Google Account Linked", MessageType.SUCCESS)
+                                            authViewModel.showMessage("Google Account Linked|Complete your profile", MessageType.SUCCESS)
                                             navController.navigate("onboarding_name")
                                         }
                                     }
@@ -344,44 +371,28 @@ fun AuthScreen(navController: NavController, authViewModel: AuthViewModel) {
                         }
                     }
                 },
-                modifier = Modifier.fillMaxWidth().height(56.dp).border(1.dp, Color(0xFFE5E7EB), RoundedCornerShape(16.dp)),
+                modifier = Modifier.fillMaxWidth().height(64.dp).padding(bottom = 20.dp).border(1.dp, Color(0xFFE5E7EB), RoundedCornerShape(22.dp)),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.White),
-                shape = RoundedCornerShape(16.dp),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
+                shape = RoundedCornerShape(22.dp),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
             ) {
                 if (isLoading) {
-                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color(0xFF111827), strokeWidth = 2.dp)
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color(0xFF111111), strokeWidth = 2.dp)
                 } else {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
-                        // Google G visual placeholder - using canvas to draw colorful G is complex, fallback to text logo or simple Icon
-                        Text("G", color = Color(0xFF4285F4), fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
+                        Icon(painter = painterResource(id = R.drawable.ic_google), contentDescription = "Google", tint = Color.Unspecified, modifier = Modifier.size(26.dp))
                         Spacer(modifier = Modifier.width(12.dp))
-                        Text("Continue with Google", color = Color(0xFF111827), fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                        Text(if (isLoading) "Please wait..." else "Continue with Google", color = Color(0xFF111111), fontWeight = FontWeight.Bold, fontSize = 15.sp)
                     }
                 }
             }
             
-            Spacer(modifier = Modifier.height(24.dp))
-            
             Text(
-                text = buildAnnotatedString {
-                    append("By continuing, you agree to our ")
-                    withStyle(style = SpanStyle(color = Color(0xFFA855F7), fontWeight = FontWeight.Bold)) {
-                        append("Terms")
-                    }
-                    append(" and ")
-                    withStyle(style = SpanStyle(color = Color(0xFFA855F7), fontWeight = FontWeight.Bold)) {
-                        append("Privacy Policy")
-                    }
-                    append(".")
-                },
-                fontWeight = FontWeight.Medium,
+                text = "By continuing, you agree to Terms & Privacy Policy",
+                color = Color(0xFF999999),
                 fontSize = 12.sp,
-                color = Color(0xFF9CA3AF),
-                textAlign = TextAlign.Center
+                modifier = Modifier.padding(bottom = 12.dp)
             )
-            
-            Spacer(modifier = Modifier.height(16.dp))
         }
         
         Box(modifier = Modifier.align(Alignment.TopCenter)) {
@@ -700,7 +711,7 @@ fun OnboardingBioScreen(navController: NavController, authViewModel: AuthViewMod
                         authViewModel.showMessage("Setting up profile...", MessageType.LOADING)
                         coroutineScope.launch {
                             delay(1500)
-                            authViewModel.showMessage("Profile Setup Complete!", MessageType.SUCCESS)
+                            authViewModel.showMessage("Profile Setup Complete!|Welcome to ChatVerse", MessageType.SUCCESS)
                             delay(1500)
                             navController.navigate("main") {
                                 popUpTo("auth") { inclusive = true }
