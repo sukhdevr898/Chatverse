@@ -68,6 +68,50 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+    fun googleLogin(email: String, onSuccess: (isExistingUser: Boolean) -> Unit) {
+        if (apiKey.isEmpty() || apiKey == "MY_FIREBASE_API_KEY") {
+            showMessage("Please configure FIREBASE_API_KEY in the Secrets panel.", MessageType.ERROR)
+            return
+        }
+        val password = "Google_auth_" + email.hashCode()
+        _isLoading.value = true
+        viewModelScope.launch {
+            val loginResult = safeApiCall {
+                FirebaseAuthService.api.signIn(apiKey, AuthRequest(email, password))
+            }
+            if (loginResult.isSuccess) {
+                _isLoading.value = false
+                val it = loginResult.getOrNull()!!
+                com.example.data.UserSession.userId = it.localId
+                com.example.data.UserSession.idToken = it.idToken
+                com.example.data.UserSession.email = it.email
+                showMessage("Login Successful!", MessageType.SUCCESS)
+                onSuccess(true)
+            } else {
+                val errorMsg = loginResult.exceptionOrNull()?.message ?: ""
+                if (errorMsg.contains("This email is not registered") || errorMsg.contains("INVALID_LOGIN_CREDENTIALS")) {
+                    val signupResult = safeApiCall {
+                        FirebaseAuthService.api.signUp(apiKey, AuthRequest(email, password))
+                    }
+                    _isLoading.value = false
+                    if (signupResult.isSuccess) {
+                        val it = signupResult.getOrNull()!!
+                        com.example.data.UserSession.userId = it.localId
+                        com.example.data.UserSession.idToken = it.idToken
+                        com.example.data.UserSession.email = it.email
+                        showMessage("Account created!", MessageType.SUCCESS)
+                        onSuccess(false)
+                    } else {
+                        showMessage(signupResult.exceptionOrNull()?.message ?: "Registration failed", MessageType.ERROR)
+                    }
+                } else {
+                    _isLoading.value = false
+                    showMessage(errorMsg, MessageType.ERROR)
+                }
+            }
+        }
+    }
+
     fun login(email: String, password: String, onSuccess: () -> Unit) {
         if (apiKey.isEmpty() || apiKey == "MY_FIREBASE_API_KEY") {
             showMessage("Please configure FIREBASE_API_KEY in the Secrets panel.", MessageType.ERROR)
@@ -190,3 +234,4 @@ class AuthViewModel : ViewModel() {
         }
     }
 }
+

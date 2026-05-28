@@ -132,7 +132,7 @@ fun SplashScreen(navController: NavController) {
         initialValue = 0.95f,
         targetValue = 1.05f,
         animationSpec = infiniteRepeatable(
-            animation = tween(1000),
+            animation = tween(1500, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "pulse"
@@ -144,48 +144,47 @@ fun SplashScreen(navController: NavController) {
         label = "logo_alpha"
     )
 
+    val offset by animateFloatAsState(
+        targetValue = if (startAnimation) 0f else 50f,
+        animationSpec = tween(durationMillis = 1500, easing = FastOutSlowInEasing),
+        label = "logo_offset"
+    )
+
     Box(
         modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White),
+            .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.alpha(alpha)
+            modifier = Modifier
+                .alpha(alpha)
+                .offset(y = offset.dp)
         ) {
-            ChatVerseLogo(modifier = Modifier.size(128.dp).scale(pulse))
-            Spacer(modifier = Modifier.height(24.dp))
-            Text(
-                text = "ChatVerse",
-                style = MaterialTheme.typography.displaySmall.copy(
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 36.sp,
-                ),
-                color = Color.Transparent,
-                modifier = Modifier.background(
-                    Brush.linearGradient(listOf(Color(0xFFE81CFF), Color(0xFF41B5FF))), // Equivalent to text-transparent bg-clip-text
-                    alpha = 0.99f // Needed for compose text gradient blending trick sometimes but not always
-                )
-            )
-            // Properly implementing text gradient
+            Box(
+                modifier = Modifier
+                    .size(128.dp)
+                    .scale(pulse)
+                    .shadow(24.dp, androidx.compose.foundation.shape.CircleShape, ambientColor = Color(0xFFE81CFF), spotColor = Color(0xFF41B5FF))
+            ) {
+                ChatVerseLogo(modifier = Modifier.fillMaxSize())
+            }
+            Spacer(modifier = Modifier.height(32.dp))
             Text(
                 text = "ChatVerse",
                 style = androidx.compose.ui.text.TextStyle(
                     fontWeight = FontWeight.ExtraBold,
-                    fontSize = 36.sp,
+                    fontSize = 42.sp,
                     brush = Brush.linearGradient(listOf(Color(0xFFE81CFF), Color(0xFF41B5FF)))
-                ),
-                modifier = Modifier.offset(y = (-40).dp) // Laying over the transparent block or just remove the previous Text
+                )
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = "RISTA DIL SE DIL TAK",
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 14.sp,
                 color = Color.Gray,
-                letterSpacing = 1.sp,
-                modifier = Modifier.offset(y = (-40).dp)
+                letterSpacing = 2.sp
             )
         }
     }
@@ -284,9 +283,13 @@ fun AuthScreen(navController: NavController, authViewModel: AuthViewModel) {
                                 
                                 authViewModel.showMessage("Welcome to ChatVerse", MessageType.SUCCESS)
                                 delay(1000)
-                                authViewModel.login(syntheticEmail, "google_auth_123456") {
-                                    navController.navigate("main") {
-                                        popUpTo("auth") { inclusive = true }
+                                authViewModel.googleLogin(syntheticEmail) { isExistingUser ->
+                                    if (isExistingUser) {
+                                        navController.navigate("main") {
+                                            popUpTo("auth") { inclusive = true }
+                                        }
+                                    } else {
+                                        navController.navigate("onboarding_name")
                                     }
                                 }
                                 
