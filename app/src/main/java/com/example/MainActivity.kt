@@ -55,7 +55,7 @@ import kotlinx.coroutines.launch
 
 // --- COLORS (Exact HTML CSS Variables Map) ---
 val W = Color(0xFFFFFFFF)
-val Bg = Color(0xFFF4F5F9)
+val Bg = Color(0xFFFFFFFF)
 val Fg = Color(0xFF111827)
 val F2 = Color(0xFF6B7280)
 val F3 = Color(0xFF9CA3AF)
@@ -191,32 +191,24 @@ fun DynamicIsland(data: IslandData?) {
     val alpha by animateFloatAsState(if (expanded) 1f else 0f, tween(350), label = "")
 
     if (alpha > 0f) {
-        val width by animateDpAsState(if (expanded) 320.dp else 40.dp, spring(dampingRatio = 0.65f, stiffness = 400f), label = "")
-        val height by animateDpAsState(if (expanded) 72.dp else 40.dp, spring(dampingRatio = 0.65f, stiffness = 400f), label = "")
-
-        Box(modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(top = 16.dp), contentAlignment = Alignment.TopCenter) {
-            // Glow effect
-            Box(modifier = Modifier.size(width + 64.dp, height + 64.dp).alpha(alpha).background(Brush.radialGradient(listOf(if (data?.type == IslandType.SUCCESS) Ok.copy(0.12f) else Er.copy(0.12f), Color.Transparent), radius = 180f)))
-
+        Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 12.dp).statusBarsPadding(), contentAlignment = Alignment.TopCenter) {
             Box(
                 modifier = Modifier
-                    .size(width, height)
-                    .clip(RoundedCornerShape(9999.dp))
-                    .background(Color(0xFF161616))
-                    .border(1.dp, Color.White.copy(0.1f), RoundedCornerShape(9999.dp))
-                    .shadow(32.dp, RoundedCornerShape(9999.dp), ambientColor = if (data?.type == IslandType.SUCCESS) Ok.copy(0.2f) else Er.copy(0.2f), spotColor = if (data?.type == IslandType.SUCCESS) Ok.copy(0.4f) else Er.copy(0.4f))
+                    .widthIn(max = 300.dp)
                     .alpha(alpha)
+                    .shadow(12.dp, RoundedCornerShape(16.dp), spotColor = Color.Black.copy(0.08f), ambientColor = Color.Black.copy(0.02f))
+                    .border(1.5.dp, Color(0xFFF3F4F6), RoundedCornerShape(16.dp))
+                    .background(Color.White, RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(16.dp))
             ) {
-                androidx.compose.animation.AnimatedVisibility(visible = expanded, enter = fadeIn(tween(450, delayMillis = 150)) + scaleIn(initialScale = 0.8f, animationSpec = tween(450, delayMillis = 150, easing = FastOutSlowInEasing))) {
-                    Row(modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Box(modifier = Modifier.size(42.dp).clip(CircleShape).background(if (data?.type == IslandType.SUCCESS) Ok.copy(0.1f) else Er.copy(0.1f)).border(1.dp, if (data?.type == IslandType.SUCCESS) Ok.copy(0.2f) else Er.copy(0.2f), CircleShape), contentAlignment = Alignment.Center) {
-                            Icon(if (data?.type == IslandType.SUCCESS) Icons.Default.Check else Icons.Default.Close, null, tint = if (data?.type == IslandType.SUCCESS) Ok else Er, modifier = Modifier.size(18.dp))
-                        }
-                        Spacer(Modifier.width(14.dp))
-                        Column {
-                            Text(data?.title ?: "", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color.White, lineHeight = 16.sp)
-                            Text(data?.sub ?: "", fontSize = 12.sp, color = Color(0xFFAAAAAA), lineHeight = 14.sp, modifier = Modifier.padding(top = 2.dp))
-                        }
+                Row(modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp, horizontal = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Box(modifier = Modifier.size(36.dp).background(if (data?.type == IslandType.SUCCESS) Okb else Erb, CircleShape), contentAlignment = Alignment.Center) {
+                        Icon(if (data?.type == IslandType.SUCCESS) Icons.Default.Check else Icons.Default.Close, null, tint = if (data?.type == IslandType.SUCCESS) Ok else Er, modifier = Modifier.size(18.dp))
+                    }
+                    Spacer(Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(data?.title ?: "", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Fg, lineHeight = 16.sp)
+                        Text(data?.sub ?: "", fontSize = 12.sp, color = F2, lineHeight = 14.sp, modifier = Modifier.padding(top = 2.dp))
                     }
                 }
                 // Timer Bar
@@ -238,7 +230,7 @@ fun LoginScreen(onLogin: () -> Unit, showIsland: (IslandType, String, String) ->
     val anim1 by inf.animateFloat(0f, 1f, infiniteRepeatable(tween(12000, easing = EaseInOut), RepeatMode.Reverse), label = "")
     val anim2 by inf.animateFloat(0f, 1f, infiniteRepeatable(tween(14000, easing = EaseInOut), RepeatMode.Reverse), label = "")
 
-    Box(modifier = Modifier.fillMaxSize().background(W)) {
+    Box(modifier = Modifier.fillMaxSize().background(W).systemBarsPadding()) {
         // Grid background
         Canvas(modifier = Modifier.fillMaxSize()) {
             val step = 36.dp.toPx()
@@ -359,7 +351,7 @@ fun HomeScreen(onChatClick: (Int) -> Unit, onLogout: () -> Unit, showIsland: (Is
 
         // Bottom Nav (Glassmorphism simulation)
         Box(
-            modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(bottom = 16.dp, start = 20.dp, end = 20.dp)
+            modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().navigationBarsPadding().padding(bottom = 16.dp, start = 20.dp, end = 20.dp)
                 .shadow(16.dp, RoundedCornerShape(32.dp), ambientColor = Color.Black.copy(0.1f), spotColor = Color.Black.copy(0.1f))
                 .background(W, RoundedCornerShape(32.dp)).padding(vertical = 8.dp, horizontal = 12.dp)
         ) {
