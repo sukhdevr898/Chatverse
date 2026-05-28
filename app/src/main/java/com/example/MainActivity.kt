@@ -2,6 +2,7 @@ package com.example
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.compose.setContent
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
@@ -77,12 +78,7 @@ const val APP_LOGO_URL = "https://raw.githubusercontent.com/sukhdevr898/Chatvers
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Fullscreen Mode / Hide Navigation
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        val controller = WindowInsetsControllerCompat(window, window.decorView)
-        controller.hide(WindowInsetsCompat.Type.systemBars())
-        controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-
+        enableEdgeToEdge()
         setContent {
             MaterialTheme(typography = Typography(bodyLarge = TextStyle(fontFamily = FontFamily.SansSerif))) {
                 ChatVerseApp()
@@ -192,38 +188,40 @@ fun ChatVerseApp() {
 @Composable
 fun DynamicIsland(data: IslandData?) {
     val expanded = data != null
-    val width by animateDpAsState(if (expanded) 300.dp else 36.dp, tween(600, easing = FastOutSlowInEasing), label = "")
-    val height by animateDpAsState(if (expanded) 68.dp else 36.dp, tween(600, easing = FastOutSlowInEasing), label = "")
     val alpha by animateFloatAsState(if (expanded) 1f else 0f, tween(350), label = "")
 
-    Box(modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(top = 14.dp), contentAlignment = Alignment.TopCenter) {
-        // Glow effect
-        if (expanded) {
-            Box(modifier = Modifier.size(width + 48.dp, height + 48.dp).alpha(alpha).background(Brush.radialGradient(listOf(if (data?.type == IslandType.SUCCESS) Ok.copy(0.14f) else Er.copy(0.14f), Color.Transparent), radius = 150f)))
-        }
+    if (alpha > 0f) {
+        val width by animateDpAsState(if (expanded) 320.dp else 40.dp, spring(dampingRatio = 0.65f, stiffness = 400f), label = "")
+        val height by animateDpAsState(if (expanded) 72.dp else 40.dp, spring(dampingRatio = 0.65f, stiffness = 400f), label = "")
 
-        Box(
-            modifier = Modifier
-                .size(width, height)
-                .clip(RoundedCornerShape(9999.dp))
-                .background(if (expanded) W else Color(0xFF111111))
-                .border(if (expanded) 1.dp else 0.dp, Color.Black.copy(0.04f), RoundedCornerShape(9999.dp))
-                .shadow(if (expanded) 24.dp else 0.dp, RoundedCornerShape(9999.dp), ambientColor = if (data?.type == IslandType.SUCCESS) Ok.copy(0.22f) else Er.copy(0.22f))
-        ) {
-            androidx.compose.animation.AnimatedVisibility(visible = expanded, enter = fadeIn(tween(450, delayMillis = 120)) + scaleIn(initialScale = 0.7f, animationSpec = tween(450, delayMillis = 120, easing = FastOutSlowInEasing))) {
-                Row(modifier = Modifier.fillMaxSize().padding(horizontal = 18.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Box(modifier = Modifier.size(38.dp).clip(CircleShape).background(if (data?.type == IslandType.SUCCESS) Okb else Erb), contentAlignment = Alignment.Center) {
-                        Icon(if (data?.type == IslandType.SUCCESS) Icons.Default.Check else Icons.Default.Close, null, tint = if (data?.type == IslandType.SUCCESS) Ok else Er, modifier = Modifier.size(14.dp))
-                    }
-                    Spacer(Modifier.width(11.dp))
-                    Column {
-                        Text(data?.title ?: "", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = Fg, lineHeight = 15.sp)
-                        Text(data?.sub ?: "", fontSize = 11.sp, color = F2, lineHeight = 14.sp)
+        Box(modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(top = 16.dp), contentAlignment = Alignment.TopCenter) {
+            // Glow effect
+            Box(modifier = Modifier.size(width + 64.dp, height + 64.dp).alpha(alpha).background(Brush.radialGradient(listOf(if (data?.type == IslandType.SUCCESS) Ok.copy(0.12f) else Er.copy(0.12f), Color.Transparent), radius = 180f)))
+
+            Box(
+                modifier = Modifier
+                    .size(width, height)
+                    .clip(RoundedCornerShape(9999.dp))
+                    .background(Color(0xFF161616))
+                    .border(1.dp, Color.White.copy(0.1f), RoundedCornerShape(9999.dp))
+                    .shadow(32.dp, RoundedCornerShape(9999.dp), ambientColor = if (data?.type == IslandType.SUCCESS) Ok.copy(0.2f) else Er.copy(0.2f), spotColor = if (data?.type == IslandType.SUCCESS) Ok.copy(0.4f) else Er.copy(0.4f))
+                    .alpha(alpha)
+            ) {
+                androidx.compose.animation.AnimatedVisibility(visible = expanded, enter = fadeIn(tween(450, delayMillis = 150)) + scaleIn(initialScale = 0.8f, animationSpec = tween(450, delayMillis = 150, easing = FastOutSlowInEasing))) {
+                    Row(modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Box(modifier = Modifier.size(42.dp).clip(CircleShape).background(if (data?.type == IslandType.SUCCESS) Ok.copy(0.1f) else Er.copy(0.1f)).border(1.dp, if (data?.type == IslandType.SUCCESS) Ok.copy(0.2f) else Er.copy(0.2f), CircleShape), contentAlignment = Alignment.Center) {
+                            Icon(if (data?.type == IslandType.SUCCESS) Icons.Default.Check else Icons.Default.Close, null, tint = if (data?.type == IslandType.SUCCESS) Ok else Er, modifier = Modifier.size(18.dp))
+                        }
+                        Spacer(Modifier.width(14.dp))
+                        Column {
+                            Text(data?.title ?: "", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color.White, lineHeight = 16.sp)
+                            Text(data?.sub ?: "", fontSize = 12.sp, color = Color(0xFFAAAAAA), lineHeight = 14.sp, modifier = Modifier.padding(top = 2.dp))
+                        }
                     }
                 }
+                // Timer Bar
+                Box(modifier = Modifier.align(Alignment.BottomStart).height(3.dp).fillMaxWidth(alpha).background(if (data?.type == IslandType.SUCCESS) Ok else Er))
             }
-            // Timer Bar
-            Box(modifier = Modifier.align(Alignment.BottomStart).height(2.5.dp).fillMaxWidth(alpha).background(if (data?.type == IslandType.SUCCESS) Ok else Er))
         }
     }
 }
@@ -253,8 +251,8 @@ fun LoginScreen(onLogin: () -> Unit, showIsland: (IslandType, String, String) ->
         Box(modifier = Modifier.offset(x = (-50 - anim2 * 18).dp, y = (-80 - anim2 * 25).dp).size(200.dp).align(Alignment.BottomStart).scale(1f + anim2 * 0.12f).blur(80.dp).background(Cy.copy(0.05f), CircleShape))
 
         Column(modifier = Modifier.fillMaxSize().padding(horizontal = 32.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-            Image(painter = painterResource(id = R.drawable.app_logo), contentDescription = null, modifier = Modifier.size(100.dp).padding(bottom = 24.dp).shadow(20.dp, ambientColor = Vi.copy(0.18f), spotColor = Vi.copy(0.18f)))
-            Text("ChatVerse", fontSize = 34.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = (-0.5).sp, style = TextStyle(brush = Gradient))
+            Image(painter = painterResource(id = R.drawable.app_logo), contentDescription = null, modifier = Modifier.size(140.dp).padding(bottom = 24.dp).shadow(20.dp, ambientColor = Vi.copy(0.18f), spotColor = Vi.copy(0.18f)))
+            Text("ChatVerse", fontSize = 42.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = (-0.5).sp, style = TextStyle(brush = Gradient))
             Text("rista dil se dil tak.", fontSize = 16.sp, color = F2, letterSpacing = 0.4.sp, modifier = Modifier.padding(bottom = 44.dp))
 
             Text("GET STARTED", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = F3, letterSpacing = 1.6.sp, modifier = Modifier.padding(bottom = 14.dp))
@@ -321,9 +319,9 @@ fun HomeScreen(onChatClick: (Int) -> Unit, onLogout: () -> Unit, showIsland: (Is
             Column(modifier = Modifier.background(W).padding(top = 20.dp, start = 20.dp, end = 20.dp, bottom = 10.dp)) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Image(painter = painterResource(id = R.drawable.app_logo), contentDescription = null, modifier = Modifier.size(40.dp))
-                        Spacer(Modifier.width(9.dp))
-                        Text("ChatVerse", fontSize = 24.sp, fontWeight = FontWeight.Bold, letterSpacing = (-0.3).sp, style = TextStyle(brush = Gradient))
+                        Image(painter = painterResource(id = R.drawable.app_logo), contentDescription = null, modifier = Modifier.size(54.dp))
+                        Spacer(Modifier.width(10.dp))
+                        Text("ChatVerse", fontSize = 28.sp, fontWeight = FontWeight.Bold, letterSpacing = (-0.3).sp, style = TextStyle(brush = Gradient))
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
                         Box(modifier = Modifier.size(44.dp).bounceClick { showIsland(IslandType.ERROR, "Camera", "Camera access not available") }, contentAlignment = Alignment.Center) { Icon(Icons.Outlined.PhotoCamera, null, tint = F2, modifier = Modifier.size(24.dp)) }
@@ -360,14 +358,20 @@ fun HomeScreen(onChatClick: (Int) -> Unit, onLogout: () -> Unit, showIsland: (Is
         }
 
         // Bottom Nav (Glassmorphism simulation)
-        Row(
-            modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().background(W.copy(0.94f)).padding(vertical = 5.dp, horizontal = 8.dp),
-            horizontalArrangement = Arrangement.SpaceAround, verticalAlignment = Alignment.CenterVertically
+        Box(
+            modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(bottom = 16.dp, start = 20.dp, end = 20.dp)
+                .shadow(16.dp, RoundedCornerShape(32.dp), ambientColor = Color.Black.copy(0.1f), spotColor = Color.Black.copy(0.1f))
+                .background(W, RoundedCornerShape(32.dp)).padding(vertical = 8.dp, horizontal = 12.dp)
         ) {
-            NavIcon("chats", Icons.Outlined.ChatBubbleOutline, "Chats", currentTab, true) { currentTab = "chats" }
-            NavIcon("calls", Icons.Outlined.Phone, "Calls", currentTab) { currentTab = "calls" }
-            NavIcon("status", Icons.Outlined.MotionPhotosOn, "Status", currentTab) { currentTab = "status" }
-            NavIcon("profile", Icons.Outlined.PersonOutline, "Profile", currentTab) { currentTab = "profile" }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceAround, verticalAlignment = Alignment.CenterVertically
+            ) {
+                NavIcon("chats", Icons.Outlined.ChatBubbleOutline, "Chats", currentTab, true) { currentTab = "chats" }
+                NavIcon("calls", Icons.Outlined.Phone, "Calls", currentTab) { currentTab = "calls" }
+                NavIcon("status", Icons.Outlined.MotionPhotosOn, "Status", currentTab) { currentTab = "status" }
+                NavIcon("profile", Icons.Outlined.PersonOutline, "Profile", currentTab) { currentTab = "profile" }
+            }
         }
     }
 }
@@ -639,17 +643,17 @@ fun CallButton(icon: ImageVector, label: String, isActive: Boolean, onClick: () 
 fun NavIcon(id: String, icon: ImageVector, label: String, current: String, hasBadge: Boolean = false, onClick: () -> Unit) {
     val sel = id == current
     val tint by animateColorAsState(if (sel) Vi else F3, label = "")
-    Column(modifier = Modifier.bounceClick { onClick() }.padding(vertical = 5.dp, horizontal = 12.dp).widthIn(min = 56.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(modifier = Modifier.bounceClick { onClick() }.padding(vertical = 6.dp, horizontal = 8.dp).widthIn(min = 64.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Box(contentAlignment = Alignment.TopCenter) {
             androidx.compose.animation.AnimatedVisibility(visible = sel, enter = expandHorizontally(tween(350, easing = FastOutSlowInEasing)) + fadeIn(tween(350)), exit = fadeOut(tween(0))) {
-                Box(modifier = Modifier.offset(y = (-7).dp).size(22.dp, 2.5.dp).clip(RoundedCornerShape(2.dp)).background(Gradient))
+                Box(modifier = Modifier.offset(y = (-9).dp).size(28.dp, 3.dp).clip(RoundedCornerShape(2.dp)).background(Gradient))
             }
-            Box(modifier = Modifier.padding(top = 2.dp)) {
-                Icon(icon, null, tint = tint, modifier = Modifier.size(28.dp).offset(y = if (sel) (-1).dp else 0.dp).scale(if (sel) 1.12f else 1f))
-                if (hasBadge && !sel) Box(modifier = Modifier.align(Alignment.TopEnd).offset(4.dp, (-2).dp).size(18.dp).background(Er, CircleShape).border(2.dp, W, CircleShape), contentAlignment = Alignment.Center) { Text("5", color = W, fontSize = 10.sp, fontWeight = FontWeight.Bold) }
+            Box(modifier = Modifier.padding(top = 4.dp)) {
+                Icon(icon, null, tint = tint, modifier = Modifier.size(32.dp).offset(y = if (sel) (-2).dp else 0.dp).scale(if (sel) 1.15f else 1f))
+                if (hasBadge && !sel) Box(modifier = Modifier.align(Alignment.TopEnd).offset(6.dp, (-2).dp).size(20.dp).background(Er, CircleShape).border(2.dp, W, CircleShape), contentAlignment = Alignment.Center) { Text("5", color = W, fontSize = 11.sp, fontWeight = FontWeight.Bold) }
             }
         }
-        Text(label, fontSize = 12.sp, fontWeight = if (sel) FontWeight.SemiBold else FontWeight.Medium, color = tint, modifier = Modifier.padding(top = 2.dp))
+        Text(label, fontSize = 14.sp, fontWeight = if (sel) FontWeight.SemiBold else FontWeight.Medium, color = tint, modifier = Modifier.padding(top = 4.dp))
     }
 }
 
