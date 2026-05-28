@@ -24,6 +24,7 @@ import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.*
 import androidx.compose.ui.focus.onFocusChanged
@@ -71,6 +72,7 @@ val Erb = Color(0xFFFEF2F2)
 
 const val APP_LOGO_URL = "https://raw.githubusercontent.com/sukhdevr898/Chatverse/refs/heads/main/file_000000001c287208ba6c4e5b58c752ff.png"
 
+
 // --- APP ENTRY ---
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -83,29 +85,9 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             MaterialTheme(typography = Typography(bodyLarge = TextStyle(fontFamily = FontFamily.SansSerif))) {
-                AutoScaledLayout {
-                    ChatVerseApp()
-                }
+                ChatVerseApp()
             }
         }
-    }
-}
-
-@Composable
-fun AutoScaledLayout(content: @Composable () -> Unit) {
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp.toFloat()
-    // Reference standard width 360f. This scales the UI up/down proportionally based on the device width.
-    val scale = (screenWidth / 360f).coerceIn(0.85f, 1.5f)
-
-    val originalDensity = LocalDensity.current
-    val scaledDensity = Density(
-        density = originalDensity.density * scale,
-        fontScale = originalDensity.fontScale * scale
-    )
-
-    CompositionLocalProvider(LocalDensity provides scaledDensity) {
-        content()
     }
 }
 
@@ -271,11 +253,11 @@ fun LoginScreen(onLogin: () -> Unit, showIsland: (IslandType, String, String) ->
         Box(modifier = Modifier.offset(x = (-50 - anim2 * 18).dp, y = (-80 - anim2 * 25).dp).size(200.dp).align(Alignment.BottomStart).scale(1f + anim2 * 0.12f).blur(80.dp).background(Cy.copy(0.05f), CircleShape))
 
         Column(modifier = Modifier.fillMaxSize().padding(horizontal = 32.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-            AsyncImage(model = APP_LOGO_URL, contentDescription = null, modifier = Modifier.size(82.dp).padding(bottom = 24.dp).shadow(20.dp, ambientColor = Vi.copy(0.18f), spotColor = Vi.copy(0.18f)))
-            Text("ChatVerse", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = (-0.5).sp, style = TextStyle(brush = Gradient))
-            Text("rista dil se dil tak.", fontSize = 14.5.sp, color = F2, letterSpacing = 0.4.sp, modifier = Modifier.padding(bottom = 44.dp))
+            Image(painter = painterResource(id = R.drawable.app_logo), contentDescription = null, modifier = Modifier.size(100.dp).padding(bottom = 24.dp).shadow(20.dp, ambientColor = Vi.copy(0.18f), spotColor = Vi.copy(0.18f)))
+            Text("ChatVerse", fontSize = 34.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = (-0.5).sp, style = TextStyle(brush = Gradient))
+            Text("rista dil se dil tak.", fontSize = 16.sp, color = F2, letterSpacing = 0.4.sp, modifier = Modifier.padding(bottom = 44.dp))
 
-            Text("GET STARTED", fontSize = 10.5.sp, fontWeight = FontWeight.SemiBold, color = F3, letterSpacing = 1.6.sp, modifier = Modifier.padding(bottom = 14.dp))
+            Text("GET STARTED", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = F3, letterSpacing = 1.6.sp, modifier = Modifier.padding(bottom = 14.dp))
 
             // Primary Button
             Button(
@@ -297,7 +279,7 @@ fun LoginScreen(onLogin: () -> Unit, showIsland: (IslandType, String, String) ->
                     else Row(verticalAlignment = Alignment.CenterVertically) {
                         GoogleIcon(isWhite = true)
                         Spacer(Modifier.width(12.dp))
-                        Text("Sign up with Google", color = W, fontSize = 14.5.sp, fontWeight = FontWeight.Medium)
+                        Text("Sign up with Google", color = W, fontSize = 16.sp, fontWeight = FontWeight.Medium)
                     }
                 }
             }
@@ -312,18 +294,18 @@ fun LoginScreen(onLogin: () -> Unit, showIsland: (IslandType, String, String) ->
                 else Row(verticalAlignment = Alignment.CenterVertically) {
                     GoogleIcon(isWhite = false)
                     Spacer(Modifier.width(12.dp))
-                    Text("Login with Google", color = Fg, fontSize = 14.5.sp, fontWeight = FontWeight.Medium)
+                    Text("Login with Google", color = Fg, fontSize = 16.sp, fontWeight = FontWeight.Medium)
                 }
             }
 
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 18.dp)) {
                 Box(modifier = Modifier.weight(1f).height(1.dp).background(Bd))
-                Text(" Secured by Google ", fontSize = 11.sp, color = F3, fontWeight = FontWeight.Medium, modifier = Modifier.padding(horizontal = 14.dp))
+                Text(" Secured by Google ", fontSize = 13.sp, color = F3, fontWeight = FontWeight.Medium, modifier = Modifier.padding(horizontal = 14.dp))
                 Box(modifier = Modifier.weight(1f).height(1.dp).background(Bd))
             }
-            Text("By continuing, you agree to our Terms of Service and Privacy Policy", fontSize = 10.5.sp, color = F3, textAlign = TextAlign.Center, lineHeight = 16.sp)
+            Text("By continuing, you agree to our Terms of Service and Privacy Policy", fontSize = 12.sp, color = F3, textAlign = TextAlign.Center, lineHeight = 16.sp)
         }
-        Text("Made with ♥ by ChatVerse", fontSize = 10.5.sp, color = F3, modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 24.dp))
+        Text("Made with ♥ by ChatVerse", fontSize = 12.sp, color = F3, modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 24.dp))
     }
 }
 
@@ -339,15 +321,15 @@ fun HomeScreen(onChatClick: (Int) -> Unit, onLogout: () -> Unit, showIsland: (Is
             Column(modifier = Modifier.background(W).padding(top = 20.dp, start = 20.dp, end = 20.dp, bottom = 10.dp)) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        AsyncImage(model = APP_LOGO_URL, contentDescription = null, modifier = Modifier.size(30.dp))
+                        Image(painter = painterResource(id = R.drawable.app_logo), contentDescription = null, modifier = Modifier.size(40.dp))
                         Spacer(Modifier.width(9.dp))
-                        Text("ChatVerse", fontSize = 19.sp, fontWeight = FontWeight.Bold, letterSpacing = (-0.3).sp, style = TextStyle(brush = Gradient))
+                        Text("ChatVerse", fontSize = 24.sp, fontWeight = FontWeight.Bold, letterSpacing = (-0.3).sp, style = TextStyle(brush = Gradient))
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                        Box(modifier = Modifier.size(37.dp).bounceClick { showIsland(IslandType.ERROR, "Camera", "Camera access not available") }, contentAlignment = Alignment.Center) { Icon(Icons.Outlined.PhotoCamera, null, tint = F2, modifier = Modifier.size(15.dp)) }
-                        Box(modifier = Modifier.size(37.dp).bounceClick { showIsland(IslandType.SUCCESS, "Notifications", "You have 3 new messages") }, contentAlignment = Alignment.Center) {
-                            Icon(Icons.Outlined.Notifications, null, tint = F2, modifier = Modifier.size(15.dp))
-                            Box(modifier = Modifier.align(Alignment.TopEnd).offset((-6).dp, 6.dp).size(7.dp).background(Er, CircleShape).border(2.dp, W, CircleShape))
+                        Box(modifier = Modifier.size(44.dp).bounceClick { showIsland(IslandType.ERROR, "Camera", "Camera access not available") }, contentAlignment = Alignment.Center) { Icon(Icons.Outlined.PhotoCamera, null, tint = F2, modifier = Modifier.size(24.dp)) }
+                        Box(modifier = Modifier.size(44.dp).bounceClick { showIsland(IslandType.SUCCESS, "Notifications", "You have 3 new messages") }, contentAlignment = Alignment.Center) {
+                            Icon(Icons.Outlined.Notifications, null, tint = F2, modifier = Modifier.size(24.dp))
+                            Box(modifier = Modifier.align(Alignment.TopEnd).offset((-6).dp, 6.dp).size(10.dp).background(Er, CircleShape).border(2.dp, W, CircleShape))
                         }
                     }
                 }
@@ -359,9 +341,9 @@ fun HomeScreen(onChatClick: (Int) -> Unit, onLogout: () -> Unit, showIsland: (Is
                     modifier = Modifier.fillMaxWidth().padding(top = 18.dp, bottom = 14.dp).onFocusChanged { isFocused = it.isFocused },
                     decorationBox = { innerTextField ->
                         Row(modifier = Modifier.fillMaxWidth().background(if (isFocused) W else Bg, RoundedCornerShape(15.dp)).border(1.5.dp, if (isFocused) Bdf else Color.Transparent, RoundedCornerShape(15.dp)).padding(horizontal = 14.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.Search, null, tint = if (isFocused) Vi else F3, modifier = Modifier.size(16.dp))
+                            Icon(Icons.Default.Search, null, tint = if (isFocused) Vi else F3, modifier = Modifier.size(20.dp))
                             Spacer(Modifier.width(10.dp))
-                            if (searchQuery.isEmpty()) Text("Search conversations...", color = F3, fontSize = 13.5.sp) else innerTextField()
+                            if (searchQuery.isEmpty()) Text("Search conversations...", color = F3, fontSize = 15.sp) else innerTextField()
                         }
                     }
                 )
@@ -396,15 +378,15 @@ fun ChatsList(searchQuery: String, onChatClick: (Int) -> Unit, showIsland: (Isla
     LazyColumn(contentPadding = PaddingValues(bottom = 96.dp, top = 6.dp)) {
         item {
             Column(modifier = Modifier.padding(horizontal = 20.dp).padding(bottom = 10.dp)) {
-                Text("ONLINE NOW", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = F3, letterSpacing = 1.2.sp, modifier = Modifier.padding(bottom = 10.dp))
+                Text("ONLINE NOW", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = F3, letterSpacing = 1.2.sp, modifier = Modifier.padding(bottom = 10.dp))
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     items(mockOnlineFriends) { friend ->
                         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.bounceClick { showIsland(IslandType.SUCCESS, friend.name, "Starting conversation...") }) {
-                            Box(modifier = Modifier.size(50.dp)) {
+                            Box(modifier = Modifier.size(60.dp)) {
                                 AsyncImage(model = friend.av, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize().clip(CircleShape).border(2.dp, W, CircleShape).shadow(8.dp, CircleShape, ambientColor = Color.Black.copy(0.06f)))
-                                Box(modifier = Modifier.align(Alignment.BottomEnd).offset((-1).dp, (-1).dp).size(12.dp).background(Ok, CircleShape).border(2.5.dp, W, CircleShape))
+                                Box(modifier = Modifier.align(Alignment.BottomEnd).offset((-1).dp, (-1).dp).size(14.dp).background(Ok, CircleShape).border(2.5.dp, W, CircleShape))
                             }
-                            Text(friend.name, fontSize = 10.sp, color = F2, fontWeight = FontWeight.Medium, modifier = Modifier.padding(top = 5.dp).width(54.dp), textAlign = TextAlign.Center, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            Text(friend.name, fontSize = 12.sp, color = F2, fontWeight = FontWeight.Medium, modifier = Modifier.padding(top = 5.dp).width(64.dp), textAlign = TextAlign.Center, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
                     }
                 }
@@ -417,19 +399,19 @@ fun ChatsList(searchQuery: String, onChatClick: (Int) -> Unit, showIsland: (Isla
             LaunchedEffect(Unit) { delay(index * 35L); launch { animAlpha.animateTo(1f, tween(400)) }; launch { animOffset.animateTo(0f, tween(400, easing = FastOutSlowInEasing)) } }
 
             Row(modifier = Modifier.fillMaxWidth().graphicsLayer { alpha = animAlpha.value; translationX = animOffset.value }.bounceClick { onChatClick(chat.id) }.padding(horizontal = 12.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-                Box(modifier = Modifier.size(46.dp)) {
+                Box(modifier = Modifier.size(56.dp)) {
                     AsyncImage(model = chat.av, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize().clip(CircleShape))
-                    if (chat.on) Box(modifier = Modifier.align(Alignment.BottomEnd).size(10.dp).background(Ok, CircleShape).border(2.5.dp, W, CircleShape))
+                    if (chat.on) Box(modifier = Modifier.align(Alignment.BottomEnd).size(14.dp).background(Ok, CircleShape).border(2.5.dp, W, CircleShape))
                 }
-                Column(modifier = Modifier.weight(1f).padding(start = 12.dp)) {
+                Column(modifier = Modifier.weight(1f).padding(start = 16.dp)) {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Bottom) {
-                        Text(chat.name, fontWeight = FontWeight.SemiBold, fontSize = 13.5.sp, letterSpacing = (-0.1).sp, color = Fg)
-                        Text(chat.lt, fontSize = 10.5.sp, color = if (chat.unread > 0) Vi else F3, fontWeight = if (chat.unread > 0) FontWeight.SemiBold else FontWeight.Normal)
+                        Text(chat.name, fontWeight = FontWeight.SemiBold, fontSize = 16.sp, letterSpacing = (-0.1).sp, color = Fg)
+                        Text(chat.lt, fontSize = 12.sp, color = if (chat.unread > 0) Vi else F3, fontWeight = if (chat.unread > 0) FontWeight.SemiBold else FontWeight.Normal)
                     }
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                        Text(chat.lm, fontSize = 12.sp, color = F3, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
-                        if (chat.unread > 0) Box(modifier = Modifier.padding(start = 5.dp).height(19.dp).widthIn(min = 19.dp).background(Gradient, CircleShape), contentAlignment = Alignment.Center) {
-                            Text(chat.unread.toString(), color = W, fontSize = 10.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 5.dp))
+                        Text(chat.lm, fontSize = 14.sp, color = F3, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+                        if (chat.unread > 0) Box(modifier = Modifier.padding(start = 5.dp).height(22.dp).widthIn(min = 22.dp).background(Gradient, CircleShape), contentAlignment = Alignment.Center) {
+                            Text(chat.unread.toString(), color = W, fontSize = 12.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 5.dp))
                         }
                     }
                 }
@@ -445,12 +427,12 @@ fun ProfileTab(onLogout: () -> Unit, showIsland: (IslandType, String, String) ->
     Column(modifier = Modifier.fillMaxSize().background(W).padding(horizontal = 24.dp, vertical = 56.dp).verticalScroll(rememberScrollState())) {
         Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
             Box {
-                AsyncImage(model = "https://picsum.photos/seed/myprofile99/200/200.jpg", contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.size(76.dp).clip(CircleShape).border(3.dp, Color.Transparent, CircleShape).background(Gradient))
-                Box(modifier = Modifier.align(Alignment.BottomEnd).size(24.dp).background(Gradient, CircleShape).border(2.5.dp, W, CircleShape).bounceClick { showIsland(IslandType.ERROR, "Edit Profile", "Coming soon") }, contentAlignment = Alignment.Center) { Icon(Icons.Default.Edit, null, tint = W, modifier = Modifier.size(9.dp)) }
+                AsyncImage(model = "https://picsum.photos/seed/myprofile99/200/200.jpg", contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.size(100.dp).clip(CircleShape).border(3.dp, Color.Transparent, CircleShape).background(Gradient))
+                Box(modifier = Modifier.align(Alignment.BottomEnd).size(30.dp).background(Gradient, CircleShape).border(2.5.dp, W, CircleShape).bounceClick { showIsland(IslandType.ERROR, "Edit Profile", "Coming soon") }, contentAlignment = Alignment.Center) { Icon(Icons.Default.Edit, null, tint = W, modifier = Modifier.size(14.dp)) }
             }
             Spacer(Modifier.height(10.dp))
-            Text("Arjun Mehta", fontSize = 19.sp, fontWeight = FontWeight.Bold, color = Fg)
-            Text("rista dil se dil tak. Living in the moment,\none message at a time.", fontSize = 12.5.sp, color = F2, textAlign = TextAlign.Center, lineHeight = 18.sp, modifier = Modifier.width(260.dp))
+            Text("Arjun Mehta", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Fg)
+            Text("rista dil se dil tak. Living in the moment,\none message at a time.", fontSize = 14.sp, color = F2, textAlign = TextAlign.Center, lineHeight = 20.sp, modifier = Modifier.width(260.dp))
         }
         Spacer(Modifier.height(28.dp))
         ProfileMenuItem(Icons.Outlined.Shield, "Account & Security", Vi, Vi.copy(0.08f)) { showIsland(IslandType.SUCCESS, "Account", "Verified and secure") }
@@ -467,11 +449,11 @@ fun ProfileTab(onLogout: () -> Unit, showIsland: (IslandType, String, String) ->
 
 @Composable
 fun ProfileMenuItem(icon: ImageVector, title: String, tint: Color, bg: Color, isDestructive: Boolean = false, onClick: () -> Unit) {
-    Row(modifier = Modifier.fillMaxWidth().bounceClick { onClick() }.padding(horizontal = 14.dp, vertical = 13.dp), verticalAlignment = Alignment.CenterVertically) {
-        Box(modifier = Modifier.size(34.dp).background(bg, RoundedCornerShape(9.dp)), contentAlignment = Alignment.Center) { Icon(icon, null, tint = tint, modifier = Modifier.size(16.dp)) }
+    Row(modifier = Modifier.fillMaxWidth().bounceClick { onClick() }.padding(horizontal = 14.dp, vertical = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+        Box(modifier = Modifier.size(42.dp).background(bg, RoundedCornerShape(9.dp)), contentAlignment = Alignment.Center) { Icon(icon, null, tint = tint, modifier = Modifier.size(24.dp)) }
         Spacer(Modifier.width(13.dp))
-        Text(title, fontSize = 13.5.sp, fontWeight = FontWeight.Medium, color = if (isDestructive) Er else Fg, modifier = Modifier.weight(1f))
-        Icon(Icons.Default.ChevronRight, null, tint = F3, modifier = Modifier.size(11.dp))
+        Text(title, fontSize = 16.sp, fontWeight = FontWeight.Medium, color = if (isDestructive) Er else Fg, modifier = Modifier.weight(1f))
+        Icon(Icons.Default.ChevronRight, null, tint = F3, modifier = Modifier.size(16.dp))
     }
 }
 
@@ -488,20 +470,20 @@ fun ChatDetailScreen(chatId: Int?, onBack: () -> Unit, onCall: (String) -> Unit,
         Column(modifier = Modifier.fillMaxSize()) {
             // Header
             Row(modifier = Modifier.fillMaxWidth().background(W).padding(top = 10.dp, bottom = 10.dp, start = 12.dp, end = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-                Box(modifier = Modifier.size(34.dp).background(W, CircleShape).border(1.dp, Bd, CircleShape).bounceClick { onBack() }, contentAlignment = Alignment.Center) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null, tint = Fg, modifier = Modifier.size(16.dp)) }
+                Box(modifier = Modifier.size(44.dp).background(W, CircleShape).border(1.dp, Bd, CircleShape).bounceClick { onBack() }, contentAlignment = Alignment.Center) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null, tint = Fg, modifier = Modifier.size(24.dp)) }
                 Spacer(Modifier.width(10.dp))
-                Box(modifier = Modifier.size(36.dp)) {
+                Box(modifier = Modifier.size(44.dp)) {
                     AsyncImage(model = chat.av, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize().clip(CircleShape))
-                    if (chat.on) Box(modifier = Modifier.align(Alignment.BottomEnd).size(9.dp).background(Ok, CircleShape).border(2.dp, W, CircleShape))
+                    if (chat.on) Box(modifier = Modifier.align(Alignment.BottomEnd).size(12.dp).background(Ok, CircleShape).border(2.dp, W, CircleShape))
                 }
-                Column(modifier = Modifier.weight(1f).padding(start = 10.dp)) {
-                    Text(chat.name, fontWeight = FontWeight.SemiBold, fontSize = 14.5.sp, letterSpacing = (-0.1).sp, color = Fg)
-                    Text(if (chat.on) "Online" else "Last seen recently", fontSize = 11.sp, color = if (chat.on) Ok else F3, fontWeight = FontWeight.Medium)
+                Column(modifier = Modifier.weight(1f).padding(start = 12.dp)) {
+                    Text(chat.name, fontWeight = FontWeight.SemiBold, fontSize = 18.sp, letterSpacing = (-0.1).sp, color = Fg)
+                    Text(if (chat.on) "Online" else "Last seen recently", fontSize = 13.sp, color = if (chat.on) Ok else F3, fontWeight = FontWeight.Medium)
                 }
                 Row {
-                    Box(modifier = Modifier.size(37.dp).bounceClick { onCall("audio") }, contentAlignment = Alignment.Center) { Icon(Icons.Outlined.Phone, null, tint = F2, modifier = Modifier.size(16.dp)) }
-                    Box(modifier = Modifier.size(37.dp).bounceClick { onCall("video") }, contentAlignment = Alignment.Center) { Icon(Icons.Outlined.Videocam, null, tint = F2, modifier = Modifier.size(16.dp)) }
-                    Box(modifier = Modifier.size(37.dp).bounceClick { showMenu = true }, contentAlignment = Alignment.Center) { Icon(Icons.Default.MoreVert, null, tint = F2, modifier = Modifier.size(16.dp)) }
+                    Box(modifier = Modifier.size(44.dp).bounceClick { onCall("audio") }, contentAlignment = Alignment.Center) { Icon(Icons.Outlined.Phone, null, tint = F2, modifier = Modifier.size(24.dp)) }
+                    Box(modifier = Modifier.size(44.dp).bounceClick { onCall("video") }, contentAlignment = Alignment.Center) { Icon(Icons.Outlined.Videocam, null, tint = F2, modifier = Modifier.size(24.dp)) }
+                    Box(modifier = Modifier.size(44.dp).bounceClick { showMenu = true }, contentAlignment = Alignment.Center) { Icon(Icons.Default.MoreVert, null, tint = F2, modifier = Modifier.size(24.dp)) }
                 }
             }
 
@@ -510,25 +492,25 @@ fun ChatDetailScreen(chatId: Int?, onBack: () -> Unit, onCall: (String) -> Unit,
                 items(chat.msgs.reversed()) { msg ->
                     if (msg.isDate) {
                         Box(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp), contentAlignment = Alignment.Center) {
-                            Text(msg.dateText, fontSize = 10.5.sp, color = F3, letterSpacing = 0.3.sp, modifier = Modifier.background(W, CircleShape).border(1.dp, Bd, CircleShape).padding(horizontal = 12.dp, vertical = 3.dp))
+                            Text(msg.dateText, fontSize = 12.sp, color = F3, letterSpacing = 0.3.sp, modifier = Modifier.background(W, CircleShape).border(1.dp, Bd, CircleShape).padding(horizontal = 12.dp, vertical = 3.dp))
                         }
                     } else {
                         Row(modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp), horizontalArrangement = if (msg.isSent) Arrangement.End else Arrangement.Start) {
-                            Column(horizontalAlignment = if (msg.isSent) Alignment.End else Alignment.Start, modifier = Modifier.fillMaxWidth(0.8f)) {
+                            Column(horizontalAlignment = if (msg.isSent) Alignment.End else Alignment.Start, modifier = Modifier.fillMaxWidth(0.85f)) {
                                 Box(
                                     modifier = Modifier
                                         .background(if (msg.isSent) Gradient else SolidColor(W), RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp, bottomEnd = if (msg.isSent) 5.dp else 18.dp, bottomStart = if (!msg.isSent) 5.dp else 18.dp))
                                         .border(if (!msg.isSent) 1.dp else 0.dp, Bd, RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp, bottomEnd = if (msg.isSent) 5.dp else 18.dp, bottomStart = if (!msg.isSent) 5.dp else 18.dp))
-                                        .padding(horizontal = 13.dp, vertical = 9.dp)
+                                        .padding(horizontal = 14.dp, vertical = 10.dp)
                                 ) {
                                     Column {
-                                        if (!msg.isSent && msg.sender != null) Text(msg.sender, fontSize = 10.5.sp, color = Vi, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 1.dp))
-                                        Text(msg.text, fontSize = 13.5.sp, color = if (msg.isSent) W else Fg, lineHeight = 20.sp)
+                                        if (!msg.isSent && msg.sender != null) Text(msg.sender, fontSize = 13.sp, color = Vi, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 2.dp))
+                                        Text(msg.text, fontSize = 16.sp, color = if (msg.isSent) W else Fg, lineHeight = 22.sp)
                                     }
                                 }
-                                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 2.dp)) {
-                                    Text(msg.time, fontSize = 9.5.sp, color = if(msg.isSent) Color.Black.copy(0.4f) else F3)
-                                    if (msg.isSent) { Spacer(Modifier.width(3.dp)); Icon(if (msg.read) Icons.Default.DoneAll else Icons.Default.Check, null, tint = if (msg.read) Cy else F3, modifier = Modifier.size(13.dp)) }
+                                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 4.dp)) {
+                                    Text(msg.time, fontSize = 11.sp, color = if(msg.isSent) Color.Black.copy(0.4f) else F3)
+                                    if (msg.isSent) { Spacer(Modifier.width(4.dp)); Icon(if (msg.read) Icons.Default.DoneAll else Icons.Default.Check, null, tint = if (msg.read) Cy else F3, modifier = Modifier.size(16.dp)) }
                                 }
                             }
                         }
@@ -538,21 +520,21 @@ fun ChatDetailScreen(chatId: Int?, onBack: () -> Unit, onCall: (String) -> Unit,
 
             // Input
             Row(modifier = Modifier.fillMaxWidth().background(W).padding(horizontal = 10.dp, vertical = 8.dp), verticalAlignment = Alignment.Bottom) {
-                Box(modifier = Modifier.size(37.dp).bounceClick { showIsland(IslandType.ERROR, "Attach", "Coming soon") }, contentAlignment = Alignment.Center) { Icon(Icons.Outlined.AttachFile, null, tint = F2, modifier = Modifier.size(20.dp)) }
+                Box(modifier = Modifier.size(44.dp).bounceClick { showIsland(IslandType.ERROR, "Attach", "Coming soon") }, contentAlignment = Alignment.Center) { Icon(Icons.Outlined.AttachFile, null, tint = F2, modifier = Modifier.size(24.dp)) }
                 BasicTextField(
                     value = messageText, onValueChange = { messageText = it },
-                    modifier = Modifier.weight(1f).padding(bottom = 4.dp).background(Bg, RoundedCornerShape(22.dp)).border(1.5.dp, Bd, RoundedCornerShape(22.dp)).padding(start = 16.dp, end = 10.dp, top = 10.dp, bottom = 10.dp),
-                    textStyle = TextStyle(fontSize = 13.5.sp, color = Fg),
+                    modifier = Modifier.weight(1f).padding(bottom = 4.dp).background(Bg, RoundedCornerShape(24.dp)).border(1.5.dp, Bd, RoundedCornerShape(24.dp)).padding(start = 16.dp, end = 12.dp, top = 12.dp, bottom = 12.dp),
+                    textStyle = TextStyle(fontSize = 16.sp, color = Fg),
                     decorationBox = { inner ->
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(modifier = Modifier.weight(1f)) { if (messageText.isEmpty()) Text("Message...", color = F3, fontSize = 13.5.sp) else inner() }
-                            Icon(Icons.Outlined.SentimentSatisfied, null, tint = F3, modifier = Modifier.size(20.dp))
+                            Box(modifier = Modifier.weight(1f)) { if (messageText.isEmpty()) Text("Message...", color = F3, fontSize = 16.sp) else inner() }
+                            Icon(Icons.Outlined.SentimentSatisfied, null, tint = F3, modifier = Modifier.size(22.dp))
                         }
                     }
                 )
-                Spacer(Modifier.width(6.dp))
+                Spacer(Modifier.width(8.dp))
                 Box(
-                    modifier = Modifier.padding(bottom = 4.dp).size(38.dp).background(if (messageText.isNotBlank()) Gradient else SolidColor(F3), CircleShape).bounceClick {
+                    modifier = Modifier.padding(bottom = 4.dp).size(44.dp).background(if (messageText.isNotBlank()) Gradient else SolidColor(F3), CircleShape).bounceClick {
                         if (messageText.isNotBlank()) {
                             chat.msgs.add(ChatMsg(isSent = true, text = messageText, time = "Now"))
                             chat.lm = messageText
@@ -560,7 +542,7 @@ fun ChatDetailScreen(chatId: Int?, onBack: () -> Unit, onCall: (String) -> Unit,
                             focusManager.clearFocus()
                         }
                     }, contentAlignment = Alignment.Center
-                ) { Icon(Icons.Default.ArrowUpward, null, tint = W, modifier = Modifier.size(20.dp)) }
+                ) { Icon(Icons.Default.ArrowUpward, null, tint = W, modifier = Modifier.size(24.dp)) }
             }
         }
         
@@ -598,18 +580,18 @@ fun AudioCallScreen(chat: Chat?, onEnd: () -> Unit) {
 
     Column(modifier = Modifier.fillMaxSize().systemBarsPadding().background(Brush.linearGradient(listOf(Color(0xFF0F0A1F), Color(0xFF1A1035), Color(0xFF0D1B2A)))), horizontalAlignment = Alignment.CenterHorizontally) {
         Column(modifier = Modifier.weight(1f).padding(top = 100.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            AsyncImage(model = chat?.av, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.size(100.dp).clip(CircleShape).border(3.dp, Vi.copy(0.4f), CircleShape).shadow(shadowPulse.dp, CircleShape, ambientColor = Vi.copy(0.35f), spotColor = Vi.copy(0.35f)))
-            Spacer(Modifier.height(20.dp))
-            Text(chat?.name ?: "", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = W, modifier = Modifier.padding(bottom = 6.dp))
-            Text("Calling...", fontSize = 13.sp, color = W.copy(0.5f), fontWeight = FontWeight.Normal)
+            AsyncImage(model = chat?.av, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.size(120.dp).clip(CircleShape).border(3.dp, Vi.copy(0.4f), CircleShape).shadow(shadowPulse.dp, CircleShape, ambientColor = Vi.copy(0.35f), spotColor = Vi.copy(0.35f)))
+            Spacer(Modifier.height(24.dp))
+            Text(chat?.name ?: "", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = W, modifier = Modifier.padding(bottom = 6.dp))
+            Text("Calling...", fontSize = 16.sp, color = W.copy(0.5f), fontWeight = FontWeight.Normal)
         }
         Row(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp, start = 24.dp, end = 24.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
             CallButton(Icons.Default.MicOff, "Mute", false) {}
             CallButton(Icons.Default.VolumeUp, "Speaker", false) {}
             CallButton(Icons.Default.Videocam, "Video", false) {}
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                IconButton(onClick = onEnd, modifier = Modifier.size(64.dp).background(Er, CircleShape).shadow(20.dp, CircleShape, ambientColor = Er.copy(0.4f), spotColor = Er.copy(0.4f))) { Icon(Icons.Outlined.PhoneDisabled, null, tint = W, modifier = Modifier.size(26.dp)) }
-                Text("End", fontSize = 12.sp, color = W.copy(0.7f), fontWeight = FontWeight.Medium, modifier = Modifier.padding(top = 8.dp))
+                IconButton(onClick = onEnd, modifier = Modifier.size(72.dp).background(Er, CircleShape).shadow(20.dp, CircleShape, ambientColor = Er.copy(0.4f), spotColor = Er.copy(0.4f))) { Icon(Icons.Outlined.PhoneDisabled, null, tint = W, modifier = Modifier.size(32.dp)) }
+                Text("End", fontSize = 14.sp, color = W.copy(0.7f), fontWeight = FontWeight.Medium, modifier = Modifier.padding(top = 8.dp))
             }
         }
     }
@@ -648,8 +630,8 @@ fun VideoCallScreen(chat: Chat?, onEnd: () -> Unit) {
 @Composable
 fun CallButton(icon: ImageVector, label: String, isActive: Boolean, onClick: () -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        IconButton(onClick = onClick, modifier = Modifier.size(56.dp).background(if (isActive) W else W.copy(0.12f), CircleShape)) { Icon(icon, null, tint = if (isActive) Color.Black else W, modifier = Modifier.size(24.dp)) }
-        Text(label, fontSize = 12.sp, color = W.copy(0.7f), fontWeight = FontWeight.Medium, modifier = Modifier.padding(top = 8.dp))
+        IconButton(onClick = onClick, modifier = Modifier.size(64.dp).background(if (isActive) W else W.copy(0.12f), CircleShape)) { Icon(icon, null, tint = if (isActive) Color.Black else W, modifier = Modifier.size(28.dp)) }
+        Text(label, fontSize = 14.sp, color = W.copy(0.7f), fontWeight = FontWeight.Medium, modifier = Modifier.padding(top = 8.dp))
     }
 }
 
@@ -663,11 +645,11 @@ fun NavIcon(id: String, icon: ImageVector, label: String, current: String, hasBa
                 Box(modifier = Modifier.offset(y = (-7).dp).size(22.dp, 2.5.dp).clip(RoundedCornerShape(2.dp)).background(Gradient))
             }
             Box(modifier = Modifier.padding(top = 2.dp)) {
-                Icon(icon, null, tint = tint, modifier = Modifier.size(24.dp).offset(y = if (sel) (-1).dp else 0.dp).scale(if (sel) 1.12f else 1f))
-                if (hasBadge && !sel) Box(modifier = Modifier.align(Alignment.TopEnd).offset(4.dp, (-2).dp).size(15.dp).background(Er, CircleShape).border(2.dp, W, CircleShape), contentAlignment = Alignment.Center) { Text("5", color = W, fontSize = 8.5.sp, fontWeight = FontWeight.Bold) }
+                Icon(icon, null, tint = tint, modifier = Modifier.size(28.dp).offset(y = if (sel) (-1).dp else 0.dp).scale(if (sel) 1.12f else 1f))
+                if (hasBadge && !sel) Box(modifier = Modifier.align(Alignment.TopEnd).offset(4.dp, (-2).dp).size(18.dp).background(Er, CircleShape).border(2.dp, W, CircleShape), contentAlignment = Alignment.Center) { Text("5", color = W, fontSize = 10.sp, fontWeight = FontWeight.Bold) }
             }
         }
-        Text(label, fontSize = 10.5.sp, fontWeight = if (sel) FontWeight.SemiBold else FontWeight.Medium, color = tint, modifier = Modifier.padding(top = 2.dp))
+        Text(label, fontSize = 12.sp, fontWeight = if (sel) FontWeight.SemiBold else FontWeight.Medium, color = tint, modifier = Modifier.padding(top = 2.dp))
     }
 }
 
@@ -712,21 +694,21 @@ fun CallsList(showIsland: (IslandType, String, String) -> Unit) {
     LazyColumn(contentPadding = PaddingValues(bottom = 96.dp, top = 6.dp)) {
         itemsIndexed(mockCalls) { index, call ->
             Row(modifier = Modifier.fillMaxWidth().bounceClick { }.padding(horizontal = 12.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-                AsyncImage(model = call.av, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.size(46.dp).clip(CircleShape))
-                Column(modifier = Modifier.weight(1f).padding(start = 12.dp)) {
-                    Text(call.name, fontWeight = FontWeight.SemiBold, fontSize = 14.5.sp, color = if (call.type.contains("miss")) Er else Fg, modifier = Modifier.padding(bottom = 2.dp))
+                AsyncImage(model = call.av, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.size(56.dp).clip(CircleShape))
+                Column(modifier = Modifier.weight(1f).padding(start = 16.dp)) {
+                    Text(call.name, fontWeight = FontWeight.SemiBold, fontSize = 16.sp, color = if (call.type.contains("miss")) Er else Fg, modifier = Modifier.padding(bottom = 2.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(if (call.type.contains("in")) Icons.Default.CallReceived else if (call.type.contains("out")) Icons.Default.CallMade else Icons.Default.CallMissed, null, tint = if (call.type.contains("miss")) Er else if (call.type.contains("in")) Ok else Vi, modifier = Modifier.size(12.dp))
+                        Icon(if (call.type.contains("in")) Icons.Default.CallReceived else if (call.type.contains("out")) Icons.Default.CallMade else Icons.Default.CallMissed, null, tint = if (call.type.contains("miss")) Er else if (call.type.contains("in")) Ok else Vi, modifier = Modifier.size(16.dp))
                         Spacer(Modifier.width(5.dp))
-                        Icon(if(call.type.contains("video")) Icons.Default.Videocam else Icons.Default.Phone, null, tint = F3, modifier = Modifier.size(10.dp))
-                        Spacer(Modifier.width(3.dp))
-                        Text(if (call.type.contains("in")) "Incoming${if(call.dur.isNotEmpty())" · "+call.dur else ""}" else if(call.type.contains("out")) "Outgoing${if(call.dur.isNotEmpty())" · "+call.dur else ""}" else "Missed", fontSize = 12.5.sp, color = F3)
+                        Icon(if(call.type.contains("video")) Icons.Default.Videocam else Icons.Default.Phone, null, tint = F3, modifier = Modifier.size(14.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Text(if (call.type.contains("in")) "Incoming${if(call.dur.isNotEmpty())" · "+call.dur else ""}" else if(call.type.contains("out")) "Outgoing${if(call.dur.isNotEmpty())" · "+call.dur else ""}" else "Missed", fontSize = 14.sp, color = F3)
                     }
                 }
-                Text(call.time.split(",").last().trim(), fontSize = 11.sp, color = F3, modifier = Modifier.padding(end = 12.dp))
-                Box(modifier = Modifier.size(38.dp).background(W, CircleShape).border(1.dp, Bd, CircleShape).bounceClick { showIsland(IslandType.SUCCESS, "Audio Call", "Calling ${call.name}...") }, contentAlignment = Alignment.Center) { Icon(Icons.Default.Phone, null, tint = Vi, modifier = Modifier.size(16.dp)) }
-                Spacer(Modifier.width(4.dp))
-                Box(modifier = Modifier.size(38.dp).background(W, CircleShape).border(1.dp, Bd, CircleShape).bounceClick { showIsland(IslandType.SUCCESS, "Video Call", "Starting video with ${call.name}...") }, contentAlignment = Alignment.Center) { Icon(Icons.Default.Videocam, null, tint = Cy, modifier = Modifier.size(16.dp)) }
+                Text(call.time.split(",").last().trim(), fontSize = 13.sp, color = F3, modifier = Modifier.padding(end = 8.dp))
+                Box(modifier = Modifier.size(44.dp).background(W, CircleShape).border(1.dp, Bd, CircleShape).bounceClick { showIsland(IslandType.SUCCESS, "Audio Call", "Calling ${call.name}...") }, contentAlignment = Alignment.Center) { Icon(Icons.Default.Phone, null, tint = Vi, modifier = Modifier.size(20.dp)) }
+                Spacer(Modifier.width(8.dp))
+                Box(modifier = Modifier.size(44.dp).background(W, CircleShape).border(1.dp, Bd, CircleShape).bounceClick { showIsland(IslandType.SUCCESS, "Video Call", "Starting video with ${call.name}...") }, contentAlignment = Alignment.Center) { Icon(Icons.Default.Videocam, null, tint = Cy, modifier = Modifier.size(20.dp)) }
             }
             if (index < mockCalls.lastIndex) Box(modifier = Modifier.padding(start = 70.dp, end = 12.dp).fillMaxWidth().height(1.dp).background(Bd))
         }
