@@ -8,7 +8,7 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.*
-import java.util.Base64
+import android.util.Base64
 import org.json.JSONObject
 
 // Firestore REST DTOs
@@ -206,7 +206,7 @@ object FirestoreService {
         try {
             val parts = idToken.split(".")
             if (parts.size == 3) {
-                val payload = String(Base64.getUrlDecoder().decode(parts[1]))
+                val payload = String(Base64.decode(parts[1], Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP))
                 val json = JSONObject(payload)
                 return json.optString("aud", "chatverse-898")
             }

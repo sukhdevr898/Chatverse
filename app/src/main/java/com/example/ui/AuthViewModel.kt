@@ -277,19 +277,18 @@ class AuthViewModel : ViewModel() {
                 com.example.data.UserSession.email = it.email
                 if (uid != null && token != null && it.email != null) {
                     try {
-                        val userObj = com.example.data.User(uid, it.email.substringBefore("@"))
                         val projectId = com.example.data.FirestoreService.getProjectIdFromToken(token)
-                        val firestoreResponse = com.example.data.FirestoreService.api.createUser(projectId, uid, "Bearer $token", userObj.toFirestore())
-                        if (!firestoreResponse.isSuccessful) {
-                            val errorBody = firestoreResponse.errorBody()?.string()
-                            showMessage("DB Error: ${firestoreResponse.code()} $errorBody", MessageType.ERROR)
-                        } else {
-                            showMessage("Login Successful!", MessageType.SUCCESS)
-                            onSuccess()
+                        val firestoreResponse = com.example.data.FirestoreService.api.getUser(projectId, uid, "Bearer $token")
+                        if (!firestoreResponse.isSuccessful && firestoreResponse.code() == 404) {
+                            // User document might not exist if they signed up but failed to create document
+                            val userObj = com.example.data.User(uid, it.email.substringBefore("@"))
+                            com.example.data.FirestoreService.api.createUser(projectId, uid, "Bearer $token", userObj.toFirestore())
                         }
+                        showMessage("Login Successful!", MessageType.SUCCESS)
+                        onSuccess()
                     } catch (e: Exception) {
                         e.printStackTrace()
-                        showMessage("Failed to create user in DB: ${e.message}", MessageType.ERROR)
+                        showMessage("Failed to verify user in DB: ${e.message}", MessageType.ERROR)
                     }
                 } else {
                     showMessage("Login Successful, but missing token/uid", MessageType.SUCCESS)
