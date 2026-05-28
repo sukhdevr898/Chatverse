@@ -32,7 +32,7 @@ import com.example.data.FriendRequestData
 import com.example.ui.theme.*
 
 @Composable
-fun HomeScreen(navController: NavController, onNavigateToFriends: () -> Unit, viewModel: HomeViewModel = viewModel(), friendsViewModel: FriendsViewModel = viewModel()) {
+fun HomeScreen(navController: NavController, onNavigateToFriends: () -> Unit, viewModel: HomeViewModel = viewModel(), friendsViewModel: FriendsViewModel = viewModel(), authViewModel: com.example.ui.AuthViewModel) {
     val chats by viewModel.chats.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
     val friendRequests by friendsViewModel.friendRequests.collectAsState()
@@ -47,7 +47,7 @@ fun HomeScreen(navController: NavController, onNavigateToFriends: () -> Unit, vi
             .background(Color(0xFFF8F9FA))
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            HomeTopHeader()
+            HomeTopHeader(navController, viewModel)
             HomeSearchBar(searchQuery, viewModel::updateSearchQuery)
             
             LazyColumn(
@@ -133,7 +133,7 @@ fun HomeScreen(navController: NavController, onNavigateToFriends: () -> Unit, vi
 }
 
 @Composable
-fun HomeTopHeader() {
+fun HomeTopHeader(navController: NavController, viewModel: HomeViewModel) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -174,14 +174,11 @@ fun HomeTopHeader() {
             }
 
             // Avatar
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFFF3F4F6))
-            ) {
-                Icon(Icons.Filled.Person, contentDescription = null, tint = Color.Gray, modifier = Modifier.fillMaxSize().padding(8.dp))
-            }
+            val currentUser = viewModel.currentUser.collectAsState().value
+            com.example.ui.components.UserAvatar(
+                avatarId = currentUser?.avatarId ?: 0,
+                modifier = Modifier.size(40.dp).clickable { navController.navigate("settings") }
+            )
         }
     }
 }
@@ -367,7 +364,8 @@ data class ChatItemUiModel(
     val timestamp: Long = 0L,
     val unreadCount: Int = 0,
     val isOnline: Boolean = false,
-    val isTyping: Boolean = false
+    val isTyping: Boolean = false,
+    val avatarId: Int = 0
 )
 
 @Composable
@@ -381,14 +379,8 @@ fun ChatItem(chat: ChatItemUiModel, onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Avatar
-        Box(
-            modifier = Modifier
-                .size(48.dp)
-                .clip(CircleShape)
-                .background(Color(0xFFF3F4F6)),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(Icons.Filled.Person, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(24.dp))
+        Box(contentAlignment = Alignment.Center) {
+            com.example.ui.components.UserAvatar(avatarId = chat.avatarId, modifier = Modifier.size(48.dp))
             if (chat.isOnline) {
                 Box(
                     modifier = Modifier

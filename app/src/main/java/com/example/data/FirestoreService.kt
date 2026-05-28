@@ -42,8 +42,9 @@ fun User.toFirestore(): FirestoreDocument {
             "dob" to FirestoreValue(stringValue = this.dob),
             "mobile" to FirestoreValue(stringValue = this.mobile),
             "bio" to FirestoreValue(stringValue = this.bio),
-            "profileCompleted" to FirestoreValue(booleanValue = this.profileCompleted),
-            "profileImage" to FirestoreValue(stringValue = this.profileImage)
+            "gender" to FirestoreValue(stringValue = this.gender),
+            "avatarId" to FirestoreValue(integerValue = this.avatarId.toString()),
+            "profileCompleted" to FirestoreValue(booleanValue = this.profileCompleted)
         )
     )
 }
@@ -58,9 +59,10 @@ fun FirestoreDocument.toUser(): User? {
     val dob = fields["dob"]?.stringValue ?: ""
     val mobile = fields["mobile"]?.stringValue ?: ""
     val bio = fields["bio"]?.stringValue ?: ""
+    val gender = fields["gender"]?.stringValue ?: ""
+    val avatarId = fields["avatarId"]?.integerValue?.toIntOrNull() ?: 0
     val profileCompleted = fields["profileCompleted"]?.booleanValue ?: false
-    val profileImage = fields["profileImage"]?.stringValue ?: ""
-    return User(id, username, isOnline, name, email, dob, mobile, bio, profileCompleted, profileImage)
+    return User(id, username, isOnline, name, email, dob, mobile, bio, gender, avatarId, profileCompleted)
 }
 
 fun FriendRequestData.toFirestore(): FirestoreDocument {

@@ -26,7 +26,9 @@ import androidx.navigation.NavController
 import com.example.ui.theme.*
 
 @Composable
-fun SettingsScreen(navController: NavController) {
+fun SettingsScreen(navController: NavController, homeViewModel: HomeViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
+    val currentUser by homeViewModel.currentUser.collectAsState()
+    
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -74,17 +76,18 @@ fun SettingsScreen(navController: NavController) {
                             .padding(20.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Box(modifier = Modifier.size(64.dp).clip(CircleShape).background(Color(0xFFF3F4F6))) {
-                            Icon(Icons.Filled.Person, contentDescription = null, tint = Color.Gray, modifier = Modifier.fillMaxSize().padding(12.dp))
-                        }
+                        com.example.ui.components.UserAvatar(
+                            avatarId = currentUser?.avatarId ?: 0,
+                            modifier = Modifier.size(64.dp)
+                        )
                         Spacer(modifier = Modifier.width(16.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(username, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp, color = Color(0xFF111827))
+                                Text(currentUser?.name.takeIf { !it.isNullOrBlank() } ?: username, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp, color = Color(0xFF111827))
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Icon(Icons.Filled.Verified, contentDescription = null, tint = Color(0xFF3B82F6), modifier = Modifier.size(16.dp))
                             }
-                            Text("@$username", fontSize = 14.sp, fontWeight = FontWeight.Medium, color = Color.Gray)
+                            Text(currentUser?.username ?: "@$username", fontSize = 14.sp, fontWeight = FontWeight.Medium, color = Color.Gray)
                         }
                         Box(
                             modifier = Modifier.size(40.dp).background(Color(0xFFF3E8FF), CircleShape).clickable {},

@@ -22,8 +22,9 @@ data class User(
     val dob: String = "",
     val mobile: String = "",
     val bio: String = "",
-    val profileCompleted: Boolean = false,
-    val profileImage: String = ""
+    val gender: String = "",
+    val avatarId: Int = 0,
+    val profileCompleted: Boolean = false
 )
 
 data class ChatMessageData(

@@ -432,7 +432,7 @@ fun OnboardingHeader(step: Int, onBack: () -> Unit) {
         }
         
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            for (i in 1..4) {
+            for (i in 1..6) {
                 val width = if (i == step) 24.dp else 8.dp
                 val color = if (i == step) Color(0xFFA855F7) else if (i < step) Color(0xFFE9D5FF) else Color(0xFFE5E7EB)
                 Box(modifier = Modifier.height(6.dp).width(width).background(color, CircleShape))
@@ -480,7 +480,7 @@ fun OnboardingNameScreen(navController: NavController, authViewModel: AuthViewMo
                             authViewModel.showMessage("Please enter your name", MessageType.ERROR)
                         } else {
                             authViewModel.onboardingName = name
-                            navController.navigate("onboarding_dob")
+                            navController.navigate("onboarding_gender")
                         }
                     },
                     modifier = Modifier.fillMaxWidth().height(56.dp).padding(bottom = 24.dp),
@@ -498,11 +498,11 @@ fun OnboardingNameScreen(navController: NavController, authViewModel: AuthViewMo
 
 @Composable
 fun OnboardingDobScreen(navController: NavController, authViewModel: AuthViewModel) {
-    var dob by remember { mutableStateOf("") }
+    var dob by remember { mutableStateOf(authViewModel.onboardingDob) }
     
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF8F9FA))) {
-            OnboardingHeader(step = 2) { navController.popBackStack() }
+            OnboardingHeader(step = 4) { navController.popBackStack() }
             
             Column(modifier = Modifier.padding(horizontal = 24.dp)) {
                 Text("When is your birthday?", style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold, color = Color(0xFF111827)))
@@ -553,11 +553,11 @@ fun OnboardingDobScreen(navController: NavController, authViewModel: AuthViewMod
 
 @Composable
 fun OnboardingMobileScreen(navController: NavController, authViewModel: AuthViewModel) {
-    var mobile by remember { mutableStateOf("") }
+    var mobile by remember { mutableStateOf(authViewModel.onboardingMobile) }
     
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF8F9FA))) {
-            OnboardingHeader(step = 3) { navController.popBackStack() }
+            OnboardingHeader(step = 5) { navController.popBackStack() }
             
             Column(modifier = Modifier.padding(horizontal = 24.dp)) {
                 Text("Add mobile number", style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold, color = Color(0xFF111827)))
@@ -649,14 +649,14 @@ fun OnboardingMobileScreen(navController: NavController, authViewModel: AuthView
 
 @Composable
 fun OnboardingBioScreen(navController: NavController, authViewModel: AuthViewModel) {
-    var bio by remember { mutableStateOf("") }
+    var bio by remember { mutableStateOf(authViewModel.onboardingBio) }
     var isLoading by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
     
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF8F9FA))) {
-            OnboardingHeader(step = 4) { navController.popBackStack() }
+            OnboardingHeader(step = 6) { navController.popBackStack() }
             
             Column(modifier = Modifier.padding(horizontal = 24.dp)) {
                 Text("Write a short bio", style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold, color = Color(0xFF111827)))
@@ -729,5 +729,123 @@ fun OnboardingBioScreen(navController: NavController, authViewModel: AuthViewMod
         }
         
         // Island handled by MainActivity
+    }
+}
+
+@Composable
+fun OnboardingGenderScreen(navController: NavController, authViewModel: AuthViewModel) {
+    var gender by remember { mutableStateOf(authViewModel.onboardingGender) }
+    
+    Box(modifier = Modifier.fillMaxSize().background(Color.White)) {
+        Column(modifier = Modifier.fillMaxSize().systemBarsPadding()) {
+            OnboardingHeader(step = 2) { navController.popBackStack() }
+            
+            Column(modifier = Modifier.padding(horizontal = 24.dp).weight(1f)) {
+                Text("What's your gender?", style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold, color = Color(0xFF111827)))
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("This helps us personalize your experience.", style = MaterialTheme.typography.bodyMedium, color = Color.Gray, fontWeight = FontWeight.Medium)
+                
+                Spacer(modifier = Modifier.height(32.dp))
+                
+                val genders = listOf("Male", "Female", "Other", "Prefer not to say")
+                
+                genders.forEach { option ->
+                    val isSelected = gender == option
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 6.dp)
+                            .background(if (isSelected) Color(0xFFF3E8FF) else Color(0xFFF9FAFB), RoundedCornerShape(16.dp))
+                            .border(1.dp, if (isSelected) Color(0xFFA855F7) else Color.Transparent, RoundedCornerShape(16.dp))
+                            .clickable { gender = option }
+                            .padding(16.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(option, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium, color = if (isSelected) Color(0xFFA855F7) else Color(0xFF111827))
+                            Spacer(modifier = Modifier.weight(1f))
+                            if (isSelected) {
+                                Icon(Icons.Filled.Check, contentDescription = null, tint = Color(0xFFA855F7))
+                            }
+                        }
+                    }
+                }
+                
+                Spacer(modifier = Modifier.weight(1f))
+                
+                Button(
+                    onClick = {
+                        if (gender.isBlank()) {
+                            authViewModel.showMessage("Please select your gender", MessageType.ERROR)
+                        } else {
+                            authViewModel.onboardingGender = gender
+                            navController.navigate("onboarding_avatar")
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth().height(56.dp).padding(bottom = 24.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF111827)),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text("Continue", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun OnboardingAvatarScreen(navController: NavController, authViewModel: AuthViewModel) {
+    var avatarId by remember { mutableStateOf(if(authViewModel.onboardingAvatarId == 0) 1 else authViewModel.onboardingAvatarId) }
+    
+    Box(modifier = Modifier.fillMaxSize().background(Color.White)) {
+        Column(modifier = Modifier.fillMaxSize().systemBarsPadding()) {
+            OnboardingHeader(step = 3) { navController.popBackStack() }
+            
+            Column(modifier = Modifier.padding(horizontal = 24.dp).weight(1f)) {
+                Text("Choose your avatar", style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold, color = Color(0xFF111827)))
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Pick an avatar that represents you.", style = MaterialTheme.typography.bodyMedium, color = Color.Gray, fontWeight = FontWeight.Medium)
+                
+                Spacer(modifier = Modifier.height(32.dp))
+                
+                val avatars = (1..6).toList()
+                
+                androidx.compose.foundation.lazy.grid.LazyVerticalGrid(
+                    columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(3),
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(avatars.size) { index ->
+                        val id = avatars[index]
+                        val isSelected = avatarId == id
+                        Box(
+                            modifier = Modifier
+                                .aspectRatio(1f)
+                                .background(if (isSelected) Color(0xFFF3E8FF) else Color(0xFFF9FAFB), androidx.compose.foundation.shape.CircleShape)
+                                .border(3.dp, if (isSelected) Color(0xFFA855F7) else Color.Transparent, androidx.compose.foundation.shape.CircleShape)
+                                .clickable { avatarId = id }
+                                .padding(12.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            com.example.ui.components.UserAvatar(avatarId = id, modifier = Modifier.fillMaxSize())
+                        }
+                    }
+                }
+                
+                Spacer(modifier = Modifier.weight(1f))
+                
+                Button(
+                    onClick = {
+                        authViewModel.onboardingAvatarId = avatarId
+                        navController.navigate("onboarding_dob")
+                    },
+                    modifier = Modifier.fillMaxWidth().height(56.dp).padding(bottom = 24.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF111827)),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text("Continue", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                }
+            }
+        }
     }
 }

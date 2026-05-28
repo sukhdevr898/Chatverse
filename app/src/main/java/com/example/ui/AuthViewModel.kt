@@ -73,6 +73,8 @@ class AuthViewModel : ViewModel() {
     var onboardingDob = ""
     var onboardingMobile = ""
     var onboardingBio = ""
+    var onboardingGender = ""
+    var onboardingAvatarId = 0
 
     fun saveProfile(onSuccess: () -> Unit) {
         val uid = com.example.data.UserSession.userId
@@ -109,8 +111,9 @@ class AuthViewModel : ViewModel() {
                         dob = onboardingDob,
                         mobile = onboardingMobile,
                         bio = onboardingBio,
-                        profileCompleted = true,
-                        profileImage = ""
+                        gender = onboardingGender,
+                        avatarId = onboardingAvatarId,
+                        profileCompleted = true
                     )
                     
                     val response = com.example.data.FirestoreService.api.createUser(projectId, uid, "Bearer $token", user.toFirestore())
@@ -197,7 +200,7 @@ class AuthViewModel : ViewModel() {
             } else {
                 _isLoading.value = false
                 val errorMsg = loginResult.exceptionOrNull()?.message ?: ""
-                if (errorMsg.contains("This email is not registered") || errorMsg.contains("INVALID_LOGIN_CREDENTIALS")) {
+                if (errorMsg.contains("EMAIL_NOT_FOUND") || errorMsg.contains("INVALID_LOGIN_CREDENTIALS") || errorMsg.contains("This email is not registered") || errorMsg.contains("Invalid email or password")) {
                     showMessage("Account not found. Please signup first.", MessageType.ERROR)
                 } else {
                     showMessage(errorMsg, MessageType.ERROR)
@@ -228,7 +231,7 @@ class AuthViewModel : ViewModel() {
                 onSuccess()
             } else {
                 val errorMsg = loginResult.exceptionOrNull()?.message ?: ""
-                if (errorMsg.contains("This email is not registered") || errorMsg.contains("INVALID_LOGIN_CREDENTIALS")) {
+                if (errorMsg.contains("EMAIL_NOT_FOUND") || errorMsg.contains("INVALID_LOGIN_CREDENTIALS") || errorMsg.contains("This email is not registered") || errorMsg.contains("Invalid email or password")) {
                     val signupResult = safeApiCall {
                         FirebaseAuthService.api.signUp(apiKey, AuthRequest(email, password))
                     }

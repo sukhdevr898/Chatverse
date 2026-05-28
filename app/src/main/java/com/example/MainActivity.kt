@@ -150,10 +150,12 @@ fun ChatVerseApp(authViewModel: AuthViewModel = viewModel()) {
             composable("splash") { SplashScreen(navController, authViewModel) }
             composable("auth") { AuthScreen(navController, authViewModel) }
             composable("onboarding_name") { OnboardingNameScreen(navController, authViewModel) }
+            composable("onboarding_gender") { OnboardingGenderScreen(navController, authViewModel) }
+            composable("onboarding_avatar") { OnboardingAvatarScreen(navController, authViewModel) }
             composable("onboarding_dob") { OnboardingDobScreen(navController, authViewModel) }
             composable("onboarding_mobile") { OnboardingMobileScreen(navController, authViewModel) }
             composable("onboarding_bio") { OnboardingBioScreen(navController, authViewModel) }
-            composable("main") { MainScreen(navController) }
+            composable("main") { MainScreen(navController, authViewModel) }
             composable("chat/{chatId}/{username}") { backStackEntry ->
                 val chatId = backStackEntry.arguments?.getString("chatId") ?: ""
                 val username = java.net.URLDecoder.decode(backStackEntry.arguments?.getString("username") ?: "", "UTF-8")

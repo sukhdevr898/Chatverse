@@ -45,12 +45,17 @@ fun DynamicIslandMessage(messages: List<IslandMessage>) {
             currentMessage?.let { message ->
                 Box(
                     modifier = Modifier
+                        .animateContentSize(
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioLowBouncy,
+                                stiffness = Spring.StiffnessLow
+                            )
+                        )
                         .wrapContentWidth()
-                        .defaultMinSize(minWidth = 140.dp)
-                        .height(48.dp)
-                        .shadow(elevation = 24.dp, shape = RoundedCornerShape(24.dp), spotColor = Color(0x66000000), ambientColor = Color(0x33000000))
-                        .background(Color.Black, shape = RoundedCornerShape(24.dp))
-                        .padding(horizontal = 16.dp, vertical = 6.dp),
+                        .defaultMinSize(minWidth = 160.dp)
+                        .shadow(elevation = 32.dp, shape = RoundedCornerShape(32.dp), spotColor = Color.Black.copy(alpha = 0.5f), ambientColor = Color.Black.copy(alpha = 0.2f))
+                        .background(Color.Black, shape = RoundedCornerShape(32.dp))
+                        .padding(horizontal = 20.dp, vertical = 12.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     AnimatedContent(
@@ -58,8 +63,7 @@ fun DynamicIslandMessage(messages: List<IslandMessage>) {
                         transitionSpec = {
                             fadeIn(animationSpec = tween(300)) togetherWith fadeOut(animationSpec = tween(300))
                         },
-                        label = "IslandContent",
-                        modifier = Modifier.animateContentSize(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow))
+                        label = "IslandContent"
                     ) { (type, text) ->
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
                             if (type == MessageType.LOADING) {

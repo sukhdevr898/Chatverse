@@ -19,6 +19,9 @@ class HomeViewModel : ViewModel() {
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
+    private val _currentUser = MutableStateFlow<com.example.data.User?>(null)
+    val currentUser: StateFlow<com.example.data.User?> = _currentUser.asStateFlow()
+
     private var allChats = listOf<ChatItemUiModel>()
 
     private var isFirstPoll = true
@@ -75,6 +78,8 @@ class HomeViewModel : ViewModel() {
                 val usersList = response.body()?.documents?.mapNotNull { it.toUser() } ?: emptyList()
                 val friendsData = usersList.filter { friendsList.contains(it.id) }
                 
+                _currentUser.value = usersList.find { it.id == currentUserId }
+                
                 val chatItems = mutableListOf<ChatItemUiModel>()
                 
                 for (user in friendsData) {
@@ -124,7 +129,8 @@ class HomeViewModel : ViewModel() {
                             timestamp = timestamp,
                             unreadCount = unread,
                             isOnline = user.isOnline,
-                            isTyping = false
+                            isTyping = false,
+                            avatarId = user.avatarId
                         )
                     )
                 }

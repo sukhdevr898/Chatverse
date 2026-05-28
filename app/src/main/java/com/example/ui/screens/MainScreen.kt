@@ -33,7 +33,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.ui.theme.*
 
 @Composable
-fun MainScreen(rootNavController: NavController) {
+fun MainScreen(rootNavController: NavController, authViewModel: com.example.ui.AuthViewModel) {
     val bottomNavController = rememberNavController()
     
     Scaffold(
@@ -57,7 +57,7 @@ fun MainScreen(rootNavController: NavController) {
                         launchSingleTop = true
                         restoreState = true
                     }
-                }) }
+                }, authViewModel = authViewModel) }
                 composable("friends") { FriendsScreen(rootNavController, viewModel = androidx.lifecycle.viewmodel.compose.viewModel()) }
                 composable("calls") { CallsScreen(rootNavController) }
                 composable("settings") { SettingsScreen(rootNavController) }
