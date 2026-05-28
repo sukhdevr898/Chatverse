@@ -33,7 +33,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.PathNode
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -80,9 +83,29 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             MaterialTheme(typography = Typography(bodyLarge = TextStyle(fontFamily = FontFamily.SansSerif))) {
-                ChatVerseApp()
+                AutoScaledLayout {
+                    ChatVerseApp()
+                }
             }
         }
+    }
+}
+
+@Composable
+fun AutoScaledLayout(content: @Composable () -> Unit) {
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.toFloat()
+    // Reference standard width 360f. This scales the UI up/down proportionally based on the device width.
+    val scale = (screenWidth / 360f).coerceIn(0.85f, 1.5f)
+
+    val originalDensity = LocalDensity.current
+    val scaledDensity = Density(
+        density = originalDensity.density * scale,
+        fontScale = originalDensity.fontScale * scale
+    )
+
+    CompositionLocalProvider(LocalDensity provides scaledDensity) {
+        content()
     }
 }
 
