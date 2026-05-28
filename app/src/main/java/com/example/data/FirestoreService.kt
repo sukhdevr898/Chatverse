@@ -36,7 +36,14 @@ fun User.toFirestore(): FirestoreDocument {
         fields = mapOf(
             "id" to FirestoreValue(stringValue = this.id),
             "username" to FirestoreValue(stringValue = this.username),
-            "isOnline" to FirestoreValue(booleanValue = this.isOnline)
+            "isOnline" to FirestoreValue(booleanValue = this.isOnline),
+            "name" to FirestoreValue(stringValue = this.name),
+            "email" to FirestoreValue(stringValue = this.email),
+            "dob" to FirestoreValue(stringValue = this.dob),
+            "mobile" to FirestoreValue(stringValue = this.mobile),
+            "bio" to FirestoreValue(stringValue = this.bio),
+            "profileCompleted" to FirestoreValue(booleanValue = this.profileCompleted),
+            "profileImage" to FirestoreValue(stringValue = this.profileImage)
         )
     )
 }
@@ -46,7 +53,14 @@ fun FirestoreDocument.toUser(): User? {
     val id = fields["id"]?.stringValue ?: return null
     val username = fields["username"]?.stringValue ?: "Unknown"
     val isOnline = fields["isOnline"]?.booleanValue ?: false
-    return User(id, username, isOnline)
+    val name = fields["name"]?.stringValue ?: ""
+    val email = fields["email"]?.stringValue ?: ""
+    val dob = fields["dob"]?.stringValue ?: ""
+    val mobile = fields["mobile"]?.stringValue ?: ""
+    val bio = fields["bio"]?.stringValue ?: ""
+    val profileCompleted = fields["profileCompleted"]?.booleanValue ?: false
+    val profileImage = fields["profileImage"]?.stringValue ?: ""
+    return User(id, username, isOnline, name, email, dob, mobile, bio, profileCompleted, profileImage)
 }
 
 fun FriendRequestData.toFirestore(): FirestoreDocument {
@@ -101,6 +115,13 @@ interface FirestoreApi {
         @Header("Authorization") auth: String,
         @Query("pageSize") pageSize: Int = 1000
     ): Response<FirestoreListResponse>
+
+    @GET("projects/{projectId}/databases/(default)/documents/users/{userId}")
+    suspend fun getUser(
+        @Path("projectId") projectId: String,
+        @Path("userId") userId: String,
+        @Header("Authorization") auth: String
+    ): Response<FirestoreDocument>
 
     @PATCH("projects/{projectId}/databases/(default)/documents/users/{userId}")
     suspend fun createUser(

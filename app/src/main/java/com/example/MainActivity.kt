@@ -96,7 +96,7 @@ fun ChatVerseApp(authViewModel: AuthViewModel = viewModel()) {
                     if (!reqResponse.isSuccessful && reqResponse.code() == 401) {
                         com.example.data.UserSession.clear()
                         kotlinx.coroutines.Dispatchers.Main.dispatch(kotlin.coroutines.EmptyCoroutineContext, Runnable {
-                            navController.navigate("login") {
+                            navController.navigate("auth") {
                                 popUpTo(0) { inclusive = true }
                             }
                         })
@@ -147,7 +147,7 @@ fun ChatVerseApp(authViewModel: AuthViewModel = viewModel()) {
             popEnterTransition = { fadeIn(tween(500)) + slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Down, tween(500)) },
             popExitTransition = { fadeOut(tween(500)) + slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Down, tween(500)) }
         ) {
-            composable("splash") { SplashScreen(navController) }
+            composable("splash") { SplashScreen(navController, authViewModel) }
             composable("auth") { AuthScreen(navController, authViewModel) }
             composable("onboarding_name") { OnboardingNameScreen(navController, authViewModel) }
             composable("onboarding_dob") { OnboardingDobScreen(navController, authViewModel) }

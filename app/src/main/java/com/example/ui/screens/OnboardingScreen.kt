@@ -110,18 +110,14 @@ fun ChatVerseLogo(modifier: Modifier = Modifier) {
 
 
 @Composable
-fun SplashScreen(navController: NavController) {
+fun SplashScreen(navController: NavController, authViewModel: AuthViewModel) {
     var startAnimation by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         startAnimation = true
         delay(2000)
-        if (com.example.data.UserSession.idToken != null) {
-            navController.navigate("main") {
-                popUpTo("splash") { inclusive = true }
-            }
-        } else {
-            navController.navigate("auth") {
+        authViewModel.checkGoogleSession { route -> 
+            navController.navigate(route) {
                 popUpTo("splash") { inclusive = true }
             }
         }
@@ -244,10 +240,10 @@ fun AuthScreen(navController: NavController, authViewModel: AuthViewModel) {
             
             Spacer(modifier = Modifier.weight(1f))
             
-            val interactionSource = remember { MutableInteractionSource() }
-            val isPressed by interactionSource.collectIsPressedAsState()
-            val scale by animateFloatAsState(
-                targetValue = if (isPressed) 0.97f else 1f,
+            val interactionSourceLogin = remember { MutableInteractionSource() }
+            val isPressedLogin by interactionSourceLogin.collectIsPressedAsState()
+            val scaleLogin by animateFloatAsState(
+                targetValue = if (isPressedLogin) 0.97f else 1f,
                 animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
                 label = "scale"
             )
@@ -259,7 +255,7 @@ fun AuthScreen(navController: NavController, authViewModel: AuthViewModel) {
                         return@Button
                     }
                     
-                    authViewModel.showMessage("Verifying Account...", MessageType.LOADING)
+                    authViewModel.showMessage("Attempting Login...", MessageType.LOADING)
 
                     val credentialManager = CredentialManager.create(context)
                     val googleIdOption = GetGoogleIdOption.Builder()
@@ -281,25 +277,10 @@ fun AuthScreen(navController: NavController, authViewModel: AuthViewModel) {
                                 val baseId = googleIdTokenCredential.id.replace(" ", "")
                                 val syntheticEmail = if (baseId.contains("@")) baseId else "$baseId@gmail.com"
                                 
-                                authViewModel.showMessage("Welcome to ChatVerse", MessageType.SUCCESS)
-                                delay(1000)
-                                authViewModel.googleLogin(syntheticEmail) { isExistingUser ->
-                                    if (isExistingUser) {
-                                        navController.navigate("main") {
+                                authViewModel.googleLogin(syntheticEmail) {
+                                    authViewModel.checkGoogleSession { route ->
+                                        navController.navigate(route) {
                                             popUpTo("auth") { inclusive = true }
-                                        }
-                                    } else {
-                                        navController.navigate("onboarding_name")
-                                    }
-                                }
-                                
-                                coroutineScope.launch {
-                                    delay(2000)
-                                    val currentMessage = authViewModel.messages.lastOrNull()?.text ?: ""
-                                    if (currentMessage.contains("not registered") || currentMessage.contains("Failed") || currentMessage.contains("Invalid")) {
-                                        authViewModel.signup(syntheticEmail, "google_auth_123456") {
-                                            authViewModel.showMessage("Google Account Linked|Complete your profile", MessageType.SUCCESS)
-                                            navController.navigate("onboarding_name")
                                         }
                                     }
                                 }
@@ -313,13 +294,13 @@ fun AuthScreen(navController: NavController, authViewModel: AuthViewModel) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp)
-                    .scale(scale)
+                    .scale(scaleLogin)
                     .shadow(elevation = 12.dp, shape = RoundedCornerShape(16.dp), spotColor = Color(0x33000000), ambientColor = Color(0x11000000))
-                    .border(1.dp, Color(0xFFF3F4F6), RoundedCornerShape(16.dp)),
+                    .border(1.dp, Color(0xFFE5E7EB), RoundedCornerShape(16.dp)),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.White),
                 shape = RoundedCornerShape(16.dp),
                 contentPadding = PaddingValues(0.dp),
-                interactionSource = interactionSource
+                interactionSource = interactionSourceLogin
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color(0xFF4B5563), strokeWidth = 3.dp)
@@ -327,7 +308,79 @@ fun AuthScreen(navController: NavController, authViewModel: AuthViewModel) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
                         Icon(painter = painterResource(id = R.drawable.ic_google), contentDescription = "Google", tint = Color.Unspecified, modifier = Modifier.size(24.dp))
                         Spacer(modifier = Modifier.width(12.dp))
-                        Text("Continue with Google", color = Color(0xFF1F2937), fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                        Text("Log In with Google", color = Color(0xFF111827), fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            val interactionSourceSignup = remember { MutableInteractionSource() }
+            val isPressedSignup by interactionSourceSignup.collectIsPressedAsState()
+            val scaleSignup by animateFloatAsState(
+                targetValue = if (isPressedSignup) 0.97f else 1f,
+                animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
+                label = "scale"
+            )
+
+            Button(
+                onClick = {
+                    if (BuildConfig.GOOGLE_WEB_CLIENT_ID.isEmpty() || BuildConfig.GOOGLE_WEB_CLIENT_ID == "MY_GOOGLE_WEB_CLIENT_ID") {
+                        authViewModel.showMessage("Please configure GOOGLE_WEB_CLIENT_ID", MessageType.ERROR)
+                        return@Button
+                    }
+                    
+                    authViewModel.showMessage("Verifying Signup...", MessageType.LOADING)
+
+                    val credentialManager = CredentialManager.create(context)
+                    val googleIdOption = GetGoogleIdOption.Builder()
+                        .setFilterByAuthorizedAccounts(false)
+                        .setServerClientId(BuildConfig.GOOGLE_WEB_CLIENT_ID)
+                        .setAutoSelectEnabled(true)
+                        .build()
+
+                    val request = GetCredentialRequest.Builder()
+                        .addCredentialOption(googleIdOption)
+                        .build()
+
+                    coroutineScope.launch {
+                        try {
+                            val result = credentialManager.getCredential(context = context, request = request)
+                            val credential = result.credential
+                            if (credential is CustomCredential && credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+                                val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+                                val baseId = googleIdTokenCredential.id.replace(" ", "")
+                                val syntheticEmail = if (baseId.contains("@")) baseId else "$baseId@gmail.com"
+                                
+                                authViewModel.googleSignup(syntheticEmail) {
+                                    authViewModel.checkGoogleSession { route ->
+                                        navController.navigate(route) {
+                                            popUpTo("auth") { inclusive = true }
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (e: Exception) {
+                            Log.e("Auth", "Google Signup failed", e)
+                            authViewModel.showMessage("Google Signup failed", MessageType.ERROR)
+                        }
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(60.dp)
+                    .scale(scaleSignup)
+                    .shadow(elevation = 8.dp, shape = RoundedCornerShape(16.dp), spotColor = Color(0xFFA855F7), ambientColor = Color(0xFFA855F7)),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF111827)),
+                shape = RoundedCornerShape(16.dp),
+                contentPadding = PaddingValues(0.dp),
+                interactionSource = interactionSourceSignup
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White, strokeWidth = 3.dp)
+                } else {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+                        Text("Sign Up with Google", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp)
                     }
                 }
             }
@@ -426,6 +479,7 @@ fun OnboardingNameScreen(navController: NavController, authViewModel: AuthViewMo
                         if (name.isBlank()) {
                             authViewModel.showMessage("Please enter your name", MessageType.ERROR)
                         } else {
+                            authViewModel.onboardingName = name
                             navController.navigate("onboarding_dob")
                         }
                     },
@@ -480,6 +534,7 @@ fun OnboardingDobScreen(navController: NavController, authViewModel: AuthViewMod
                         if (dob.isBlank() || dob.length < 8) {
                             authViewModel.showMessage("Please enter a valid date", MessageType.ERROR)
                         } else {
+                            authViewModel.onboardingDob = dob
                             navController.navigate("onboarding_mobile")
                         }
                     },
@@ -575,6 +630,7 @@ fun OnboardingMobileScreen(navController: NavController, authViewModel: AuthView
                         if (mobile.length != 10) {
                             authViewModel.showMessage("Please enter a valid 10-digit number", MessageType.ERROR)
                         } else {
+                            authViewModel.onboardingMobile = mobile
                             navController.navigate("onboarding_bio")
                         }
                     },
@@ -641,12 +697,11 @@ fun OnboardingBioScreen(navController: NavController, authViewModel: AuthViewMod
                             authViewModel.showMessage("Please write a short bio", MessageType.ERROR)
                             return@Button
                         }
+                        authViewModel.onboardingBio = bio
                         isLoading = true
                         authViewModel.showMessage("Setting up profile...", MessageType.LOADING)
-                        coroutineScope.launch {
-                            delay(1500)
-                            authViewModel.showMessage("Profile Setup Complete!|Welcome to ChatVerse", MessageType.SUCCESS)
-                            delay(1500)
+                        authViewModel.saveProfile {
+                            isLoading = false
                             navController.navigate("main") {
                                 popUpTo("auth") { inclusive = true }
                             }

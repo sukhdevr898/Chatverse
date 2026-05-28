@@ -8,6 +8,7 @@ import com.example.data.AuthRequest
 import com.example.data.FirebaseAuthService
 import com.example.data.OobCodeRequest
 import com.example.data.toFirestore
+import com.example.data.toUser
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -68,7 +69,97 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    fun googleLogin(email: String, onSuccess: (isExistingUser: Boolean) -> Unit) {
+    var onboardingName = ""
+    var onboardingDob = ""
+    var onboardingMobile = ""
+    var onboardingBio = ""
+
+    fun saveProfile(onSuccess: () -> Unit) {
+        val uid = com.example.data.UserSession.userId
+        val token = com.example.data.UserSession.idToken
+        val email = com.example.data.UserSession.email ?: ""
+        
+        if (uid != null && token != null) {
+            _isLoading.value = true
+            viewModelScope.launch {
+                try {
+                    val projectId = com.example.data.FirestoreService.getProjectIdFromToken(token)
+                    
+                    var username = "@" + email.substringBefore("@").lowercase().replace(" ", "")
+                    
+                    // Username Uniqueness Check
+                    val usersResponse = com.example.data.FirestoreService.api.getUsers(projectId, "Bearer $token")
+                    if (usersResponse.isSuccessful) {
+                        val documents = usersResponse.body()?.documents ?: emptyList()
+                        val existingUsernames = documents.mapNotNull { it.fields?.get("username")?.stringValue }
+                        var index = 1
+                        val originalUsername = username
+                        while (existingUsernames.contains(username)) {
+                            username = "${originalUsername}_$index"
+                            index++
+                        }
+                    }
+
+                    val user = com.example.data.User(
+                        id = uid,
+                        username = username,
+                        isOnline = true,
+                        name = onboardingName,
+                        email = email,
+                        dob = onboardingDob,
+                        mobile = onboardingMobile,
+                        bio = onboardingBio,
+                        profileCompleted = true,
+                        profileImage = ""
+                    )
+                    
+                    val response = com.example.data.FirestoreService.api.createUser(projectId, uid, "Bearer $token", user.toFirestore())
+                    _isLoading.value = false
+                    if (response.isSuccessful) {
+                        showMessage("Profile Setup Complete!", MessageType.SUCCESS)
+                        onSuccess()
+                    } else {
+                        showMessage("Failed to save profile", MessageType.ERROR)
+                    }
+                } catch (e: Exception) {
+                    _isLoading.value = false
+                    showMessage("Error saving profile", MessageType.ERROR)
+                }
+            }
+        }
+    }
+
+    fun checkGoogleSession(onRedirect: (String) -> Unit) {
+        val uid = com.example.data.UserSession.userId
+        val token = com.example.data.UserSession.idToken
+        if (uid != null && token != null) {
+            _isLoading.value = true
+            viewModelScope.launch {
+                try {
+                    val projectId = com.example.data.FirestoreService.getProjectIdFromToken(token)
+                    val response = com.example.data.FirestoreService.api.getUser(projectId, uid, "Bearer $token")
+                    _isLoading.value = false
+                    if (response.isSuccessful) {
+                        val user = response.body()?.toUser()
+                        if (user?.profileCompleted == true) {
+                            onRedirect("main")
+                        } else {
+                            onRedirect("onboarding_name")
+                        }
+                    } else {
+                        onRedirect("onboarding_name")
+                    }
+                } catch (e: Exception) {
+                    _isLoading.value = false
+                    onRedirect("onboarding_name")
+                }
+            }
+        } else {
+            onRedirect("auth")
+        }
+    }
+
+    fun googleLogin(email: String, onSuccess: () -> Unit) {
         if (apiKey.isEmpty() || apiKey == "MY_FIREBASE_API_KEY") {
             showMessage("Please configure FIREBASE_API_KEY in the Secrets panel.", MessageType.ERROR)
             return
@@ -80,13 +171,61 @@ class AuthViewModel : ViewModel() {
                 FirebaseAuthService.api.signIn(apiKey, AuthRequest(email, password))
             }
             if (loginResult.isSuccess) {
+                val it = loginResult.getOrNull()!!
+                com.example.data.UserSession.userId = it.localId
+                com.example.data.UserSession.idToken = it.idToken
+                com.example.data.UserSession.email = it.email
+                // Check if profile completed
+                try {
+                    val projectId = com.example.data.FirestoreService.getProjectIdFromToken(it.idToken!!)
+                    val response = com.example.data.FirestoreService.api.getUser(projectId, it.localId!!, "Bearer ${it.idToken}")
+                    _isLoading.value = false
+                    if (response.isSuccessful) {
+                        val user = response.body()?.toUser()
+                        if (user?.profileCompleted == true) {
+                            showMessage("Login Successful!", MessageType.SUCCESS)
+                        }
+                        onSuccess()
+                    } else {
+                        showMessage("Account exists but profile incomplete", MessageType.INFO)
+                        onSuccess()
+                    }
+                } catch (e: Exception) {
+                    _isLoading.value = false
+                    onSuccess()
+                }
+            } else {
+                _isLoading.value = false
+                val errorMsg = loginResult.exceptionOrNull()?.message ?: ""
+                if (errorMsg.contains("This email is not registered") || errorMsg.contains("INVALID_LOGIN_CREDENTIALS")) {
+                    showMessage("Account not found. Please signup first.", MessageType.ERROR)
+                } else {
+                    showMessage(errorMsg, MessageType.ERROR)
+                }
+            }
+        }
+    }
+
+    fun googleSignup(email: String, onSuccess: () -> Unit) {
+        if (apiKey.isEmpty() || apiKey == "MY_FIREBASE_API_KEY") {
+            showMessage("Please configure FIREBASE_API_KEY in the Secrets panel.", MessageType.ERROR)
+            return
+        }
+        val password = "Google_auth_" + email.hashCode()
+        _isLoading.value = true
+        viewModelScope.launch {
+            val loginResult = safeApiCall {
+                FirebaseAuthService.api.signIn(apiKey, AuthRequest(email, password))
+            }
+            if (loginResult.isSuccess) {
+                // User already exists
                 _isLoading.value = false
                 val it = loginResult.getOrNull()!!
                 com.example.data.UserSession.userId = it.localId
                 com.example.data.UserSession.idToken = it.idToken
                 com.example.data.UserSession.email = it.email
-                showMessage("Login Successful!", MessageType.SUCCESS)
-                onSuccess(true)
+                showMessage("This account already exists", MessageType.INFO)
+                onSuccess()
             } else {
                 val errorMsg = loginResult.exceptionOrNull()?.message ?: ""
                 if (errorMsg.contains("This email is not registered") || errorMsg.contains("INVALID_LOGIN_CREDENTIALS")) {
@@ -100,7 +239,7 @@ class AuthViewModel : ViewModel() {
                         com.example.data.UserSession.idToken = it.idToken
                         com.example.data.UserSession.email = it.email
                         showMessage("Account created!", MessageType.SUCCESS)
-                        onSuccess(false)
+                        onSuccess()
                     } else {
                         showMessage(signupResult.exceptionOrNull()?.message ?: "Registration failed", MessageType.ERROR)
                     }

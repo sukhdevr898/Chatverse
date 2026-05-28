@@ -16,7 +16,14 @@ import retrofit2.http.Query
 data class User(
     val id: String,
     val username: String,
-    val isOnline: Boolean = true
+    val isOnline: Boolean = true,
+    val name: String = "",
+    val email: String = "",
+    val dob: String = "",
+    val mobile: String = "",
+    val bio: String = "",
+    val profileCompleted: Boolean = false,
+    val profileImage: String = ""
 )
 
 data class ChatMessageData(
