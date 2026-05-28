@@ -1,82 +1,117 @@
 package com.example.ui.components
 
 import androidx.compose.animation.*
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.ui.IslandMessage
 import com.example.ui.MessageType
-import com.example.ui.theme.DarkSurface
-import com.example.ui.theme.ErrorRed
-import com.example.ui.theme.NeonBlue
-import com.example.ui.theme.TextPrimary
 
 @Composable
 fun DynamicIslandMessage(messages: List<IslandMessage>) {
+    val currentMessage = messages.lastOrNull()
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 48.dp, start = 24.dp, end = 24.dp), // Clear status bar
         contentAlignment = Alignment.TopCenter
     ) {
-        val currentMessage = messages.lastOrNull()
         AnimatedVisibility(
             visible = currentMessage != null,
-            enter = slideInVertically(initialOffsetY = { -100 }) + fadeIn() + scaleIn(initialScale = 0.8f),
-            exit = slideOutVertically(targetOffsetY = { -100 }) + fadeOut() + scaleOut(targetScale = 0.8f),
+            enter = fadeIn(tween(300)) + slideInVertically(tween(300), initialOffsetY = { -100 }),
+            exit = fadeOut(tween(300)) + slideOutVertically(tween(300), targetOffsetY = { -100 }),
             modifier = Modifier.padding(bottom = 8.dp)
         ) {
             currentMessage?.let { message ->
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(32.dp))
-                        .background(MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.95f))
-                        .padding(horizontal = 20.dp, vertical = 12.dp)
+                        .wrapContentWidth()
+                        .defaultMinSize(minWidth = 140.dp)
+                        .height(48.dp)
+                        .shadow(elevation = 24.dp, shape = RoundedCornerShape(24.dp), spotColor = Color(0x66000000), ambientColor = Color(0x33000000))
+                        .background(Color.Black, shape = RoundedCornerShape(24.dp))
+                        .padding(horizontal = 16.dp, vertical = 6.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        val iconColor = when (message.type) {
-                            MessageType.SUCCESS -> MaterialTheme.colorScheme.tertiary
-                            MessageType.ERROR -> MaterialTheme.colorScheme.error
-                            MessageType.INFO -> MaterialTheme.colorScheme.primary
-                            MessageType.LOADING -> MaterialTheme.colorScheme.primary
-                        }
-                        val icon = when (message.type) {
-                            MessageType.SUCCESS -> Icons.Filled.CheckCircle
-                            MessageType.ERROR -> Icons.Filled.Error
-                            MessageType.INFO -> Icons.Filled.Info
-                            MessageType.LOADING -> Icons.Filled.Info // Or CircularProgressIndicator, but icon is fine here
-                        }
+                    AnimatedContent(
+                        targetState = Pair(message.type, message.text),
+                        transitionSpec = {
+                            fadeIn(animationSpec = tween(300)) togetherWith fadeOut(animationSpec = tween(300))
+                        },
+                        label = "IslandContent",
+                        modifier = Modifier.animateContentSize(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow))
+                    ) { (type, text) ->
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+                            if (type == MessageType.LOADING) {
+                                CircularProgressIndicator(modifier = Modifier.size(16.dp), color = Color.White, strokeWidth = 2.dp)
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Text(
+                                    text = text,
+                                    color = Color.White,
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 14.sp
+                                )
+                            } else {
+                                if (type == MessageType.SUCCESS) {
+                                    Box(modifier = Modifier.size(24.dp).background(Color(0xFF22C55E), CircleShape), contentAlignment = Alignment.Center) {
+                                        Icon(Icons.Filled.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
+                                    }
+                                } else if (type == MessageType.ERROR) {
+                                    Box(modifier = Modifier.size(24.dp).background(Color(0xFFEF4444), CircleShape), contentAlignment = Alignment.Center) {
+                                        Icon(Icons.Filled.Close, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
+                                    }
+                                }
+                                
+                                Spacer(modifier = Modifier.width(10.dp))
 
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = null,
-                            tint = iconColor,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text(
-                            text = message.text,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold)
-                        )
+                                Column(horizontalAlignment = Alignment.Start) {
+                                    if (text.contains("|")) {
+                                        Text(
+                                            text = text.substringBefore("|"), 
+                                            color = if (type == MessageType.SUCCESS) Color(0xFF4ADE80) else Color(0xFFF87171),
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 12.sp,
+                                            maxLines = 1
+                                        )
+                                        Text(
+                                            text = text.substringAfter("|"),
+                                            color = Color(0xFFE5E7EB),
+                                            fontWeight = FontWeight.Medium,
+                                            fontSize = 13.sp,
+                                            maxLines = 1
+                                        )
+                                    } else {
+                                        Text(
+                                            text = text,
+                                            color = Color.White,
+                                            fontWeight = FontWeight.SemiBold,
+                                            fontSize = 14.sp,
+                                            maxLines = 1
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }

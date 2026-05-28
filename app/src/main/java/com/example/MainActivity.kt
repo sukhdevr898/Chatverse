@@ -149,9 +149,9 @@ fun ChatVerseApp(authViewModel: AuthViewModel = viewModel()) {
         ) {
             composable("splash") { SplashScreen(navController) }
             composable("auth") { AuthScreen(navController, authViewModel) }
-            composable("onboarding_name") { OnboardingNameScreen(navController) }
-            composable("onboarding_dob") { OnboardingDobScreen(navController) }
-            composable("onboarding_mobile") { OnboardingMobileScreen(navController) }
+            composable("onboarding_name") { OnboardingNameScreen(navController, authViewModel) }
+            composable("onboarding_dob") { OnboardingDobScreen(navController, authViewModel) }
+            composable("onboarding_mobile") { OnboardingMobileScreen(navController, authViewModel) }
             composable("onboarding_bio") { OnboardingBioScreen(navController, authViewModel) }
             composable("main") { MainScreen(navController) }
             composable("chat/{chatId}/{username}") { backStackEntry ->

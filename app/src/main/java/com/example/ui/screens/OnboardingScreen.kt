@@ -23,6 +23,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
@@ -107,79 +108,6 @@ fun ChatVerseLogo(modifier: Modifier = Modifier) {
     }
 }
 
-@Composable
-fun DynamicIslandNotification(authViewModel: AuthViewModel) {
-    val messages = authViewModel.messages
-    val currentMessage = messages.lastOrNull()
-    val messageText = currentMessage?.text ?: ""
-    val messageType = currentMessage?.type ?: MessageType.INFO
-
-    DynamicIslandLocal(messageText, messageType)
-}
-
-@Composable
-fun DynamicIslandLocal(messageText: String, messageType: MessageType) {
-    val isVisible = messageText.isNotEmpty()
-
-    AnimatedVisibility(
-        visible = isVisible,
-        enter = fadeIn() + slideInVertically(initialOffsetY = { -50 }) + expandVertically(expandFrom = Alignment.Top),
-        exit = fadeOut() + slideOutVertically(targetOffsetY = { -50 }) + shrinkVertically(shrinkTowards = Alignment.Top),
-        modifier = Modifier.padding(top = 24.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .widthIn(min = 120.dp, max = 340.dp)
-                .height(64.dp)
-                .shadow(elevation = 16.dp, shape = RoundedCornerShape(32.dp))
-                .background(Color.Black, shape = RoundedCornerShape(32.dp))
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
-                if (messageType == MessageType.LOADING) {
-                    CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Color.White, strokeWidth = 2.dp)
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = messageText,
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp
-                    )
-                } else {
-                    if (messageType == MessageType.SUCCESS) {
-                        Box(modifier = Modifier.size(36.dp).background(Color(0xFF22C55E), CircleShape), contentAlignment = Alignment.Center) {
-                            Icon(Icons.Filled.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
-                        }
-                    } else if (messageType == MessageType.ERROR) {
-                        Box(modifier = Modifier.size(36.dp).background(Color(0xFFEF4444), CircleShape), contentAlignment = Alignment.Center) {
-                            Icon(Icons.Filled.Close, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
-                        }
-                    }
-                    
-                    Spacer(modifier = Modifier.width(12.dp))
-
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = if (messageText.contains("|")) messageText.substringBefore("|") else if (messageType == MessageType.SUCCESS) "Success" else "Error", 
-                            color = if (messageType == MessageType.SUCCESS) Color(0xFF4ADE80) else Color(0xFFF87171),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 13.sp,
-                            maxLines = 1
-                        )
-                        Text(
-                            text = if (messageText.contains("|")) messageText.substringAfter("|") else messageText,
-                            color = Color(0xFFE5E7EB),
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 14.sp,
-                            maxLines = 1
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
 
 @Composable
 fun SplashScreen(navController: NavController) {
@@ -317,6 +245,14 @@ fun AuthScreen(navController: NavController, authViewModel: AuthViewModel) {
             
             Spacer(modifier = Modifier.weight(1f))
             
+            val interactionSource = remember { MutableInteractionSource() }
+            val isPressed by interactionSource.collectIsPressedAsState()
+            val scale by animateFloatAsState(
+                targetValue = if (isPressed) 0.97f else 1f,
+                animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
+                label = "scale"
+            )
+
             Button(
                 onClick = {
                     if (BuildConfig.GOOGLE_WEB_CLIENT_ID.isEmpty() || BuildConfig.GOOGLE_WEB_CLIENT_ID == "MY_GOOGLE_WEB_CLIENT_ID") {
@@ -349,7 +285,9 @@ fun AuthScreen(navController: NavController, authViewModel: AuthViewModel) {
                                 authViewModel.showMessage("Welcome to ChatVerse", MessageType.SUCCESS)
                                 delay(1000)
                                 authViewModel.login(syntheticEmail, "google_auth_123456") {
-                                    navController.navigate("onboarding_name")
+                                    navController.navigate("main") {
+                                        popUpTo("auth") { inclusive = true }
+                                    }
                                 }
                                 
                                 coroutineScope.launch {
@@ -372,11 +310,13 @@ fun AuthScreen(navController: NavController, authViewModel: AuthViewModel) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp)
-                    .shadow(elevation = 8.dp, shape = RoundedCornerShape(16.dp), spotColor = Color(0x26000000), ambientColor = Color(0x14000000))
+                    .scale(scale)
+                    .shadow(elevation = 12.dp, shape = RoundedCornerShape(16.dp), spotColor = Color(0x33000000), ambientColor = Color(0x11000000))
                     .border(1.dp, Color(0xFFF3F4F6), RoundedCornerShape(16.dp)),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.White),
                 shape = RoundedCornerShape(16.dp),
-                contentPadding = PaddingValues(0.dp)
+                contentPadding = PaddingValues(0.dp),
+                interactionSource = interactionSource
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color(0xFF4B5563), strokeWidth = 3.dp)
@@ -412,9 +352,7 @@ fun AuthScreen(navController: NavController, authViewModel: AuthViewModel) {
             )
         }
         
-        Box(modifier = Modifier.align(Alignment.TopCenter)) {
-            DynamicIslandNotification(authViewModel)
-        }
+        // Island handled by MainActivity
     }
 }
 
@@ -448,16 +386,8 @@ fun OnboardingHeader(step: Int, onBack: () -> Unit) {
 }
 
 @Composable
-fun OnboardingNameScreen(navController: NavController) {
+fun OnboardingNameScreen(navController: NavController, authViewModel: AuthViewModel) {
     var name by remember { mutableStateOf("") }
-    var localError by remember { mutableStateOf("") }
-    
-    LaunchedEffect(localError) {
-        if (localError.isNotEmpty()) {
-            delay(2500)
-            localError = ""
-        }
-    }
     
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF8F9FA))) {
@@ -491,7 +421,7 @@ fun OnboardingNameScreen(navController: NavController) {
                 Button(
                     onClick = {
                         if (name.isBlank()) {
-                            localError = "Please enter your name"
+                            authViewModel.showMessage("Please enter your name", MessageType.ERROR)
                         } else {
                             navController.navigate("onboarding_dob")
                         }
@@ -505,23 +435,13 @@ fun OnboardingNameScreen(navController: NavController) {
             }
         }
         
-        Box(modifier = Modifier.align(Alignment.TopCenter)) {
-            DynamicIslandLocal(localError, MessageType.ERROR)
-        }
+        // Island handled by MainActivity
     }
 }
 
 @Composable
-fun OnboardingDobScreen(navController: NavController) {
+fun OnboardingDobScreen(navController: NavController, authViewModel: AuthViewModel) {
     var dob by remember { mutableStateOf("") }
-    var localError by remember { mutableStateOf("") }
-    
-    LaunchedEffect(localError) {
-        if (localError.isNotEmpty()) {
-            delay(2500)
-            localError = ""
-        }
-    }
     
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF8F9FA))) {
@@ -555,7 +475,7 @@ fun OnboardingDobScreen(navController: NavController) {
                 Button(
                     onClick = {
                         if (dob.isBlank() || dob.length < 8) {
-                            localError = "Please enter a valid date"
+                            authViewModel.showMessage("Please enter a valid date", MessageType.ERROR)
                         } else {
                             navController.navigate("onboarding_mobile")
                         }
@@ -569,23 +489,13 @@ fun OnboardingDobScreen(navController: NavController) {
             }
         }
         
-        Box(modifier = Modifier.align(Alignment.TopCenter)) {
-            DynamicIslandLocal(localError, MessageType.ERROR)
-        }
+        // Island handled by MainActivity
     }
 }
 
 @Composable
-fun OnboardingMobileScreen(navController: NavController) {
+fun OnboardingMobileScreen(navController: NavController, authViewModel: AuthViewModel) {
     var mobile by remember { mutableStateOf("") }
-    var localError by remember { mutableStateOf("") }
-    
-    LaunchedEffect(localError) {
-        if (localError.isNotEmpty()) {
-            delay(2500)
-            localError = ""
-        }
-    }
     
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF8F9FA))) {
@@ -660,7 +570,7 @@ fun OnboardingMobileScreen(navController: NavController) {
                 Button(
                     onClick = {
                         if (mobile.length != 10) {
-                            localError = "Please enter a valid 10-digit number"
+                            authViewModel.showMessage("Please enter a valid 10-digit number", MessageType.ERROR)
                         } else {
                             navController.navigate("onboarding_bio")
                         }
@@ -674,25 +584,16 @@ fun OnboardingMobileScreen(navController: NavController) {
             }
         }
         
-        Box(modifier = Modifier.align(Alignment.TopCenter)) {
-            DynamicIslandLocal(localError, MessageType.ERROR)
-        }
+        // Island handled by MainActivity
     }
 }
 
 @Composable
 fun OnboardingBioScreen(navController: NavController, authViewModel: AuthViewModel) {
     var bio by remember { mutableStateOf("") }
-    var localError by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
-    
-    LaunchedEffect(localError) {
-        if (localError.isNotEmpty()) {
-            delay(2500)
-            localError = ""
-        }
-    }
+
     
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF8F9FA))) {
@@ -723,10 +624,18 @@ fun OnboardingBioScreen(navController: NavController, authViewModel: AuthViewMod
                 
                 Spacer(modifier = Modifier.weight(1f))
                 
+                val interactionSource = remember { MutableInteractionSource() }
+                val isPressed by interactionSource.collectIsPressedAsState()
+                val scale by animateFloatAsState(
+                    targetValue = if (isPressed) 0.97f else 1f,
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
+                    label = "scale"
+                )
+
                 Button(
                     onClick = {
                         if (bio.isBlank()) {
-                            localError = "Please write a short bio"
+                            authViewModel.showMessage("Please write a short bio", MessageType.ERROR)
                             return@Button
                         }
                         isLoading = true
@@ -740,11 +649,12 @@ fun OnboardingBioScreen(navController: NavController, authViewModel: AuthViewMod
                             }
                         }
                     },
-                    modifier = Modifier.fillMaxWidth().height(56.dp).padding(bottom = 24.dp).shadow(8.dp, RoundedCornerShape(16.dp), spotColor = Color(0xFFA855F7), ambientColor = Color(0xFFA855F7)),
+                    modifier = Modifier.fillMaxWidth().height(56.dp).padding(bottom = 24.dp).scale(scale).shadow(8.dp, RoundedCornerShape(16.dp), spotColor = Color(0xFFA855F7), ambientColor = Color(0xFFA855F7)),
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
                     contentPadding = PaddingValues(0.dp),
                     shape = RoundedCornerShape(16.dp),
-                    enabled = !isLoading
+                    enabled = !isLoading,
+                    interactionSource = interactionSource
                 ) {
                     Box(
                         modifier = Modifier.fillMaxSize().background(Brush.linearGradient(listOf(Color(0xFFE81CFF), Color(0xFF41B5FF))), RoundedCornerShape(16.dp)),
@@ -760,9 +670,6 @@ fun OnboardingBioScreen(navController: NavController, authViewModel: AuthViewMod
             }
         }
         
-        Box(modifier = Modifier.align(Alignment.TopCenter)) {
-            DynamicIslandNotification(authViewModel)
-            DynamicIslandLocal(localError, MessageType.ERROR)
-        }
+        // Island handled by MainActivity
     }
 }
